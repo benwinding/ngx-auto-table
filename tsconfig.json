@@ -10,20 +10,12 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "target": "es5",
-    "typeRoots": [
-      "node_modules/@types"
-    ],
-    "lib": [
-      "es2018",
-      "dom"
-    ],
+    "typeRoots": ["node_modules/@types"],
+    "lib": ["es2018", "dom"],
     "paths": {
-      "lib": [
-        "dist/my-lib"
-      ],
-      "lib/*": [
-        "dist/my-lib/*"
-      ]
+      "lib": ["dist/my-lib"],
+      "lib/*": ["dist/my-lib/*"],
+      "@angular/*": ["node_modules/@angular/*"]
     }
   }
 }

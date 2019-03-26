@@ -531,8 +531,6 @@ AutoTableModule.decorators = [
                 declarations: [...sharedComponents, AppExportCsvExportComponent],
                 exports: sharedComponents,
                 imports: [
-                    CommonModule,
-                    RouterModule,
                     CsvModule,
                     ReactiveFormsModule,
                     MatAutocompleteModule,
@@ -550,6 +548,8 @@ AutoTableModule.decorators = [
                     MatSortModule,
                     MatTableModule,
                     MatToolbarModule,
+                    CommonModule,
+                    RouterModule,
                 ]
             },] }
 ];
@@ -564,6 +564,6 @@ AutoTableModule.decorators = [
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
-export { AutoTableModule, AppExportCsvExportComponent as ɵc, AppTableLoaderComponent as ɵb, AutoTableComponent as ɵa };
+export { AutoTableModule, AutoTableComponent, AppExportCsvExportComponent as ɵb, AppTableLoaderComponent as ɵa };
 
 //# sourceMappingURL=ngx-auto-table-lib.js.map

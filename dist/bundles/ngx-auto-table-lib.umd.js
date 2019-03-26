@@ -740,8 +740,6 @@
                         declarations: __spread(sharedComponents, [AppExportCsvExportComponent]),
                         exports: sharedComponents,
                         imports: [
-                            common.CommonModule,
-                            router.RouterModule,
                             ngxCsv.CsvModule,
                             forms.ReactiveFormsModule,
                             material.MatAutocompleteModule,
@@ -759,6 +757,8 @@
                             material.MatSortModule,
                             material.MatTableModule,
                             material.MatToolbarModule,
+                            common.CommonModule,
+                            router.RouterModule,
                         ]
                     },] }
         ];
@@ -776,9 +776,9 @@
      */
 
     exports.AutoTableModule = AutoTableModule;
-    exports.ɵc = AppExportCsvExportComponent;
-    exports.ɵb = AppTableLoaderComponent;
-    exports.ɵa = AutoTableComponent;
+    exports.AutoTableComponent = AutoTableComponent;
+    exports.ɵb = AppExportCsvExportComponent;
+    exports.ɵa = AppTableLoaderComponent;
 
     Object.defineProperty(exports, '__esModule', { value: true });
 

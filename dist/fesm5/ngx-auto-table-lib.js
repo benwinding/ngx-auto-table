@@ -1,4 +1,4 @@
-import { __values, __assign, __awaiter, __generator, __spread } from 'tslib';
+import { __spread, __values, __assign, __awaiter, __generator } from 'tslib';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { SelectionModel } from '@angular/cdk/collections';
 import { filter } from 'rxjs/operators';
@@ -600,8 +600,6 @@ var AutoTableModule = /** @class */ (function () {
                     declarations: __spread(sharedComponents, [AppExportCsvExportComponent]),
                     exports: sharedComponents,
                     imports: [
-                        CommonModule,
-                        RouterModule,
                         CsvModule,
                         ReactiveFormsModule,
                         MatAutocompleteModule,
@@ -619,6 +617,8 @@ var AutoTableModule = /** @class */ (function () {
                         MatSortModule,
                         MatTableModule,
                         MatToolbarModule,
+                        CommonModule,
+                        RouterModule,
                     ]
                 },] }
     ];
@@ -635,6 +635,6 @@ var AutoTableModule = /** @class */ (function () {
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
-export { AutoTableModule, AppExportCsvExportComponent as ɵc, AppTableLoaderComponent as ɵb, AutoTableComponent as ɵa };
+export { AutoTableModule, AutoTableComponent, AppExportCsvExportComponent as ɵb, AppTableLoaderComponent as ɵa };
 
 //# sourceMappingURL=ngx-auto-table-lib.js.map

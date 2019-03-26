@@ -33,8 +33,6 @@ const sharedComponents = [AutoTableComponent, AppTableLoaderComponent];
   declarations: [...sharedComponents, AppExportCsvExportComponent],
   exports: sharedComponents,
   imports: [
-    CommonModule,
-    RouterModule,
     CsvModule,
     ReactiveFormsModule,
     MatAutocompleteModule,
@@ -52,6 +50,8 @@ const sharedComponents = [AutoTableComponent, AppTableLoaderComponent];
     MatSortModule,
     MatTableModule,
     MatToolbarModule,
+    CommonModule,
+    RouterModule,
   ]
 })
 export class AutoTableModule {}
