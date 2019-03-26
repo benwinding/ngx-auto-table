@@ -25,7 +25,7 @@ import { AppTableLoaderComponent } from './components/app-table-loader.component
 import { CsvModule } from '@ctrl/ngx-csv';
 import { AppExportCsvExportComponent } from './components/app-table-csv-export.component';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+// import { RouterModule } from '@angular/router';
 
 const sharedComponents = [AutoTableComponent, AppTableLoaderComponent];
 
@@ -51,7 +51,6 @@ const sharedComponents = [AutoTableComponent, AppTableLoaderComponent];
     MatTableModule,
     MatToolbarModule,
     CommonModule,
-    RouterModule,
   ]
 })
 export class AutoTableModule {}
