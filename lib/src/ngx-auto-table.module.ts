@@ -25,7 +25,7 @@ import { AppTableLoaderComponent } from './components/app-table-loader.component
 import { CsvModule } from '@ctrl/ngx-csv';
 import { AppExportCsvExportComponent } from './components/app-table-csv-export.component';
 import { CommonModule } from '@angular/common';
-// import { RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 
 const sharedComponents = [AutoTableComponent, AppTableLoaderComponent];
 
@@ -33,6 +33,8 @@ const sharedComponents = [AutoTableComponent, AppTableLoaderComponent];
   declarations: [...sharedComponents, AppExportCsvExportComponent],
   exports: sharedComponents,
   imports: [
+    CommonModule,
+    RouterModule,
     CsvModule,
     ReactiveFormsModule,
     MatAutocompleteModule,
@@ -50,7 +52,6 @@ const sharedComponents = [AutoTableComponent, AppTableLoaderComponent];
     MatSortModule,
     MatTableModule,
     MatToolbarModule,
-    CommonModule,
   ]
 })
 export class AutoTableModule {}
