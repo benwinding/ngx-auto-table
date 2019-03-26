@@ -1,0 +1,97 @@
+.no-items,
+app-toolbar-loader {
+  text-align: center;
+  padding: 20px;
+  width: 100%;
+}
+
+.no-items {
+  color: #555;
+}
+
+.addRightPixel {
+  width: calc(100% - 1px);
+}
+
+.relative {
+  position: relative;
+}
+
+.overflow-hidden {
+  overflow: hidden;
+}
+
+.flex-h {
+  display: flex;
+  flex-direction: row;
+}
+
+.space-between {
+  justify-content: space-between;
+}
+
+.align-center {
+  align-items: center;
+}
+
+.auto-elevation {
+  box-shadow: 0px 5px 5px -3px rgba(0, 0, 0, 0.2),
+    0px 8px 10px 1px rgba(0, 0, 0, 0.14), 0px 3px 14px 2px rgba(0, 0, 0, 0.12);
+}
+
+.table-header {
+  width: 100%;
+  background-color: white;
+  margin-top: 15px;
+  height: 70px;
+
+  .filters-container {
+    .filter {
+      margin: 10px;
+    }
+    .filter-columns {
+      margin: 10px;
+    }
+  }
+
+  .bulk-actions {
+    position: absolute;
+    top: 0px;
+    transition: all 1.2s;
+    height: 70px;
+    background-color: #c4efb3;
+    width: 100%;
+
+    .item-count {
+      color: darkgreen;
+      padding-left: 10px;
+    }
+    .buttons {
+      button {
+        margin-right: 10px;
+      }
+    }
+  }
+}
+
+.hidden {
+  top: -70px !important;
+  overflow: hidden !important;
+}
+
+.selected-row-multiple {
+  background-color: #eee;
+}
+
+.selected-row-single {
+  background-color: #b5deb6;
+}
+
+.break-words {
+  word-break: break-all;
+}
+
+.more-icon:hover {
+  background-color: lightgrey;
+  border-radius: 20px;
+}

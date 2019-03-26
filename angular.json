@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "my-lib": {
+    "lib2": {
       "root": "lib",
       "sourceRoot": "lib/src",
       "projectType": "library",
@@ -19,5 +19,5 @@
       }
     }
   },
-  "defaultProject": "auto-tab"
+  "defaultProject": "lib2"
 }

@@ -1,17 +1,24 @@
 {
-  "name": "auto-tab",
-  "version": "0.0.0",
+  "name": "ngx-auto-table",
+  "version": "0.1.0",
+  "description": "A simple data-table built on Material and RXJS",
   "scripts": {
-    "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
-    "test": "ng test",
-    "lint": "ng lint",
-    "e2e": "ng e2e"
+    "build": "ng build"
   },
-  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/benwinding/ngx-auto-table.git"
+  },
+  "keywords": [
+    "angular",
+    "material",
+    "data",
+    "table",
+    "ngx"
+  ],
   "dependencies": {
     "@angular/animations": "~7.0.0",
+    "@angular/cdk": "7.1.1",
     "@angular/common": "~7.0.0",
     "@angular/compiler": "~7.0.0",
     "@angular/core": "~7.0.0",
@@ -20,6 +27,8 @@
     "@angular/platform-browser": "~7.0.0",
     "@angular/platform-browser-dynamic": "~7.0.0",
     "@angular/router": "~7.0.0",
+    "@angular/material": "7.1.1",
+    "@ctrl/ngx-csv": "^1.1.4",
     "core-js": "^2.5.4",
     "rxjs": "~6.3.3",
     "zone.js": "~0.8.26"
@@ -48,5 +57,11 @@
     "tslib": "^1.9.0",
     "tslint": "~5.11.0",
     "typescript": "~3.1.6"
-  }
+  },
+  "author": "hello@benwinding.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/benwinding/ngx-auto-table/issues"
+  },
+  "homepage": "https://github.com/benwinding/ngx-auto-table#readme"
 }
