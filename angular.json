@@ -17,21 +17,6 @@
           }
         }
       }
-    },
-    "nutotable": {
-      "root": "projects/nutotable",
-      "sourceRoot": "projects/nutotable/src",
-      "projectType": "library",
-      "prefix": "lib",
-      "architect": {
-        "build": {
-          "builder": "@angular-devkit/build-ng-packagr:build",
-          "options": {
-            "tsConfig": "projects/nutotable/tsconfig.lib.json",
-            "project": "projects/nutotable/ng-package.json"
-          }
-        }
-      }
     }
   },
   "defaultProject": "lib2"

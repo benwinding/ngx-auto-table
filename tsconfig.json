@@ -18,17 +18,11 @@
       "dom"
     ],
     "paths": {
-      "my-lib": [
+      "lib": [
         "dist/my-lib"
       ],
-      "my-lib/*": [
+      "lib/*": [
         "dist/my-lib/*"
-      ],
-      "nutotable": [
-        "dist/nutotable"
-      ],
-      "nutotable/*": [
-        "dist/nutotable/*"
       ]
     }
   }

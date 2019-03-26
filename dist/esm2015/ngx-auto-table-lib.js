@@ -1,0 +1,12 @@
+/**
+ * @fileoverview added by tsickle
+ * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ */
+/**
+ * Generated bundle index. Do not edit.
+ */
+export { AutoTableModule } from './public_api';
+export { AppExportCsvExportComponent as ɵc } from './components/app-table-csv-export.component';
+export { AppTableLoaderComponent as ɵb } from './components/app-table-loader.component';
+export { AutoTableComponent as ɵa } from './components/ngx-auto-table.component';
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibmd4LWF1dG8tdGFibGUtbGliLmpzIiwic291cmNlUm9vdCI6Im5nOi8vbmd4LWF1dG8tdGFibGUtbGliLyIsInNvdXJjZXMiOlsibmd4LWF1dG8tdGFibGUtbGliLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7Ozs7QUFJQSxnQ0FBYyxjQUFjLENBQUM7QUFFN0IsT0FBTyxFQUFDLDJCQUEyQixJQUFJLEVBQUUsRUFBQyxNQUFNLDZDQUE2QyxDQUFDO0FBQzlGLE9BQU8sRUFBQyx1QkFBdUIsSUFBSSxFQUFFLEVBQUMsTUFBTSx5Q0FBeUMsQ0FBQztBQUN0RixPQUFPLEVBQUMsa0JBQWtCLElBQUksRUFBRSxFQUFDLE1BQU0sdUNBQXVDLENBQUMiLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIEdlbmVyYXRlZCBidW5kbGUgaW5kZXguIERvIG5vdCBlZGl0LlxuICovXG5cbmV4cG9ydCAqIGZyb20gJy4vcHVibGljX2FwaSc7XG5cbmV4cG9ydCB7QXBwRXhwb3J0Q3N2RXhwb3J0Q29tcG9uZW50IGFzIMm1Y30gZnJvbSAnLi9jb21wb25lbnRzL2FwcC10YWJsZS1jc3YtZXhwb3J0LmNvbXBvbmVudCc7XG5leHBvcnQge0FwcFRhYmxlTG9hZGVyQ29tcG9uZW50IGFzIMm1Yn0gZnJvbSAnLi9jb21wb25lbnRzL2FwcC10YWJsZS1sb2FkZXIuY29tcG9uZW50JztcbmV4cG9ydCB7QXV0b1RhYmxlQ29tcG9uZW50IGFzIMm1YX0gZnJvbSAnLi9jb21wb25lbnRzL25neC1hdXRvLXRhYmxlLmNvbXBvbmVudCc7Il19

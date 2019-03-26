@@ -2,7 +2,7 @@
 import { ReactiveFormsModule } from '@angular/forms';
 
 import { NgModule } from '@angular/core';
-import { AutoTableComponent } from './components/auto-table.component';
+import { AutoTableComponent } from './components/ngx-auto-table.component';
 import {
   MatAutocompleteModule,
   MatButtonModule,
