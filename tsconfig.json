@@ -23,6 +23,12 @@
       ],
       "my-lib/*": [
         "dist/my-lib/*"
+      ],
+      "nutotable": [
+        "dist/nutotable"
+      ],
+      "nutotable/*": [
+        "dist/nutotable/*"
       ]
     }
   }

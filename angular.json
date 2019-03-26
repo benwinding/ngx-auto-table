@@ -17,6 +17,41 @@
           }
         }
       }
+    },
+    "nutotable": {
+      "root": "projects/nutotable",
+      "sourceRoot": "projects/nutotable/src",
+      "projectType": "library",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-ng-packagr:build",
+          "options": {
+            "tsConfig": "projects/nutotable/tsconfig.lib.json",
+            "project": "projects/nutotable/ng-package.json"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "projects/nutotable/src/test.ts",
+            "tsConfig": "projects/nutotable/tsconfig.spec.json",
+            "karmaConfig": "projects/nutotable/karma.conf.js"
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "projects/nutotable/tsconfig.lib.json",
+              "projects/nutotable/tsconfig.spec.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
+            ]
+          }
+        }
+      }
     }
   },
   "defaultProject": "lib2"
