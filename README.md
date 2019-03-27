@@ -46,6 +46,38 @@ ngOnInit() {
 }
 ```
 
+#### Row Operations
+``` typescript
+this.config = {
+  data$: people$,
+  actions: [
+    {
+      label: 'Delete',
+      icon: 'delete',
+      onClick: (p: User) => {
+        // Do stuff
+      }
+    }
+  ]
+};
+```
+
+#### Bulk Row Operations
+``` typescript
+this.config = {
+  data$: people$,
+  actionsBulk: [
+    {
+      label: 'Delete',
+      icon: 'delete',
+      onClick: (p: User) => {
+        // Do stuff
+      }
+    }
+  ]
+};
+```
+
 #### Basic Example Component
 To use the table in a component, simply add it to the template and feed it an obseravble in the Typescript file.
 
