@@ -7,6 +7,7 @@ A simple to use data table for Angular.
 - Uses angular material theme and icons under the hood
 - Row and Bulk actions, easily configurable
 - Typed Data passed into the configuration
+- Custom ng-templates for each column
 
 #### Install
 `yarn add ngx-auto-table`
@@ -23,6 +24,15 @@ imports: [
 ]
 ```
 
+Then add this to your tsconfig:
+
+``` json
+  "compilerOptions": {
+    ...
+    "paths": {
+      "@angular/*": ["node_modules/@angular/*"]
+    }
+```
 #### Usage
 - Add the table to the HTML template
 ``` html
@@ -76,6 +86,22 @@ this.config = {
     }
   ]
 };
+```
+
+#### Custom Templates
+``` html
+<ngx-auto-table 
+  [config]="config" 
+  [columnDefinitions]="{
+    name: {},
+    age: {},
+    email: {template: emailTemplate}
+  }"
+>
+  <ng-template #emailTemplate let-row>
+    <a [href]="'mailto:'+row.email">{{ row.email }} </a>
+  </ng-template>
+</ngx-auto-table>
 ```
 
 #### Basic Example Component
