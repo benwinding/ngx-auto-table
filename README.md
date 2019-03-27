@@ -4,7 +4,7 @@ A simple to use data table for Angular.
 ### Features include
 - Default filtering and sorting of all data
 - Uses RXJS observables
-- Uses angular material under the hood
+- Uses angular material theme and icons under the hood
 - Row and Bulk actions, easily configurable
 - Typed Data passed into the configuration
 
@@ -53,7 +53,7 @@ this.config = {
   actions: [
     {
       label: 'Delete',
-      icon: 'delete',
+      icon: 'delete', // material icon set
       onClick: (p: User) => {
         // Do stuff
       }
@@ -69,7 +69,7 @@ this.config = {
   actionsBulk: [
     {
       label: 'Delete',
-      icon: 'delete',
+      icon: 'delete', // material icon set
       onClick: (p: User) => {
         // Do stuff
       }
