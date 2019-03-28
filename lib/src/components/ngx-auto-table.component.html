@@ -10,7 +10,7 @@
         <input
           matInput
           (keyup)="applyFilter($event.target.value)"
-          placeholder="Search Rows..."
+          [placeholder]="this.config.filterText || 'Search Rows...'"
           #filterField
         />
         <mat-icon
