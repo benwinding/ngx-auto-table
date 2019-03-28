@@ -358,16 +358,16 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   }
 
   onClickRow($event, row: T) {
-    console.log('ngx-auto-table: onClickRow()', { $event, row });
     if (this.config.onSelectItem) {
+      console.log('ngx-auto-table: onClickRow()', { $event, row });
       this.selectionSingle.select(row);
       this.config.onSelectItem(row);
     }
   }
 
   onDoubleClickRow($event, row: T) {
-    console.log('ngx-auto-table: onClickRow()', { $event, row });
     if (this.config.onSelectItemDoubleClick) {
+      console.log('ngx-auto-table: onDoubleClickRow()', { $event, row });
       this.selectionSingle.select(row);
       this.config.onSelectItemDoubleClick(row);
     }

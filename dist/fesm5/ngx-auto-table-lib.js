@@ -495,8 +495,8 @@ var AutoTableComponent = /** @class */ (function () {
      * @return {?}
      */
     function ($event, row) {
-        console.log('ngx-auto-table: onClickRow()', { $event: $event, row: row });
         if (this.config.onSelectItem) {
+            console.log('ngx-auto-table: onClickRow()', { $event: $event, row: row });
             this.selectionSingle.select(row);
             this.config.onSelectItem(row);
         }
@@ -512,8 +512,8 @@ var AutoTableComponent = /** @class */ (function () {
      * @return {?}
      */
     function ($event, row) {
-        console.log('ngx-auto-table: onClickRow()', { $event: $event, row: row });
         if (this.config.onSelectItemDoubleClick) {
+            console.log('ngx-auto-table: onDoubleClickRow()', { $event: $event, row: row });
             this.selectionSingle.select(row);
             this.config.onSelectItemDoubleClick(row);
         }

@@ -406,8 +406,8 @@ class AutoTableComponent {
      * @return {?}
      */
     onClickRow($event, row) {
-        console.log('ngx-auto-table: onClickRow()', { $event, row });
         if (this.config.onSelectItem) {
+            console.log('ngx-auto-table: onClickRow()', { $event, row });
             this.selectionSingle.select(row);
             this.config.onSelectItem(row);
         }
@@ -418,8 +418,8 @@ class AutoTableComponent {
      * @return {?}
      */
     onDoubleClickRow($event, row) {
-        console.log('ngx-auto-table: onClickRow()', { $event, row });
         if (this.config.onSelectItemDoubleClick) {
+            console.log('ngx-auto-table: onDoubleClickRow()', { $event, row });
             this.selectionSingle.select(row);
             this.config.onSelectItemDoubleClick(row);
         }
