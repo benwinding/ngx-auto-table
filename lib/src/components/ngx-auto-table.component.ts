@@ -14,6 +14,7 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { filter } from 'rxjs/operators';
 
 export interface AutoTableConfig<T> {
+  debug: boolean;
   data$: Observable<T[]>;
   filename?: string;
   actions?: ActionDefinition<T>[];
@@ -126,7 +127,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     if (this.config.clearSelected) {
       this.clearSelectedSubscription = this.config.clearSelected.subscribe(
         () => {
-          console.log('ngx-auto-table: clearSelected');
+          this.log('clearSelected');
           this.selectionMultiple.clear();
           this.selectionSingle.clear();
         }
@@ -162,7 +163,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
       return keysData.has(cur) && acc;
     }, true);
 
-    console.log('ngx-auto-table: initFilter()', {
+    this.log('initFilter()', {
       rowFields: keysData,
       allFieldsExist,
       headerKeysDisplayed: this.headerKeysDisplayed
@@ -269,7 +270,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
         };
       }
     );
-    console.log('ngx-auto-table: initColumnDefinitions', {
+    this.log('initColumnDefinitions', {
       firstDataItem,
       inputDefintionFields
     });
@@ -359,7 +360,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
 
   onClickRow($event, row: T) {
     if (this.config.onSelectItem) {
-      console.log('ngx-auto-table: onClickRow()', { $event, row });
+      this.log('onClickRow()', { $event, row });
       this.selectionSingle.select(row);
       this.config.onSelectItem(row);
     }
@@ -367,7 +368,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
 
   onDoubleClickRow($event, row: T) {
     if (this.config.onSelectItemDoubleClick) {
-      console.log('ngx-auto-table: onDoubleClickRow()', { $event, row });
+      this.log('onDoubleClickRow()', { $event, row });
       this.selectionSingle.select(row);
       this.config.onSelectItemDoubleClick(row);
     }
@@ -376,6 +377,12 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   async onClickBulkAction(action: ActionDefinitionBulk<T>) {
     await action.onClick(this.selectionMultiple.selected);
     this.selectionMultiple.clear();
+  }
+
+  log(str: string, obj?: any) {
+    if (this.config.debug) {
+      console.log('<ngx-auto-table> : ' + str, obj);
+    }
   }
 
   warn(msg: string) {}

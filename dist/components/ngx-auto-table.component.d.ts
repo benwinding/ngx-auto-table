@@ -4,6 +4,7 @@ import { Subscription, Observable } from 'rxjs';
 import { FormControl } from '@angular/forms';
 import { SelectionModel } from '@angular/cdk/collections';
 export interface AutoTableConfig<T> {
+    debug: boolean;
     data$: Observable<T[]>;
     filename?: string;
     actions?: ActionDefinition<T>[];
@@ -91,6 +92,7 @@ export declare class AutoTableComponent<T> implements OnInit, OnDestroy {
     onClickRow($event: any, row: T): void;
     onDoubleClickRow($event: any, row: T): void;
     onClickBulkAction(action: ActionDefinitionBulk<T>): Promise<void>;
+    log(str: string, obj?: any): void;
     warn(msg: string): void;
 }
 export {};
