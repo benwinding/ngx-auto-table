@@ -4,9 +4,10 @@ A simple to use data table for Angular.
 ### Features include
 - Default filtering and sorting of all data
 - Uses RXJS observables
-- Uses angular material under the hood
+- Uses angular material theme and icons under the hood
 - Row and Bulk actions, easily configurable
 - Typed Data passed into the configuration
+- Custom ng-templates for each column
 
 #### Install
 `yarn add ngx-auto-table`
@@ -23,6 +24,15 @@ imports: [
 ]
 ```
 
+Then add this to your tsconfig:
+
+``` json
+  "compilerOptions": {
+    ...
+    "paths": {
+      "@angular/*": ["node_modules/@angular/*"]
+    }
+```
 #### Usage
 - Add the table to the HTML template
 ``` html
@@ -44,6 +54,54 @@ ngOnInit() {
     data$: people$
   };
 }
+```
+
+#### Row Operations
+``` typescript
+this.config = {
+  data$: people$,
+  actions: [
+    {
+      label: 'Delete',
+      icon: 'delete', // material icon set
+      onClick: (p: User) => {
+        // Do stuff
+      }
+    }
+  ]
+};
+```
+
+#### Bulk Row Operations
+``` typescript
+this.config = {
+  data$: people$,
+  actionsBulk: [
+    {
+      label: 'Delete',
+      icon: 'delete', // material icon set
+      onClick: (p: User) => {
+        // Do stuff
+      }
+    }
+  ]
+};
+```
+
+#### Custom Templates
+``` html
+<ngx-auto-table 
+  [config]="config" 
+  [columnDefinitions]="{
+    name: {},
+    age: {},
+    email: {template: emailTemplate}
+  }"
+>
+  <ng-template #emailTemplate let-row>
+    <a [href]="'mailto:'+row.email">{{ row.email }} </a>
+  </ng-template>
+</ngx-auto-table>
 ```
 
 #### Basic Example Component
