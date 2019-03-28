@@ -20,6 +20,7 @@ export interface AutoTableConfig<T> {
   actionsBulk?: ActionDefinitionBulk<T>[];
   bulkSelectMaxCount?: number;
   onSelectItem?: (row: T) => void;
+  onSelectItemDoubleClick?: (row: T) => void;
   clearSelected?: Observable<void>;
   initialSort?: string;
   initialSortDir?: 'asc' | 'desc';
@@ -28,6 +29,7 @@ export interface AutoTableConfig<T> {
   hideFilter?: boolean;
   hideHeader?: boolean;
   hideChooseColumns?: boolean;
+  filterText?: string;
   exportFilename?: string;
   exportRowFormat?: (row: T) => void;
 }
@@ -360,6 +362,14 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     if (this.config.onSelectItem) {
       this.selectionSingle.select(row);
       this.config.onSelectItem(row);
+    }
+  }
+
+  onDoubleClickRow($event, row: T) {
+    console.log('ngx-auto-table: onClickRow()', { $event, row });
+    if (this.config.onSelectItemDoubleClick) {
+      this.selectionSingle.select(row);
+      this.config.onSelectItemDoubleClick(row);
     }
   }
 

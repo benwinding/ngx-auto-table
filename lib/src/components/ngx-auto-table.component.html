@@ -44,7 +44,7 @@
     >
       <span class="item-count">
         ({{ selectionMultiple.selected.length }} Items Selected)
-        {{ isMaxReached() ? ' Max Reached!' : '' }}
+        {{ isMaxReached() ? " Max Reached!" : "" }}
       </span>
       <span class="buttons flex-h align-center">
         <button
@@ -157,6 +157,7 @@
     mat-row
     *matRowDef="let row; columns: headerKeysDisplayed"
     (click)="onClickRow($event, row)"
+    (dblclick)="onDoubleClickRow($event, row)"
     [class.selected-row-multiple]="selectionMultiple.isSelected(row)"
     [class.selected-row-single]="selectionSingle.isSelected(row)"
     [class.has-pointer]="config.onSelectItem"

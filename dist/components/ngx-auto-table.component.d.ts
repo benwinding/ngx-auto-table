@@ -10,6 +10,7 @@ export interface AutoTableConfig<T> {
     actionsBulk?: ActionDefinitionBulk<T>[];
     bulkSelectMaxCount?: number;
     onSelectItem?: (row: T) => void;
+    onSelectItemDoubleClick?: (row: T) => void;
     clearSelected?: Observable<void>;
     initialSort?: string;
     initialSortDir?: 'asc' | 'desc';
@@ -18,6 +19,7 @@ export interface AutoTableConfig<T> {
     hideFilter?: boolean;
     hideHeader?: boolean;
     hideChooseColumns?: boolean;
+    filterText?: string;
     exportFilename?: string;
     exportRowFormat?: (row: T) => void;
 }
@@ -87,6 +89,7 @@ export declare class AutoTableComponent<T> implements OnInit, OnDestroy {
     onColumnFilterChange($event: any): void;
     onClickBulkItem($event: any, item: any): void;
     onClickRow($event: any, row: T): void;
+    onDoubleClickRow($event: any, row: T): void;
     onClickBulkAction(action: ActionDefinitionBulk<T>): Promise<void>;
     warn(msg: string): void;
 }
