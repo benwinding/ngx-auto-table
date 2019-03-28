@@ -165,12 +165,12 @@
 </table>
 
 <mat-toolbar class="mat-elevation-z8 overflow-hidden">
-  <mat-toolbar-row>
+  <mat-toolbar-row *ngIf="!dataSource || hasNoItems">
     <app-toolbar-loader *ngIf="!dataSource"></app-toolbar-loader>
     <h1 *ngIf="hasNoItems" class="no-items">No items found</h1>
   </mat-toolbar-row>
   <mat-toolbar-row
-    style="display: flex; align-items: centered; justify-content: space-between;"
+    class="paginator-row"
   >
     <app-table-csv-export
       *ngIf="exportFilename"
