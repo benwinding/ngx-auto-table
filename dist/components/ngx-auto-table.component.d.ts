@@ -1,11 +1,11 @@
-import { OnInit, OnDestroy, EventEmitter } from '@angular/core';
-import { MatTableDataSource, MatPaginator, MatSort } from '@angular/material';
-import { Subscription, Observable } from 'rxjs';
-import { FormControl } from '@angular/forms';
-import { SelectionModel } from '@angular/cdk/collections';
+import { OnInit, OnDestroy, EventEmitter } from "@angular/core";
+import { MatTableDataSource, MatPaginator, MatSort } from "@angular/material";
+import { Observable, Subject } from "rxjs";
+import { FormControl } from "@angular/forms";
+import { SelectionModel } from "@angular/cdk/collections";
 export interface AutoTableConfig<T> {
-    debug: boolean;
     data$: Observable<T[]>;
+    debug?: boolean;
     filename?: string;
     actions?: ActionDefinition<T>[];
     actionsBulk?: ActionDefinitionBulk<T>[];
@@ -14,7 +14,7 @@ export interface AutoTableConfig<T> {
     onSelectItemDoubleClick?: (row: T) => void;
     clearSelected?: Observable<void>;
     initialSort?: string;
-    initialSortDir?: 'asc' | 'desc';
+    initialSortDir?: "asc" | "desc";
     pageSize?: number;
     hideFields?: string[];
     hideFilter?: boolean;
@@ -23,6 +23,7 @@ export interface AutoTableConfig<T> {
     filterText?: string;
     exportFilename?: string;
     exportRowFormat?: (row: T) => void;
+    $triggerSelectItem?: Observable<T>;
 }
 export interface ActionDefinition<T> {
     label: string;
@@ -60,7 +61,6 @@ export declare class AutoTableComponent<T> implements OnInit, OnDestroy {
     headerKeysDisplayed: any[];
     headerKeysDisplayedMap: {};
     dataSource: MatTableDataSource<any>;
-    dataSourceSubscription: Subscription;
     paginator: MatPaginator;
     pageSize: number;
     sort: MatSort;
@@ -70,7 +70,7 @@ export declare class AutoTableComponent<T> implements OnInit, OnDestroy {
     filterControl: FormControl;
     selectionMultiple: SelectionModel<any>;
     selectionSingle: SelectionModel<any>;
-    clearSelectedSubscription: Subscription;
+    $onDestroyed: Subject<{}>;
     ngOnInit(): void;
     ngOnDestroy(): void;
     applyFilter(filterValue: string): void;
@@ -93,6 +93,6 @@ export declare class AutoTableComponent<T> implements OnInit, OnDestroy {
     onDoubleClickRow($event: any, row: T): void;
     onClickBulkAction(action: ActionDefinitionBulk<T>): Promise<void>;
     log(str: string, obj?: any): void;
-    warn(msg: string): void;
+    warn(): void;
 }
 export {};

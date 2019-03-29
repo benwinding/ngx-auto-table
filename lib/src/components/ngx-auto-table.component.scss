@@ -50,26 +50,28 @@ app-toolbar-loader {
   height: unset;
 }
 
+mat-toolbar-row {
+  height: unset;
+}
+
+.filter-search {
+  margin-top: 11px;
+  margin-bottom: -9px;
+  margin-right: 20px;
+}
+
+.filter-columns {
+  margin-top: 11px;
+  margin-bottom: -9px;
+}
+
 .table-header {
   width: 100%;
-  background-color: white;
-  height: 70px;
-
-  .filters-container {
-    .filter {
-      margin: 10px;
-    }
-    .filter-columns {
-      margin: 10px;
-    }
-  }
 
   .bulk-actions {
     position: absolute;
     top: 0px;
     transition: all 0.7s;
-    height: 70px;
-    background-color: #c4efb3;
     width: 100%;
 
     .item-count {

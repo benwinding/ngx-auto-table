@@ -1,9 +1,10 @@
 {
   "name": "ngx-auto-table",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "A simple data-table built on Material and RXJS",
   "scripts": {
-    "build": "ng build"
+    "build": "ng build",
+    "dev": "ng build --watch "
   },
   "repository": {
     "type": "git",

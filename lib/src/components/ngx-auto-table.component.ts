@@ -6,16 +6,16 @@ import {
   ViewChild,
   Output,
   EventEmitter
-} from '@angular/core';
-import { MatTableDataSource, MatPaginator, MatSort } from '@angular/material';
-import { Subscription, Observable } from 'rxjs';
-import { FormControl } from '@angular/forms';
-import { SelectionModel } from '@angular/cdk/collections';
-import { filter } from 'rxjs/operators';
+} from "@angular/core";
+import { MatTableDataSource, MatPaginator, MatSort } from "@angular/material";
+import { Observable, Subject } from "rxjs";
+import { FormControl } from "@angular/forms";
+import { SelectionModel } from "@angular/cdk/collections";
+import { filter, takeUntil } from "rxjs/operators";
 
 export interface AutoTableConfig<T> {
-  debug: boolean;
   data$: Observable<T[]>;
+  debug?: boolean;
   filename?: string;
   actions?: ActionDefinition<T>[];
   actionsBulk?: ActionDefinitionBulk<T>[];
@@ -24,7 +24,7 @@ export interface AutoTableConfig<T> {
   onSelectItemDoubleClick?: (row: T) => void;
   clearSelected?: Observable<void>;
   initialSort?: string;
-  initialSortDir?: 'asc' | 'desc';
+  initialSortDir?: "asc" | "desc";
   pageSize?: number;
   hideFields?: string[];
   hideFilter?: boolean;
@@ -33,6 +33,7 @@ export interface AutoTableConfig<T> {
   filterText?: string;
   exportFilename?: string;
   exportRowFormat?: (row: T) => void;
+  $triggerSelectItem?: Observable<T>;
 }
 
 export interface ActionDefinition<T> {
@@ -61,9 +62,9 @@ interface ColumnDefinitionInternal extends ColumnDefinition {
 }
 
 @Component({
-  selector: 'ngx-auto-table',
-  templateUrl: './ngx-auto-table.component.html',
-  styleUrls: ['./ngx-auto-table.component.scss']
+  selector: "ngx-auto-table",
+  templateUrl: "./ngx-auto-table.component.html",
+  styleUrls: ["./ngx-auto-table.component.scss"]
 })
 export class AutoTableComponent<T> implements OnInit, OnDestroy {
   @Output()
@@ -85,7 +86,6 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   headerKeysDisplayedMap = {};
 
   dataSource: MatTableDataSource<any>;
-  dataSourceSubscription: Subscription;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   pageSize = 25;
   @ViewChild(MatSort) sort: MatSort;
@@ -99,13 +99,15 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   // Bulk items selection
   selectionMultiple = new SelectionModel<any>(true, []);
   selectionSingle = new SelectionModel<any>(false, []);
-  clearSelectedSubscription: Subscription;
+
+  $onDestroyed = new Subject();
 
   ngOnInit() {
-    this.dataSourceSubscription = this.config.data$
+    this.config.data$
       .pipe(filter(e => !!e))
+      .pipe(takeUntil(this.$onDestroyed))
       .subscribe(originalData => {
-        console.log('ngx-auto-table, subscribed: ', { originalData });
+        console.log("ngx-auto-table, subscribed: ", { originalData });
         this.dataSource = new MatTableDataSource(originalData);
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
@@ -124,24 +126,35 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
         this.initFilter(originalData);
       });
 
+    if (this.config.$triggerSelectItem) {
+      this.config.$triggerSelectItem
+        .pipe(takeUntil(this.$onDestroyed))
+        .subscribe(item => {
+          this.log("$triggerSelectItem", item);
+          const str = JSON.stringify(item);
+          const foundItem = this.dataSource.data.find(
+            row => JSON.stringify(row) === str
+          );
+          if (foundItem) {
+            this.selectionSingle.select(foundItem);
+          }
+        });
+    }
+
     if (this.config.clearSelected) {
-      this.clearSelectedSubscription = this.config.clearSelected.subscribe(
-        () => {
-          this.log('clearSelected');
+      this.config.clearSelected
+        .pipe(takeUntil(this.$onDestroyed))
+        .subscribe(() => {
+          this.log("clearSelected");
           this.selectionMultiple.clear();
           this.selectionSingle.clear();
-        }
-      );
+        });
     }
   }
 
   ngOnDestroy() {
-    if (this.dataSourceSubscription) {
-      this.dataSourceSubscription.unsubscribe();
-    }
-    if (this.clearSelectedSubscription) {
-      this.clearSelectedSubscription.unsubscribe();
-    }
+    this.$onDestroyed.next();
+    this.$onDestroyed.complete();
   }
 
   applyFilter(filterValue: string) {
@@ -157,13 +170,13 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     const firstRow = originalData[0];
     const keysData = new Set(Object.keys(firstRow));
     const keysHeader = new Set(this.headerKeysDisplayed);
-    keysHeader.delete('__bulk');
-    keysHeader.delete('__star');
+    keysHeader.delete("__bulk");
+    keysHeader.delete("__star");
     const allFieldsExist = Array.from(keysHeader).reduce((acc, cur) => {
       return keysData.has(cur) && acc;
     }, true);
 
-    this.log('initFilter()', {
+    this.log("initFilter()", {
       rowFields: keysData,
       allFieldsExist,
       headerKeysDisplayed: this.headerKeysDisplayed
@@ -209,7 +222,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   }
 
   private toTitleCase(str) {
-    return str.replace('_', ' ').replace(/\w\S*/g, function(txt) {
+    return str.replace("_", " ").replace(/\w\S*/g, function(txt) {
       return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
     });
   }
@@ -270,7 +283,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
         };
       }
     );
-    this.log('initColumnDefinitions', {
+    this.log("initColumnDefinitions", {
       firstDataItem,
       inputDefintionFields
     });
@@ -289,11 +302,11 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     );
     // Add bulk select column at start
     if (this.config.actionsBulk) {
-      this.headerKeysDisplayed.unshift('__bulk');
+      this.headerKeysDisplayed.unshift("__bulk");
     }
     // Add actions column at end
     if (this.config.actions) {
-      this.headerKeysDisplayed.push('__star');
+      this.headerKeysDisplayed.push("__star");
     }
   }
 
@@ -307,17 +320,21 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
 
   /** Selects all rows if they are not all selected; otherwise clear selection. */
   masterToggle() {
-    this.isAllSelected()
-      ? this.selectionMultiple.clear()
-      : this.selectAll();
+    this.isAllSelected() ? this.selectionMultiple.clear() : this.selectAll();
     this.selectedBulk.emit(this.selectionMultiple.selected);
   }
 
   private selectAll() {
-    this.dataSource.sortData(this.dataSource.filteredData, this.dataSource.sort);
+    this.dataSource.sortData(
+      this.dataSource.filteredData,
+      this.dataSource.sort
+    );
     let cutArray = this.dataSource.filteredData;
     if (this.config.bulkSelectMaxCount) {
-      cutArray = this.dataSource.filteredData.slice(0, this.config.bulkSelectMaxCount);
+      cutArray = this.dataSource.filteredData.slice(
+        0,
+        this.config.bulkSelectMaxCount
+      );
     }
     cutArray.forEach(row => {
       this.selectionMultiple.select(row);
@@ -349,9 +366,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
         if (isSelected) {
           this.selectionMultiple.deselect(item);
         } else {
-          this.warn(
-            `Max Selection of "${this.config.bulkSelectMaxCount}" Reached`
-          );
+          this.warn();
         }
       }
       this.selectedBulk.emit(this.selectionMultiple.selected);
@@ -360,7 +375,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
 
   onClickRow($event, row: T) {
     if (this.config.onSelectItem) {
-      this.log('onClickRow()', { $event, row });
+      this.log("onClickRow()", { $event, row });
       this.selectionSingle.select(row);
       this.config.onSelectItem(row);
     }
@@ -368,7 +383,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
 
   onDoubleClickRow($event, row: T) {
     if (this.config.onSelectItemDoubleClick) {
-      this.log('onDoubleClickRow()', { $event, row });
+      this.log("onDoubleClickRow()", { $event, row });
       this.selectionSingle.select(row);
       this.config.onSelectItemDoubleClick(row);
     }
@@ -381,9 +396,9 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
 
   log(str: string, obj?: any) {
     if (this.config.debug) {
-      console.log('<ngx-auto-table> : ' + str, obj);
+      console.log("<ngx-auto-table> : " + str, obj);
     }
   }
 
-  warn(msg: string) {}
+  warn() {}
 }

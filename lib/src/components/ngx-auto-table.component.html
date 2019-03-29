@@ -4,39 +4,44 @@
   *ngIf="(!config.hideFilter || !config.hideChooseColumns) && !hasNoItems"
 >
   <div class="relative">
-    <div class="filters-container flex-h align-center space-between">
-      <mat-form-field class="filter" *ngIf="!hasNoItems && !config.hideFilter">
-        <mat-icon matPrefix>search</mat-icon>
-        <input
-          matInput
-          (keyup)="applyFilter($event.target.value)"
-          [placeholder]="this.config.filterText || 'Search Rows...'"
-          #filterField
-        />
-        <mat-icon
-          class="has-pointer"
-          matSuffix
-          (click)="filterField.value = ''; applyFilter(filterField.value)"
-          >clear</mat-icon
+    <mat-toolbar class="mat-elevation-z8">
+      <mat-toolbar-row class="flex-h align-center space-between">
+        <mat-form-field
+          class="filter-search"
+          *ngIf="!hasNoItems && !config.hideFilter"
         >
-      </mat-form-field>
-      <mat-form-field
-        class="filter-columns overflow-hidden"
-        *ngIf="!hasNoItems && !config.hideChooseColumns"
-      >
-        <mat-icon matPrefix>view_column</mat-icon>
-        <mat-select
-          placeholder="Choose Columns..."
-          [formControl]="filterControl"
-          (selectionChange)="onColumnFilterChange($event)"
-          multiple
+          <mat-icon matPrefix>search</mat-icon>
+          <input
+            matInput
+            (keyup)="applyFilter($event.target.value)"
+            [placeholder]="this.config.filterText || 'Search Rows...'"
+            #filterField
+          />
+          <mat-icon
+            class="has-pointer"
+            matSuffix
+            (click)="filterField.value = ''; applyFilter(filterField.value)"
+            >clear</mat-icon
+          >
+        </mat-form-field>
+        <mat-form-field
+          class="filter-columns overflow-hidden"
+          *ngIf="!hasNoItems && !config.hideChooseColumns"
         >
-          <mat-option *ngFor="let key of headerKeysAllVisible" [value]="key">
-            {{ getKeyHeader(key) }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-    </div>
+          <mat-icon matPrefix>view_column</mat-icon>
+          <mat-select
+            placeholder="Choose Columns..."
+            [formControl]="filterControl"
+            (selectionChange)="onColumnFilterChange($event)"
+            multiple
+          >
+            <mat-option *ngFor="let key of headerKeysAllVisible" [value]="key">
+              {{ getKeyHeader(key) }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </mat-toolbar-row>
+    </mat-toolbar>
     <div
       class="bulk-actions flex-h align-center space-between"
       *ngIf="config.actionsBulk"
@@ -169,9 +174,7 @@
     <app-toolbar-loader *ngIf="!dataSource"></app-toolbar-loader>
     <h1 *ngIf="hasNoItems" class="no-items">No items found</h1>
   </mat-toolbar-row>
-  <mat-toolbar-row
-    class="paginator-row"
-  >
+  <mat-toolbar-row class="paginator-row">
     <app-table-csv-export
       *ngIf="exportFilename"
       [dataArray]="exportData"
