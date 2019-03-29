@@ -3,7 +3,9 @@
   "version": "0.0.1",
   "peerDependencies": {
     "@angular/common": "^7.0.0",
-    "@angular/core": "^7.0.0"
+    "@angular/platform-browser": "^7.0.0",
+    "@angular/core": "^7.0.0",
+    "@angular/material": "^7.0.0"
   },
   "main": "bundles/ngx-auto-table-lib.umd.js",
   "module": "fesm5/ngx-auto-table-lib.js",
