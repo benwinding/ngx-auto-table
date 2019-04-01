@@ -6,7 +6,8 @@
     "start": "ng serve --project=table-demo --watch",
     "watch-lib": "ng build --project=ngx-auto-table --watch",
     "build-lib": "ng build --project=ngx-auto-table",
-    "deploy-demo": "ng build --project=table-demo && gh-pages -d dist/table-demo"
+    "build-demo": "ng build --project=table-demo --prod",
+    "deploy-demo": "gh-pages -d dist/table-demo"
   },
   "repository": {
     "type": "git",
