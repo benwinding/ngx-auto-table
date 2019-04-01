@@ -4,7 +4,9 @@
   "description": "A simple data-table built on Material and RXJS",
   "scripts": {
     "build": "ng build",
-    "dev": "ng build --watch "
+    "start": "ng serve --project=table-demo --watch",
+    "watch-lib": "ng build --project=ngx-auto-table --watch",
+    "build-lib": "ng build --project=ngx-auto-table"
   },
   "repository": {
     "type": "git",
