@@ -1,10 +1,28 @@
 {
   "name": "ngx-auto-table",
-  "version": "0.0.1",
+  "version": "0.1.10",
+  "description": "A simple data-table built on Material and RXJS",
   "peerDependencies": {
     "@angular/common": "^7.0.0",
     "@angular/platform-browser": "^7.0.0",
     "@angular/core": "^7.0.0",
     "@angular/material": "^7.0.0"
-  }
+  },
+  "author": "hello@benwinding.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/benwinding/ngx-auto-table/issues"
+  },
+  "homepage": "https://github.com/benwinding/ngx-auto-table#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/benwinding/ngx-auto-table.git"
+  },
+  "keywords": [
+    "angular",
+    "material",
+    "data",
+    "table",
+    "ngx"
+  ]
 }

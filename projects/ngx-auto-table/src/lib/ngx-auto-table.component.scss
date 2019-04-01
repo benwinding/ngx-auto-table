@@ -65,30 +65,30 @@ mat-toolbar-row {
   margin-bottom: -9px;
 }
 
+.bulk-actions {
+  position: absolute;
+  top: 0px;
+  transition: all 0.7s;
+  width: 100%;
+  height: 100%;
+}
+
+.item-count {
+  padding-left: 10px;
+}
+
+button {
+  margin-right: 10px;
+}
+
 .table-header {
   width: 100%;
-
-  .bulk-actions {
-    position: absolute;
-    top: 0px;
-    transition: all 0.7s;
-    width: 100%;
-
-    .item-count {
-      color: darkgreen;
-      padding-left: 10px;
-    }
-    .buttons {
-      button {
-        margin-right: 10px;
-      }
-    }
-  }
 }
 
 .hidden {
   top: -70px !important;
   overflow: hidden !important;
+  height: 0px;
 }
 
 .selected-row-multiple {

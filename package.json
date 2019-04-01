@@ -1,6 +1,6 @@
 {
   "name": "ngx-auto-table",
-  "version": "0.1.8",
+  "version": "0.0.0",
   "description": "A simple data-table built on Material and RXJS",
   "scripts": {
     "build": "ng build",
@@ -12,14 +12,6 @@
     "type": "git",
     "url": "git+https://github.com/benwinding/ngx-auto-table.git"
   },
-  "main": "dist",
-  "keywords": [
-    "angular",
-    "material",
-    "data",
-    "table",
-    "ngx"
-  ],
   "dependencies": {
     "@angular/animations": "~7.0.0",
     "@angular/cdk": "7.1.1",

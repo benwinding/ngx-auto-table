@@ -42,26 +42,28 @@
         </mat-form-field>
       </mat-toolbar-row>
     </mat-toolbar>
-    <div
-      class="bulk-actions flex-h align-center space-between"
+    <mat-toolbar
+      class="bulk-actions flex-h align-center mat-primary"
       *ngIf="config.actionsBulk"
       [class.hidden]="!selectionMultiple.hasValue()"
     >
-      <span class="item-count">
-        ({{ selectionMultiple.selected.length }} Items Selected)
-        {{ isMaxReached() ? " Max Reached!" : "" }}
-      </span>
-      <span class="buttons flex-h align-center">
-        <button
-          mat-raised-button
-          *ngFor="let action of config.actionsBulk"
-          (click)="onClickBulkAction(action)"
-        >
-          <mat-icon>{{ action.icon }}</mat-icon>
-          <span>{{ action.label }}</span>
-        </button>
-      </span>
-    </div>
+      <mat-toolbar-row class="flex-h align-center space-between">
+        <span class="item-count">
+          ({{ selectionMultiple.selected.length }} Items Selected)
+          {{ isMaxReached() ? " Max Reached!" : "" }}
+        </span>
+        <span class="buttons flex-h align-center">
+          <button
+            mat-raised-button
+            *ngFor="let action of config.actionsBulk"
+            (click)="onClickBulkAction(action)"
+          >
+            <mat-icon>{{ action.icon }}</mat-icon>
+            <span>{{ action.label }}</span>
+          </button>
+        </span>
+      </mat-toolbar-row>
+    </mat-toolbar>
   </div>
 </div>
 <table

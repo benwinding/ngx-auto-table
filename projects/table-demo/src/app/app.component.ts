@@ -17,7 +17,6 @@ function MakeRow(name: string): TestRow {
 @Component({
   selector: "app-root",
   template: `
-    <!--The content below is only a placeholder and can be replaced.-->
     <div style="text-align:center">
       NGX Auto Table Testing
     </div>
