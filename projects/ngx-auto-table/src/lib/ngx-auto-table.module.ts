@@ -1,7 +1,7 @@
 // Angular
-import { ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule } from "@angular/forms";
 
-import { NgModule } from '@angular/core';
+import { NgModule } from "@angular/core";
 import {
   MatAutocompleteModule,
   MatButtonModule,
@@ -18,14 +18,14 @@ import {
   MatTableModule,
   MatToolbarModule,
   MatMenuModule
-} from '@angular/material';
+} from "@angular/material";
 
-import { CsvModule } from '@ctrl/ngx-csv';
-import { AppExportCsvExportComponent } from './app-table-csv-export.component';
-import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { AutoTableComponent } from './ngx-auto-table.component';
-import { AppTableLoaderComponent } from './app-table-loader.component';
+import { CsvModule } from "@ctrl/ngx-csv";
+import { AppExportCsvExportComponent } from "./app-table-csv-export.component";
+import { CommonModule } from "@angular/common";
+import { RouterModule } from "@angular/router";
+import { AutoTableComponent } from "./ngx-auto-table.component";
+import { AppTableLoaderComponent } from "./app-table-loader.component";
 
 const sharedComponents = [AutoTableComponent, AppTableLoaderComponent];
 
@@ -51,7 +51,7 @@ const sharedComponents = [AutoTableComponent, AppTableLoaderComponent];
     MatTableModule,
     MatToolbarModule,
     CommonModule,
-    RouterModule,
+    RouterModule
   ]
 })
 export class AutoTableModule {}
