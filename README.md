@@ -1,5 +1,7 @@
 # ngx-auto-table
-A simple to use data table for Angular.
+A simple to use data table for Angular. (Wrapper around the Material Table)
+
+## [Demo](https://benwinding.github.io/ngx-auto-table/index.html)
 
 ### Features include
 - Default filtering and sorting of all data
