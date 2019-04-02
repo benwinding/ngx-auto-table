@@ -1,6 +1,6 @@
 import { Component } from "@angular/core";
 import { AutoTableConfig } from "ngx-auto-table/public_api";
-import { Observable, of } from "rxjs";
+import { Observable, of, BehaviorSubject } from "rxjs";
 
 interface TestRow {
   name: string;
@@ -33,13 +33,15 @@ function MakeRow(name: string): TestRow {
 export class AppComponent {
   config: AutoTableConfig<TestRow>;
   constructor() {
+    const rowDavid = MakeRow("David");
     const data$ = of([
       MakeRow("Mike"),
-      MakeRow("David"),
+      rowDavid,
       MakeRow("Frank"),
       MakeRow("Jess"),
       MakeRow("Thelma")
     ]);
+    const $triggerSelectItem = new BehaviorSubject(rowDavid);
     this.config = {
       data$: data$,
       actionsBulk: [
@@ -59,7 +61,8 @@ export class AppComponent {
             console.log({row});
           }
         }
-      ]
+      ],
+      $triggerSelectItem: $triggerSelectItem
     };
   }
 }

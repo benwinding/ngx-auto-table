@@ -1,38 +1,36 @@
-import {
-  Component,
-  OnInit,
-  Input,
-  OnDestroy,
-  ViewChild,
-  Output,
-  EventEmitter
-} from "@angular/core";
+import { Component, OnInit, Input, OnDestroy, ViewChild } from "@angular/core";
 import { MatTableDataSource, MatPaginator, MatSort } from "@angular/material";
 import { Observable, Subject } from "rxjs";
 import { FormControl } from "@angular/forms";
 import { SelectionModel } from "@angular/cdk/collections";
-import { filter, takeUntil } from "rxjs/operators";
+import { filter, takeUntil, throttleTime } from "rxjs/operators";
 
 export interface AutoTableConfig<T> {
   data$: Observable<T[]>;
   debug?: boolean;
-  filename?: string;
+  // Actions
   actions?: ActionDefinition<T>[];
   actionsBulk?: ActionDefinitionBulk<T>[];
   bulkSelectMaxCount?: number;
-  onSelectItem?: (row: T) => void;
-  onSelectItemDoubleClick?: (row: T) => void;
-  clearSelected?: Observable<void>;
+  // Sorting and pagination
   initialSort?: string;
   initialSortDir?: "asc" | "desc";
   pageSize?: number;
+  // Top bar configuration
   hideFields?: string[];
   hideFilter?: boolean;
   hideHeader?: boolean;
   hideChooseColumns?: boolean;
   filterText?: string;
+  // Export configuration
   exportFilename?: string;
   exportRowFormat?: (row: T) => void;
+  // Selection callbacks
+  onSelectItem?: (row: T) => void;
+  onSelectItemDoubleClick?: (row: T) => void;
+  onSelectedBulk?: (row: T[]) => void;
+  // Triggers
+  $triggerClearSelected?: Observable<void>;
   $triggerSelectItem?: Observable<T>;
 }
 
@@ -67,8 +65,6 @@ interface ColumnDefinitionInternal extends ColumnDefinition {
   styleUrls: ["./ngx-auto-table.component.scss"]
 })
 export class AutoTableComponent<T> implements OnInit, OnDestroy {
-  @Output()
-  selectedBulk = new EventEmitter<T[]>();
   @Input()
   config: AutoTableConfig<T>;
   @Input()
@@ -128,24 +124,26 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
 
     if (this.config.$triggerSelectItem) {
       this.config.$triggerSelectItem
+        .pipe(throttleTime(300))
         .pipe(takeUntil(this.$onDestroyed))
         .subscribe(item => {
-          this.log("$triggerSelectItem", item);
+          this.log("$triggerSelectItem: selecting item", { item });
           const str = JSON.stringify(item);
           const foundItem = this.dataSource.data.find(
             row => JSON.stringify(row) === str
           );
+          this.log("$triggerSelectItem: found item:", { foundItem });
           if (foundItem) {
             this.selectionSingle.select(foundItem);
           }
         });
     }
 
-    if (this.config.clearSelected) {
-      this.config.clearSelected
+    if (this.config.$triggerClearSelected) {
+      this.config.$triggerClearSelected
         .pipe(takeUntil(this.$onDestroyed))
         .subscribe(() => {
-          this.log("clearSelected");
+          this.log("$triggerClearSelected: clearing selection");
           this.selectionMultiple.clear();
           this.selectionSingle.clear();
         });
@@ -321,7 +319,9 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   /** Selects all rows if they are not all selected; otherwise clear selection. */
   masterToggle() {
     this.isAllSelected() ? this.selectionMultiple.clear() : this.selectAll();
-    this.selectedBulk.emit(this.selectionMultiple.selected);
+    if (this.config.onSelectedBulk) {
+      this.config.onSelectedBulk(this.selectionMultiple.selected);
+    }
   }
 
   private selectAll() {
@@ -369,7 +369,9 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
           this.warn();
         }
       }
-      this.selectedBulk.emit(this.selectionMultiple.selected);
+      if (this.config.onSelectedBulk) {
+        this.config.onSelectedBulk(this.selectionMultiple.selected);
+      }
     }
   }
 
