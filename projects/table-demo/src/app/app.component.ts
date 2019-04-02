@@ -46,7 +46,18 @@ export class AppComponent {
         {
           label: 'Delete',
           icon: 'delete',
-          onClick: (rows: TestRow[]) => {}
+          onClick: (rows: TestRow[]) => {
+            console.log({rows});
+          }
+        }
+      ],
+      actions: [
+        {
+          label: 'Show',
+          icon: 'remove_red_eye',
+          onClick: (row: TestRow) => {
+            console.log({row});
+          }
         }
       ]
     };
