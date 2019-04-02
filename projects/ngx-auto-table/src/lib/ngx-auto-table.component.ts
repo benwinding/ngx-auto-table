@@ -376,9 +376,9 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   }
 
   onClickRow($event, row: T) {
+    this.log("onClickRow()", { $event, row });
+    this.selectionSingle.select(row);
     if (this.config.onSelectItem) {
-      this.log("onClickRow()", { $event, row });
-      this.selectionSingle.select(row);
       this.config.onSelectItem(row);
     }
   }

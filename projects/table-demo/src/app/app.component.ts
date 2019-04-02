@@ -44,6 +44,7 @@ export class AppComponent {
     const $triggerSelectItem = new BehaviorSubject(rowDavid);
     this.config = {
       data$: data$,
+      debug: true,
       actionsBulk: [
         {
           label: 'Delete',
