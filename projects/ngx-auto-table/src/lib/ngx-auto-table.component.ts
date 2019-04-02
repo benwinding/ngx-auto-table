@@ -104,7 +104,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
       .pipe(filter(e => !!e))
       .pipe(takeUntil(this.$onDestroyed))
       .subscribe(originalData => {
-        console.log("ngx-auto-table, subscribed: ", { originalData });
+        this.log("ngx-auto-table, subscribed: ", { originalData });
         this.dataSource = new MatTableDataSource(originalData);
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
@@ -355,7 +355,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   }
 
   onColumnFilterChange($event) {
-    console.log({ $event });
+    this.log('onColumnFilterChange: ', { $event });
     const selectedValues = this.filterControl.value;
     this.setDisplayedColumns(selectedValues);
     this.initFilter(this.dataSource.data);
