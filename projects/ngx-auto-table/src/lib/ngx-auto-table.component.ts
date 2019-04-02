@@ -7,7 +7,7 @@ import { filter, takeUntil, throttleTime } from "rxjs/operators";
 
 export interface AutoTableConfig<T> {
   data$: Observable<T[]>;
-  onDataUpdated?: (row: T[]) => void;
+  onDataUpdated?: (rows: T[]) => void;
   debug?: boolean;
   // Actions
   actions?: ActionDefinition<T>[];
@@ -31,6 +31,7 @@ export interface AutoTableConfig<T> {
   onSelectItemDoubleClick?: (row: T) => void;
   onSelectedBulk?: (row: T[]) => void;
   // Triggers
+  selectFirstOnInit?: boolean;
   $triggerClearSelected?: Observable<void>;
   $triggerSelectItem?: Observable<T>;
 }
@@ -104,6 +105,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
       .pipe(filter(e => !!e))
       .pipe(takeUntil(this.$onDestroyed))
       .subscribe(originalData => {
+        const hasBeenInitedBefore = this.dataSource && this.dataSource.data && this.dataSource.data.length;
         this.log("ngx-auto-table, subscribed: ", { originalData });
         this.dataSource = new MatTableDataSource(originalData);
         this.dataSource.paginator = this.paginator;
@@ -120,8 +122,13 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
         if (this.config.pageSize) {
           this.pageSize = this.config.pageSize;
         }
-        const firstDataItem = originalData[0];
-        this.initDisplayedColumns(firstDataItem);
+        if (!hasBeenInitedBefore) {
+          const firstDataItem = originalData[0];
+          this.initDisplayedColumns(firstDataItem);
+          if (this.config.selectFirstOnInit) {
+            this.selectionSingle.select(firstDataItem);
+          }
+        }
         this.initExport(originalData);
         this.initFilter(originalData);
       });
@@ -400,11 +407,10 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     this.selectionMultiple.clear();
   }
 
-  log(str: string, obj?: any) {
+  private log(str: string, obj?: any) {
     if (this.config.debug) {
       console.log("<ngx-auto-table> : " + str, obj);
     }
   }
-
-  warn() {}
+  private warn() {}
 }
