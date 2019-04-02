@@ -7,6 +7,7 @@ import { filter, takeUntil, throttleTime } from "rxjs/operators";
 
 export interface AutoTableConfig<T> {
   data$: Observable<T[]>;
+  onDataUpdated?: (row: T[]) => void;
   debug?: boolean;
   // Actions
   actions?: ActionDefinition<T>[];
@@ -112,6 +113,9 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
           return;
         } else {
           this.hasNoItems = false;
+        }
+        if (this.config.onDataUpdated) {
+          this.config.onDataUpdated(originalData);
         }
         if (this.config.pageSize) {
           this.pageSize = this.config.pageSize;
