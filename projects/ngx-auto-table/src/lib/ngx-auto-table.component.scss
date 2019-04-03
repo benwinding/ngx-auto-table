@@ -104,7 +104,7 @@ td {
 }
 
 .selected-row-single {
-  background-color: #b5deb6bb;
+  filter: brightness(1.4) hue-rotate(15deg);
 }
 
 .break-words {
