@@ -1,188 +1,197 @@
-<div
-  class="table-header auto-elevation overflow-hidden"
-  [class.addRightPixel]="config.hideHeader"
-  *ngIf="(!config.hideFilter || !config.hideChooseColumns) && !hasNoItems"
->
-  <div class="relative">
-    <mat-toolbar class="mat-elevation-z8">
-      <mat-toolbar-row class="flex-h align-center space-between">
-        <mat-form-field
-          class="filter-search"
-          *ngIf="!hasNoItems && !config.hideFilter"
-        >
-          <mat-icon matPrefix>search</mat-icon>
-          <input
-            matInput
-            (keyup)="applyFilter($event.target.value)"
-            [placeholder]="this.config.filterText || 'Search Rows...'"
-            #filterField
-          />
-          <mat-icon
-            class="has-pointer"
-            matSuffix
-            (click)="filterField.value = ''; applyFilter(filterField.value)"
-            >clear</mat-icon
-          >
-        </mat-form-field>
-        <mat-form-field
-          class="filter-columns overflow-hidden"
-          *ngIf="!hasNoItems && !config.hideChooseColumns"
-        >
-          <mat-icon matPrefix>view_column</mat-icon>
-          <mat-select
-            placeholder="Choose Columns..."
-            [formControl]="filterControl"
-            (selectionChange)="onColumnFilterChange($event)"
-            multiple
-          >
-            <mat-option *ngFor="let key of headerKeysAllVisible" [value]="key">
-              {{ getKeyHeader(key) }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-      </mat-toolbar-row>
-    </mat-toolbar>
-    <mat-toolbar
-      class="bulk-actions flex-h align-center mat-primary"
-      *ngIf="config.actionsBulk"
-      [class.hidden]="!selectionMultiple.hasValue()"
-    >
-      <mat-toolbar-row class="flex-h align-center space-between">
-        <span class="item-count">
-          ({{ selectionMultiple.selected.length }} Items Selected)
-          {{ isMaxReached() ? " Max Reached!" : "" }}
-        </span>
-        <span class="buttons flex-h align-center">
-          <button
-            mat-raised-button
-            *ngFor="let action of config.actionsBulk"
-            (click)="onClickBulkAction(action)"
-          >
-            <mat-icon>{{ action.icon }}</mat-icon>
-            <span>{{ action.label }}</span>
-          </button>
-        </span>
-      </mat-toolbar-row>
-    </mat-toolbar>
-  </div>
-</div>
-<table
-  mat-table
-  #table
-  matSort
-  [matSortActive]="config.initialSort"
-  [matSortDirection]="config.initialSortDir"
-  [dataSource]="this.dataSource"
-  style="width:100%;"
-  class="mat-elevation-z8"
->
-  <ng-container
-    *ngFor="let def of columnDefinitionsAllArray"
-    [matColumnDef]="def.field"
+<div class="table-container">
+  <div
+    class="table-header auto-elevation overflow-hidden"
+    [class.addRightPixel]="config.hideHeader"
+    *ngIf="(!config.hideFilter || !config.hideChooseColumns) && !hasNoItems"
   >
-    <th mat-header-cell mat-sort-header *matHeaderCellDef>{{ def.header }}</th>
-    <td mat-cell *matCellDef="let row">
-      <div *ngIf="!def.template" [class.break-words]="def.forceWrap">
-        {{ row[def.field] }}
-      </div>
-      <div *ngIf="def.template">
-        <div
-          *ngTemplateOutlet="def.template; context: { $implicit: row }"
-        ></div>
-      </div>
-    </td>
-  </ng-container>
-
-  <ng-container matColumnDef="__bulk" stickyEnd>
-    <th mat-header-cell *matHeaderCellDef>
-      <mat-checkbox
-        (change)="$event ? masterToggle() : null"
-        [checked]="selectionMultiple.hasValue() && isAllSelected()"
-        [indeterminate]="selectionMultiple.hasValue() && !isAllSelected()"
+    <div class="relative">
+      <mat-toolbar class="mat-elevation-z8">
+        <mat-toolbar-row class="flex-h align-center space-between">
+          <mat-form-field
+            class="filter-search"
+            *ngIf="!hasNoItems && !config.hideFilter"
+          >
+            <mat-icon matPrefix>search</mat-icon>
+            <input
+              matInput
+              (keyup)="applyFilter($event.target.value)"
+              [placeholder]="this.config.filterText || 'Search Rows...'"
+              #filterField
+            />
+            <mat-icon
+              class="has-pointer"
+              matSuffix
+              (click)="filterField.value = ''; applyFilter(filterField.value)"
+              >clear</mat-icon
+            >
+          </mat-form-field>
+          <mat-form-field
+            class="filter-columns overflow-hidden"
+            *ngIf="!hasNoItems && !config.hideChooseColumns"
+          >
+            <mat-icon matPrefix>view_column</mat-icon>
+            <mat-select
+              placeholder="Choose Columns..."
+              [formControl]="filterControl"
+              (selectionChange)="onColumnFilterChange($event)"
+              multiple
+            >
+              <mat-option
+                *ngFor="let key of headerKeysAllVisible"
+                [value]="key"
+              >
+                {{ getKeyHeader(key) }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </mat-toolbar-row>
+      </mat-toolbar>
+      <mat-toolbar
+        class="bulk-actions flex-h align-center mat-primary"
+        *ngIf="config.actionsBulk"
+        [class.hidden]="!selectionMultiple.hasValue()"
       >
-      </mat-checkbox>
-    </th>
-    <td mat-cell *matCellDef="let row">
-      <mat-checkbox
-        (click)="$event.stopPropagation()"
-        (change)="onClickBulkItem($event, row)"
-        [checked]="selectionMultiple.isSelected(row)"
-      >
-      </mat-checkbox>
-    </td>
-  </ng-container>
-
-  <ng-container matColumnDef="__star" stickyEnd>
-    <th mat-header-cell *matHeaderCellDef></th>
-    <td mat-cell *matCellDef="let row">
-      <div *ngIf="config.actions">
-        <mat-icon
-          mat-list-icon
-          class="more-icon has-pointer"
-          [matMenuTriggerFor]="rowMenu"
-          >more_vert</mat-icon
-        >
-        <mat-menu #rowMenu="matMenu" class="row-menu">
-          <div mat-menu-item *ngFor="let action of config.actions">
+        <mat-toolbar-row class="flex-h align-center space-between">
+          <span class="item-count">
+            ({{ selectionMultiple.selected.length }} Items Selected)
+            {{ isMaxReached() ? " Max Reached!" : "" }}
+          </span>
+          <span class="buttons flex-h align-center">
             <button
-              mat-menu-item
-              *ngIf="action.onClick"
-              (click)="action.onClick(row)"
+              mat-raised-button
+              *ngFor="let action of config.actionsBulk"
+              (click)="onClickBulkAction(action)"
             >
               <mat-icon>{{ action.icon }}</mat-icon>
               <span>{{ action.label }}</span>
             </button>
-            <a
-              mat-menu-item
-              *ngIf="action.onRouterLink && !action.routerLinkQuery"
-              [routerLink]="['/' + action.onRouterLink(row)]"
-            >
-              <mat-icon>{{ action.icon }}</mat-icon>
-              <span>{{ action.label }}</span>
-            </a>
-            <a
-              mat-menu-item
-              *ngIf="action.onRouterLink && action.routerLinkQuery"
-              [routerLink]="['/' + action.onRouterLink(row)]"
-              [queryParams]="action.routerLinkQuery(row)"
-            >
-              <mat-icon>{{ action.icon }}</mat-icon>
-              <span>{{ action.label }}</span>
-            </a>
-          </div>
-        </mat-menu>
-      </div>
-    </td>
-  </ng-container>
+          </span>
+        </mat-toolbar-row>
+      </mat-toolbar>
+    </div>
+  </div>
+  <table
+    mat-table
+    #table
+    matSort
+    [matSortActive]="config.initialSort"
+    [matSortDirection]="config.initialSortDir"
+    [dataSource]="this.dataSource"
+    style="width:100%;"
+    class="mat-elevation-z8"
+  >
+    <ng-container
+      *ngFor="let def of columnDefinitionsAllArray"
+      [matColumnDef]="def.field"
+    >
+      <th mat-header-cell mat-sort-header *matHeaderCellDef>
+        {{ def.header }}
+      </th>
+      <td mat-cell *matCellDef="let row">
+        <div *ngIf="!def.template" [class.break-words]="def.forceWrap">
+          {{ row[def.field] }}
+        </div>
+        <div *ngIf="def.template">
+          <div
+            *ngTemplateOutlet="def.template; context: { $implicit: row }"
+          ></div>
+        </div>
+      </td>
+    </ng-container>
 
-  <tr
-    mat-header-row
-    *matHeaderRowDef="headerKeysDisplayed"
-    [hidden]="config.hideHeader"
-  ></tr>
-  <tr
-    mat-row
-    *matRowDef="let row; columns: headerKeysDisplayed"
-    (click)="onClickRow($event, row)"
-    (dblclick)="onDoubleClickRow($event, row)"
-    [class.selected-row-multiple]="selectionMultiple.isSelected(row)"
-    [class.selected-row-single]="selectionSingle.isSelected(row)"
-    [class.has-pointer]="config.onSelectItem"
-  ></tr>
-</table>
+    <ng-container matColumnDef="__bulk" stickyEnd>
+      <th mat-header-cell *matHeaderCellDef>
+        <mat-checkbox
+          (change)="$event ? masterToggle() : null"
+          [checked]="selectionMultiple.hasValue() && isAllSelected()"
+          [indeterminate]="selectionMultiple.hasValue() && !isAllSelected()"
+        >
+        </mat-checkbox>
+      </th>
+      <td mat-cell *matCellDef="let row">
+        <mat-checkbox
+          (click)="$event.stopPropagation()"
+          (change)="onClickBulkItem($event, row)"
+          [checked]="selectionMultiple.isSelected(row)"
+        >
+        </mat-checkbox>
+      </td>
+    </ng-container>
 
-<mat-toolbar class="mat-elevation-z8 overflow-hidden">
-  <mat-toolbar-row *ngIf="!dataSource || hasNoItems">
-    <app-toolbar-loader *ngIf="!dataSource"></app-toolbar-loader>
-    <h1 *ngIf="hasNoItems" class="no-items">No items found</h1>
-  </mat-toolbar-row>
-  <mat-toolbar-row class="paginator-row">
-    <app-table-csv-export
-      *ngIf="exportFilename"
-      [dataArray]="exportData"
-      [filename]="exportFilename"
-    ></app-table-csv-export>
-    <mat-paginator [pageSize]="pageSize" [pageSizeOptions]="[5, 10, 25, 100]">
-    </mat-paginator>
-  </mat-toolbar-row>
-</mat-toolbar>
+    <ng-container matColumnDef="__star" stickyEnd>
+      <th mat-header-cell *matHeaderCellDef></th>
+      <td mat-cell *matCellDef="let row">
+        <div *ngIf="config.actions">
+          <mat-icon
+            mat-list-icon
+            class="more-icon has-pointer"
+            [matMenuTriggerFor]="rowMenu"
+            >more_vert</mat-icon
+          >
+          <mat-menu #rowMenu="matMenu" class="row-menu">
+            <div mat-menu-item *ngFor="let action of config.actions">
+              <button
+                mat-menu-item
+                *ngIf="action.onClick"
+                (click)="action.onClick(row)"
+              >
+                <mat-icon>{{ action.icon }}</mat-icon>
+                <span>{{ action.label }}</span>
+              </button>
+              <a
+                mat-menu-item
+                *ngIf="action.onRouterLink && !action.routerLinkQuery"
+                [routerLink]="['/' + action.onRouterLink(row)]"
+              >
+                <mat-icon>{{ action.icon }}</mat-icon>
+                <span>{{ action.label }}</span>
+              </a>
+              <a
+                mat-menu-item
+                *ngIf="action.onRouterLink && action.routerLinkQuery"
+                [routerLink]="['/' + action.onRouterLink(row)]"
+                [queryParams]="action.routerLinkQuery(row)"
+              >
+                <mat-icon>{{ action.icon }}</mat-icon>
+                <span>{{ action.label }}</span>
+              </a>
+            </div>
+          </mat-menu>
+        </div>
+      </td>
+    </ng-container>
+
+    <tr
+      mat-header-row
+      *matHeaderRowDef="headerKeysDisplayed"
+      [hidden]="config.hideHeader"
+    ></tr>
+    <tr
+      mat-row
+      *matRowDef="let row; columns: headerKeysDisplayed"
+      (click)="onClickRow($event, row)"
+      (dblclick)="onDoubleClickRow($event, row)"
+      [class.selected-row-multiple]="selectionMultiple.isSelected(row)"
+      [class.selected-row-single]="selectionSingle.isSelected(row)"
+      [class.has-pointer]="config.onSelectItem"
+    ></tr>
+  </table>
+  <mat-toolbar class="mat-elevation-z8 overflow-hidden expansion-joint">
+    <mat-toolbar-row> </mat-toolbar-row>
+  </mat-toolbar>
+  <mat-toolbar class="mat-elevation-z8 overflow-hidden">
+    <mat-toolbar-row *ngIf="!dataSource || hasNoItems">
+      <app-toolbar-loader *ngIf="!dataSource"></app-toolbar-loader>
+      <h1 *ngIf="hasNoItems" class="no-items">No items found</h1>
+    </mat-toolbar-row>
+    <mat-toolbar-row class="paginator-row">
+      <app-table-csv-export
+        *ngIf="exportFilename"
+        [dataArray]="exportData"
+        [filename]="exportFilename"
+      ></app-table-csv-export>
+      <mat-paginator [pageSize]="pageSize" [pageSizeOptions]="[5, 10, 25, 100]">
+      </mat-paginator>
+    </mat-toolbar-row>
+  </mat-toolbar>
+</div>

@@ -115,3 +115,14 @@ td {
   background-color: lightgrey;
   border-radius: 20px;
 }
+
+.expansion-joint {
+  flex-grow: 1;
+  min-height: 0px;
+}
+
+.table-container {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
