@@ -1,6 +1,6 @@
 {
   "name": "ngx-auto-table",
-  "version": "0.2.4",
+  "version": "0.3.4",
   "description": "A simple data-table built on Material and RXJS",
   "peerDependencies": {
     "@angular/common": "^7.0.0",
