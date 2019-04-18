@@ -95,16 +95,20 @@ button {
   cursor: pointer;
 }
 
-.selected-row-multiple {
-  background-color: #eee9;
-}
-
 td {
   background: unset;
 }
 
+tr:hover {
+  filter: brightness(0.9) hue-rotate(15deg);
+}
+
 .selected-row-single {
-  filter: brightness(1.4) hue-rotate(15deg);
+  filter: brightness(0.8) hue-rotate(15deg);
+}
+
+.selected-row-multiple {
+  filter: brightness(0.7) hue-rotate(15deg);
 }
 
 .break-words {

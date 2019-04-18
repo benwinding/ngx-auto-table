@@ -3,12 +3,11 @@
   "version": "0.0.0",
   "description": "A simple data-table built on Material and RXJS",
   "scripts": {
-    "start": "ng serve --project=table-demo --watch --vendor-source-map",
+    "start": "ng serve --project=table-demo --port=4222 --watch --vendor-source-map",
     "build-demo": "ng build --project=table-demo --prod",
     "deploy-demo": "npm run build-demo && gh-pages -d dist/table-demo",
     "watch-lib": "ng build --project=ngx-auto-table --watch",
-    "build-lib": "ng build --project=ngx-auto-table",
-    "deploy-lib": "npm run build-lib && cd dist/ngx-auto-table && npm publish && cd ../../"
+    "build-lib": "ng build --project=ngx-auto-table"
   },
   "repository": {
     "type": "git",
