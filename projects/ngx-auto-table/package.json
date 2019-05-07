@@ -1,14 +1,14 @@
 {
   "name": "ngx-auto-table",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "A simple data-table built on Material and RXJS",
   "peerDependencies": {
-    "@angular/common": "^7.0.0",
-    "@angular/platform-browser": "^7.0.0",
-    "@angular/core": "^7.0.0",
-    "@ctrl/ngx-csv": "^1.1.4",
-    "@angular/router": "^7.0.0",
-    "@angular/material": "^7.0.0"
+    "@angular/common": "^7.x",
+    "@angular/platform-browser": "^7.x",
+    "@angular/core": "^7.x",
+    "@ctrl/ngx-csv": "^1.x",
+    "@angular/router": "^7.x",
+    "@angular/material": "^7.x"
   },
   "author": "hello@benwinding.com",
   "license": "MIT",
