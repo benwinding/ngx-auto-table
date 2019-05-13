@@ -57,6 +57,12 @@ export interface ColumnDefinition {
   forceWrap?: boolean;
 }
 
+function blankConfig<T>(): AutoTableConfig<T> {
+  return {
+    data$: new Subject<T[]>()
+  }
+}
+
 interface ColumnDefinitionInternal extends ColumnDefinition {
   field: string;
 }
@@ -67,8 +73,18 @@ interface ColumnDefinitionInternal extends ColumnDefinition {
   styleUrls: ["./ngx-auto-table.component.scss"]
 })
 export class AutoTableComponent<T> implements OnInit, OnDestroy {
+  private _blankConfig: AutoTableConfig<T> = blankConfig<T>();
+  private _config: AutoTableConfig<T>;
   @Input()
-  config: AutoTableConfig<T>;
+  set config(newConfig) {
+    this._config = newConfig;
+    setTimeout(() => {
+      this.ngOnInit();
+    });
+  };
+  get config() {
+    return this._config || this._blankConfig;
+  };
   @Input()
   columnDefinitions: {
     [field: string]: ColumnDefinition;
@@ -100,7 +116,26 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
 
   $onDestroyed = new Subject();
 
+  reInitializeVariables() {
+    this.columnDefinitionsAll = {};
+    this.columnDefinitionsAllArray = [];
+    this.headerKeysAll = [];
+    this.headerKeysAllVisible = [];
+    this.headerKeysDisplayed = [];
+    this.headerKeysDisplayedMap = [];
+    this.filterControl = new FormControl();
+    this.selectionMultiple = new SelectionModel<any>(true, []);
+    this.selectionSingle = new SelectionModel<any>(false, []);
+    this.dataSource = undefined;
+  }
+
   ngOnInit() {
+    this.$onDestroyed.next();
+    if (!this.config) {
+      this.log('no [config] set on auto-table component');
+      return;
+    }
+    this.reInitializeVariables();
     this.config.data$
       .pipe(filter(e => !!e))
       .pipe(takeUntil(this.$onDestroyed))
@@ -163,7 +198,6 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.$onDestroyed.next();
-    this.$onDestroyed.complete();
   }
 
   applyFilter(filterValue: string) {

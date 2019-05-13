@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { AutoTableConfig } from "ngx-auto-table/public_api";
 import { BehaviorSubject } from "rxjs";
 import { take } from "rxjs/operators";
@@ -60,7 +60,7 @@ function MakeRandomRow(): TestRow {
     ></ngx-auto-table>
   `
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   config: AutoTableConfig<TestRow>;
   data$ = new BehaviorSubject<TestRow[]>(null);
 
@@ -71,6 +71,20 @@ export class AppComponent {
       MakeRandomRow(),
       MakeRandomRow()
     ]);
+  }
+
+  async fakeDelay(ms: number) {
+    console.log('delay: begin')
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        console.log('delay: end ' + ms)
+        resolve();
+      }, ms);
+    })
+  }
+
+  async ngOnInit() {
+    await this.fakeDelay(3000);
     this.config = {
       data$: this.data$,
       debug: true,
@@ -95,6 +109,7 @@ export class AppComponent {
       selectFirstOnInit: true
     };
   }
+
   async onClickAddRandomTake1() {
     const currentItems = await this.data$.pipe(take(1)).toPromise();
     const randomItem = MakeRandomRow();
