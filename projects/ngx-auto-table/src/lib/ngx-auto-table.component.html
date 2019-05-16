@@ -59,9 +59,12 @@
           <span class="buttons flex-h align-center">
             <button
               mat-raised-button
+              color="secondary"
+              [disabled]="isPerformingBulkAction"
               *ngFor="let action of config.actionsBulk"
-              (click)="onClickBulkAction(action)"
+              (click)="onClickBulkAction(action, btnBulkLoader)"
             >
+              <app-btn-loader [disabled]="true" #btnBulkLoader></app-btn-loader>
               <mat-icon>{{ action.icon }}</mat-icon>
               <span>{{ action.label }}</span>
             </button>
@@ -122,18 +125,21 @@
       <th mat-header-cell *matHeaderCellDef></th>
       <td mat-cell *matCellDef="let row">
         <div *ngIf="config.actions">
-          <mat-icon
-            mat-list-icon
-            class="more-icon has-pointer"
+          <button
+            mat-mini-fab
+            color="secondary"
+            class="float-right"
+            [disabled]="isPerformingBulkAction"
             [matMenuTriggerFor]="rowMenu"
-            >more_vert</mat-icon
           >
+            <mat-icon color="dark">more_vert</mat-icon>
+          </button>
           <mat-menu #rowMenu="matMenu" class="row-menu">
             <div mat-menu-item *ngFor="let action of config.actions">
               <button
                 mat-menu-item
                 *ngIf="action.onClick"
-                (click)="action.onClick(row)"
+                (click)="onClickedAction(action, row)"
               >
                 <mat-icon>{{ action.icon }}</mat-icon>
                 <span>{{ action.label }}</span>
@@ -176,6 +182,7 @@
       [class.has-pointer]="config.onSelectItem"
     ></tr>
   </table>
+
   <mat-toolbar class="mat-elevation-z8 overflow-hidden expansion-joint">
     <mat-toolbar-row> </mat-toolbar-row>
   </mat-toolbar>

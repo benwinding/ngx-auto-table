@@ -109,6 +109,8 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
 
   hasNoItems: boolean;
 
+  isPerformingBulkAction = false;
+
   filterControl = new FormControl();
   // Bulk items selection
   selectionMultiple = new SelectionModel<any>(true, []);
@@ -436,9 +438,20 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     }
   }
 
-  async onClickBulkAction(action: ActionDefinitionBulk<T>) {
+  async onClickedAction(action, row) {
+    await action.onClick(row);
+  }
+
+  async onClickBulkAction(action: ActionDefinitionBulk<T>, btnBulkAction) {
+    this.isPerformingBulkAction = true;
+    btnBulkAction.disabled = false;
+    // const nativeRef = btnBulkAction._elementRef.nativeElement;
+    // nativeRef.style.filter = 'brightness(0.8) hue-rotate(15deg);';
     await action.onClick(this.selectionMultiple.selected);
     this.selectionMultiple.clear();
+    // nativeRef.style.filter = '';
+    btnBulkAction.disabled = true;
+    this.isPerformingBulkAction = false;
   }
 
   private log(str: string, obj?: any) {

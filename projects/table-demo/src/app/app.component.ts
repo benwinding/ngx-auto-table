@@ -74,17 +74,17 @@ export class AppComponent implements OnInit {
   }
 
   async fakeDelay(ms: number) {
-    console.log('delay: begin')
+    console.log('fake delay: begin for: ' + ms + 'ms')
     return new Promise((resolve) => {
       setTimeout(() => {
-        console.log('delay: end ' + ms)
+        console.log('fake delay: end...')
         resolve();
       }, ms);
     })
   }
 
   async ngOnInit() {
-    await this.fakeDelay(3000);
+    await this.fakeDelay(1000);
     this.config = {
       data$: this.data$,
       debug: true,
@@ -92,12 +92,30 @@ export class AppComponent implements OnInit {
         {
           label: "Delete",
           icon: "delete",
-          onClick: (rows: TestRow[]) => {
+          onClick: async (rows: TestRow[]) => {
+            await this.fakeDelay(300000);
+            await this.removeItems(rows);
             console.log({ rows });
           }
-        }
+        },
+        {
+          label: "Delete",
+          icon: "delete",
+          onClick: async (rows: TestRow[]) => {
+            await this.fakeDelay(1000);
+            await this.removeItems(rows);
+            console.log({ rows });
+          }
+        },
       ],
       actions: [
+        {
+          label: "Delete",
+          icon: "delete",
+          onClick: async (row: TestRow) => {
+            await this.removeItem(row);
+          }
+        },
         {
           label: "Show",
           icon: "remove_red_eye",
@@ -116,5 +134,20 @@ export class AppComponent implements OnInit {
     console.log("app: adding random item", { currentItems, randomItem });
     currentItems.push(randomItem);
     this.data$.next(currentItems);
+  }
+
+  async removeItem(row: TestRow) {
+    console.log("app: removing item", { row });
+    const currentItems = await this.data$.pipe(take(1)).toPromise();
+    const itemsAfterDelete = currentItems.filter(r => JSON.stringify(r) != JSON.stringify(row));
+    this.data$.next(itemsAfterDelete);
+  }
+
+  async removeItems(rows: TestRow[]) {
+    console.log("app: removing items", { rows });
+    const currentItems = await this.data$.pipe(take(1)).toPromise();
+    const removeSet = new Set(rows.map(r => JSON.stringify(r)));
+    const itemsAfterDelete = currentItems.filter(r => !removeSet.has(JSON.stringify(r)));
+    this.data$.next(itemsAfterDelete);
   }
 }

@@ -25,12 +25,20 @@ import { AppExportCsvExportComponent } from "./app-table-csv-export.component";
 import { CommonModule } from "@angular/common";
 import { RouterModule } from "@angular/router";
 import { AutoTableComponent } from "./ngx-auto-table.component";
-import { AppTableLoaderComponent } from "./app-table-loader.component";
+import { AppToolbarLoaderComponent } from "./loaders/toolbar-loader.component";
+import { AppBtnLoaderComponent } from "./loaders/btn-loader.component";
+import { AppTableLoaderComponent } from './loaders/table-loader.component';
 
-const sharedComponents = [AutoTableComponent, AppTableLoaderComponent];
+const sharedComponents = [AutoTableComponent];
 
 @NgModule({
-  declarations: [...sharedComponents, AppExportCsvExportComponent],
+  declarations: [
+    AppTableLoaderComponent,
+    AppToolbarLoaderComponent,
+    AppExportCsvExportComponent,
+    AppBtnLoaderComponent,
+    ...sharedComponents,
+  ],
   exports: sharedComponents,
   imports: [
     CsvModule,
