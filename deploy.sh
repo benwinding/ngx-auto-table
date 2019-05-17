@@ -1,6 +1,8 @@
 case "$1" in
   lib)
-      yarn build-lib && pushd dist/ngx-auto-table && npm publish
+      yarn build-lib
+      cp README.md dist/ngx-auto-table
+      pushd dist/ngx-auto-table && npm publish
       popd
       ;;
   demo)
