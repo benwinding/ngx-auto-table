@@ -444,13 +444,17 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
 
   async onClickBulkAction(action: ActionDefinitionBulk<T>, btnBulkAction) {
     this.isPerformingBulkAction = true;
-    btnBulkAction.disabled = false;
+    if (btnBulkAction) {
+      btnBulkAction.disabled = false;
+    }
     // const nativeRef = btnBulkAction._elementRef.nativeElement;
     // nativeRef.style.filter = 'brightness(0.8) hue-rotate(15deg);';
     await action.onClick(this.selectionMultiple.selected);
     this.selectionMultiple.clear();
     // nativeRef.style.filter = '';
-    btnBulkAction.disabled = true;
+    if (btnBulkAction) {
+      btnBulkAction.disabled = true;
+    }
     this.isPerformingBulkAction = false;
   }
 

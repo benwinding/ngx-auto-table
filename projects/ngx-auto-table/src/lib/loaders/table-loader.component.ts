@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'app-table-loader',
+  selector: 'ngx-auto-app-table-loader',
   template: `
     <mat-toolbar-row>
       <div class="loader-container is-button-icon">

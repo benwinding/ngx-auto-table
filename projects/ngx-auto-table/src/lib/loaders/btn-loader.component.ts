@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 
 @Component({
-  selector: 'app-btn-loader',
+  selector: 'ngx-auto-table-btn-loader',
   template: `
     <div *ngIf="!disabled" class="loader-container is-button-icon">
       <div class="loader-div color-invert">

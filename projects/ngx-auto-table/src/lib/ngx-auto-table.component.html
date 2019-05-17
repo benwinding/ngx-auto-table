@@ -64,7 +64,7 @@
               *ngFor="let action of config.actionsBulk"
               (click)="onClickBulkAction(action, btnBulkLoader)"
             >
-              <app-btn-loader [disabled]="true" #btnBulkLoader></app-btn-loader>
+              <ngx-auto-table-btn-loader [disabled]="true" #btnBulkLoader></ngx-auto-table-btn-loader>
               <mat-icon>{{ action.icon }}</mat-icon>
               <span>{{ action.label }}</span>
             </button>
@@ -105,6 +105,7 @@
     <ng-container matColumnDef="__bulk" stickyEnd>
       <th mat-header-cell *matHeaderCellDef>
         <mat-checkbox
+          [disabled]="isPerformingBulkAction"
           (change)="$event ? masterToggle() : null"
           [checked]="selectionMultiple.hasValue() && isAllSelected()"
           [indeterminate]="selectionMultiple.hasValue() && !isAllSelected()"
@@ -113,6 +114,7 @@
       </th>
       <td mat-cell *matCellDef="let row">
         <mat-checkbox
+          [disabled]="isPerformingBulkAction"
           (click)="$event.stopPropagation()"
           (change)="onClickBulkItem($event, row)"
           [checked]="selectionMultiple.isSelected(row)"
@@ -188,7 +190,7 @@
   </mat-toolbar>
   <mat-toolbar class="mat-elevation-z8 overflow-hidden">
     <mat-toolbar-row *ngIf="!dataSource || hasNoItems">
-      <app-toolbar-loader *ngIf="!dataSource"></app-toolbar-loader>
+      <ngx-auto-app-toolbar-loader *ngIf="!dataSource"></ngx-auto-app-toolbar-loader>
       <h1 *ngIf="hasNoItems" class="no-items">No items found</h1>
     </mat-toolbar-row>
     <mat-toolbar-row class="paginator-row">
