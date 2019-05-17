@@ -115,6 +115,10 @@ tr:hover {
   word-break: break-all;
 }
 
+.full-width {
+  width: 100%;
+}
+
 .float-right {
   float: right;
 }
@@ -133,4 +137,8 @@ tr:hover {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+}
+
+.overflow-x-auto {
+  overflow-x: auto;
 }

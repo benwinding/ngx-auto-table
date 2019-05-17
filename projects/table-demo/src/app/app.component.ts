@@ -85,24 +85,34 @@ export class AppComponent implements OnInit {
 
   async ngOnInit() {
     await this.fakeDelay(1000);
+    // await this.fakeDelay(400000);
     this.config = {
       data$: this.data$,
       debug: true,
+      bulkSelectMaxCount: 5,
       actionsBulk: [
         {
-          label: "Delete",
+          label: "Long Delete (30s)",
           icon: "delete",
           onClick: async (rows: TestRow[]) => {
-            await this.fakeDelay(300000);
+            await this.fakeDelay(30000);
             await this.removeItems(rows);
             console.log({ rows });
           }
         },
         {
-          label: "Delete",
+          label: "Quick Delete (1s)",
           icon: "delete",
           onClick: async (rows: TestRow[]) => {
             await this.fakeDelay(1000);
+            await this.removeItems(rows);
+            console.log({ rows });
+          }
+        },
+        {
+          label: "Instant Delete",
+          icon: "delete",
+          onClick: async (rows: TestRow[]) => {
             await this.removeItems(rows);
             console.log({ rows });
           }

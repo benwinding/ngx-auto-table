@@ -47,14 +47,19 @@
         </mat-toolbar-row>
       </mat-toolbar>
       <mat-toolbar
-        class="bulk-actions flex-h align-center mat-primary"
+        class="bulk-actions flex-h align-center mat-primary overflow-x-auto"
         *ngIf="config.actionsBulk"
         [class.hidden]="!selectionMultiple.hasValue()"
       >
         <mat-toolbar-row class="flex-h align-center space-between">
           <span class="item-count">
-            ({{ selectionMultiple.selected.length }} Items Selected)
+            ({{ selectionMultiple.selected.length }} Selected)
+          </span>
+          <span *ngIf="!isPerformingBulkAction" class="item-count">
             {{ isMaxReached() ? " Max Reached!" : "" }}
+          </span>
+          <span *ngIf="isPerformingBulkAction" class="item-count">
+            Performing action...
           </span>
           <span class="buttons flex-h align-center">
             <button
@@ -64,7 +69,10 @@
               *ngFor="let action of config.actionsBulk"
               (click)="onClickBulkAction(action, btnBulkLoader)"
             >
-              <ngx-auto-table-btn-loader [disabled]="true" #btnBulkLoader></ngx-auto-table-btn-loader>
+              <ngx-auto-table-btn-loader
+                [disabled]="true"
+                #btnBulkLoader
+              ></ngx-auto-table-btn-loader>
               <mat-icon>{{ action.icon }}</mat-icon>
               <span>{{ action.label }}</span>
             </button>
@@ -105,7 +113,7 @@
     <ng-container matColumnDef="__bulk" stickyEnd>
       <th mat-header-cell *matHeaderCellDef>
         <mat-checkbox
-          [disabled]="isPerformingBulkAction"
+          [disabled]="isPerformingBulkAction || hasNoItems"
           (change)="$event ? masterToggle() : null"
           [checked]="selectionMultiple.hasValue() && isAllSelected()"
           [indeterminate]="selectionMultiple.hasValue() && !isAllSelected()"
@@ -189,9 +197,16 @@
     <mat-toolbar-row> </mat-toolbar-row>
   </mat-toolbar>
   <mat-toolbar class="mat-elevation-z8 overflow-hidden">
-    <mat-toolbar-row *ngIf="!dataSource || hasNoItems">
-      <ngx-auto-app-toolbar-loader *ngIf="!dataSource"></ngx-auto-app-toolbar-loader>
-      <h1 *ngIf="hasNoItems" class="no-items">No items found</h1>
+    <mat-toolbar-row *ngIf="!dataSource">
+      <ngx-auto-app-toolbar-loader
+        class="full-width"
+      ></ngx-auto-app-toolbar-loader>
+    </mat-toolbar-row>
+    <mat-toolbar-row *ngIf="!dataSource">
+      <h1 class="no-items">Loading...</h1>
+    </mat-toolbar-row>
+    <mat-toolbar-row *ngIf="hasNoItems">
+      <h1 class="no-items">No items found</h1>
     </mat-toolbar-row>
     <mat-toolbar-row class="paginator-row">
       <app-table-csv-export
