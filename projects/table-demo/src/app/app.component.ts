@@ -134,7 +134,9 @@ export class AppComponent implements OnInit {
           }
         }
       ],
-      selectFirstOnInit: true
+      selectFirstOnInit: true,
+      // disableSelect: true,
+      // disableHoverEffect: true
     };
   }
 

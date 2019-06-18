@@ -1,61 +1,10 @@
 import { Component, OnInit, Input, OnDestroy, ViewChild } from "@angular/core";
 import { MatTableDataSource, MatPaginator, MatSort } from "@angular/material";
-import { Observable, Subject } from "rxjs";
+import { Subject } from "rxjs";
 import { FormControl } from "@angular/forms";
 import { SelectionModel } from "@angular/cdk/collections";
 import { filter, takeUntil, throttleTime } from "rxjs/operators";
-
-export interface AutoTableConfig<T> {
-  data$: Observable<T[]>;
-  onDataUpdated?: (rows: T[]) => void;
-  debug?: boolean;
-  // Actions
-  actions?: ActionDefinition<T>[];
-  actionsBulk?: ActionDefinitionBulk<T>[];
-  bulkSelectMaxCount?: number;
-  // Sorting and pagination
-  initialSort?: string;
-  initialSortDir?: "asc" | "desc";
-  pageSize?: number;
-  // Top bar configuration
-  hideFields?: string[];
-  hideFilter?: boolean;
-  hideHeader?: boolean;
-  hideChooseColumns?: boolean;
-  filterText?: string;
-  // Export configuration
-  exportFilename?: string;
-  exportRowFormat?: (row: T) => void;
-  // Selection callbacks
-  onSelectItem?: (row: T) => void;
-  onSelectItemDoubleClick?: (row: T) => void;
-  onSelectedBulk?: (row: T[]) => void;
-  // Triggers
-  selectFirstOnInit?: boolean;
-  $triggerClearSelected?: Observable<void>;
-  $triggerSelectItem?: Observable<T>;
-}
-
-export interface ActionDefinition<T> {
-  label: string;
-  icon?: string;
-  onClick?: (row: T) => void;
-  onRouterLink?: (row: T) => string;
-  routerLinkQuery?: (row: T) => {};
-}
-
-export interface ActionDefinitionBulk<T> {
-  label: string;
-  icon?: string;
-  onClick?: (row: T[]) => void;
-}
-
-export interface ColumnDefinition {
-  header?: string;
-  template?: any;
-  hide?: boolean;
-  forceWrap?: boolean;
-}
+import { AutoTableConfig, ColumnDefinition, ActionDefinitionBulk } from './AutoTableConfig';
 
 function blankConfig<T>(): AutoTableConfig<T> {
   return {
