@@ -37,6 +37,7 @@ export interface AutoTableConfig<T> {
   hideFields?: string[];
   hideFilter?: boolean;
   hideHeader?: boolean;
+  hidePaginator?: boolean;
   hideChooseColumns?: boolean;
   filterText?: string;
   // Export configuration

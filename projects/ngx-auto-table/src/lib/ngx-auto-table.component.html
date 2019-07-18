@@ -187,8 +187,12 @@
       *matRowDef="let row; columns: headerKeysDisplayed"
       (click)="onClickRow($event, row)"
       (dblclick)="onDoubleClickRow($event, row)"
-      [class.selected-row-multiple]="!config.disableSelect && selectionMultiple.isSelected(row)"
-      [class.selected-row-single]="!config.disableSelect && selectionSingle.isSelected(row)"
+      [class.selected-row-multiple]="
+        !config.disableSelect && selectionMultiple.isSelected(row)
+      "
+      [class.selected-row-single]="
+        !config.disableSelect && selectionSingle.isSelected(row)
+      "
       [class.has-pointer]="!config.disableSelect && config.onSelectItem"
       [class.hover-row]="!(config.disableSelect && config.disableHoverEffect)"
     ></tr>
@@ -215,7 +219,11 @@
         [dataArray]="exportData"
         [filename]="exportFilename"
       ></app-table-csv-export>
-      <mat-paginator [pageSize]="pageSize" [pageSizeOptions]="[5, 10, 25, 100]">
+      <mat-paginator
+        *ngIf="!config.hidePaginator"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="[5, 10, 25, 100]"
+      >
       </mat-paginator>
     </mat-toolbar-row>
   </mat-toolbar>

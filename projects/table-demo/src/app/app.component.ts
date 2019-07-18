@@ -135,6 +135,7 @@ export class AppComponent implements OnInit {
         }
       ],
       selectFirstOnInit: true,
+      hidePaginator: false,
       // disableSelect: true,
       // disableHoverEffect: true
     };
