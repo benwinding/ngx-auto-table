@@ -6,7 +6,7 @@ import { SelectionModel } from "@angular/cdk/collections";
 import { filter, takeUntil, throttleTime } from "rxjs/operators";
 import { AutoTableConfig, ColumnDefinition, ActionDefinitionBulk } from './AutoTableConfig';
 
-const uuidv4 = require('uuid/v4');
+import { v4 as uuidv4 } from 'uuid';
 
 function blankConfig<T>(): AutoTableConfig<T> {
   return {
