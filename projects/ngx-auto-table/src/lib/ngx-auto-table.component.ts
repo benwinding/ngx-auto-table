@@ -6,6 +6,8 @@ import { SelectionModel } from "@angular/cdk/collections";
 import { filter, takeUntil, throttleTime } from "rxjs/operators";
 import { AutoTableConfig, ColumnDefinition, ActionDefinitionBulk } from './AutoTableConfig';
 
+const uuidv4 = require('uuid/v4');
+
 function blankConfig<T>(): AutoTableConfig<T> {
   return {
     data$: new Subject<T[]>()
@@ -60,6 +62,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
 
   isPerformingBulkAction = false;
 
+  autoCompleteObscureName = uuidv4();
   filterControl = new FormControl();
   // Bulk items selection
   selectionMultiple = new SelectionModel<any>(true, []);

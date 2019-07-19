@@ -16,6 +16,8 @@
               matInput
               (keyup)="applyFilter($event.target.value)"
               [placeholder]="this.config.filterText || 'Search Rows...'"
+              [name]="autoCompleteObscureName"
+              autocomplete="dontcompleteme"
               #filterField
             />
             <mat-icon

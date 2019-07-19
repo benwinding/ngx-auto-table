@@ -1,11 +1,12 @@
 {
   "name": "ngx-auto-table",
-  "version": "0.3.19",
+  "version": "0.3.20",
   "description": "A simple data-table built on Material and RXJS",
   "dependencies": {
     "@angular/cdk": "^7.x",
     "@angular/material": "^7.x",
-    "@ctrl/ngx-csv": "^1.x"
+    "@ctrl/ngx-csv": "^1.x",
+    "uuid": "^3.3.2"
   },
   "peerDependencies": {
     "@angular/animations": "^7.x",
