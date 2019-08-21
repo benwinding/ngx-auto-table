@@ -116,7 +116,7 @@
       <th mat-header-cell *matHeaderCellDef>
         <mat-checkbox
           [disabled]="isPerformingBulkAction || hasNoItems"
-          (change)="$event ? masterToggle() : null"
+          (change)="masterToggle()"
           [checked]="selectionMultiple.hasValue() && isAllSelected()"
           [indeterminate]="selectionMultiple.hasValue() && !isAllSelected()"
         >
