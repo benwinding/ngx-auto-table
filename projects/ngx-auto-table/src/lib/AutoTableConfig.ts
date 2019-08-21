@@ -25,6 +25,7 @@ export interface AutoTableConfig<T> {
   data$: Observable<T[]>;
   onDataUpdated?: (rows: T[]) => void;
   debug?: boolean;
+  cacheId?: string;
   // Actions
   actions?: ActionDefinition<T>[];
   actionsBulk?: ActionDefinitionBulk<T>[];

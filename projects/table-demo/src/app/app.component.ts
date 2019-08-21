@@ -136,6 +136,7 @@ export class AppComponent implements OnInit {
       ],
       selectFirstOnInit: true,
       hidePaginator: false,
+      cacheId: 'some-table'
       // disableSelect: true,
       // disableHoverEffect: true
     };

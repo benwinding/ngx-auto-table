@@ -4,14 +4,18 @@ import { Subject } from "rxjs";
 import { FormControl } from "@angular/forms";
 import { SelectionModel } from "@angular/cdk/collections";
 import { filter, takeUntil, throttleTime } from "rxjs/operators";
-import { AutoTableConfig, ColumnDefinition, ActionDefinitionBulk } from './AutoTableConfig';
+import {
+  AutoTableConfig,
+  ColumnDefinition,
+  ActionDefinitionBulk
+} from "./AutoTableConfig";
 
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 
 function blankConfig<T>(): AutoTableConfig<T> {
   return {
     data$: new Subject<T[]>()
-  }
+  };
 }
 
 interface ColumnDefinitionInternal extends ColumnDefinition {
@@ -32,10 +36,10 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     setTimeout(() => {
       this.ngOnInit();
     });
-  };
+  }
   get config() {
     return this._config || this._blankConfig;
-  };
+  }
   @Input()
   columnDefinitions: {
     [field: string]: ColumnDefinition;
@@ -86,7 +90,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   ngOnInit() {
     this.$onDestroyed.next();
     if (!this.config) {
-      this.log('no [config] set on auto-table component');
+      this.log("no [config] set on auto-table component");
       return;
     }
     this.reInitializeVariables();
@@ -94,7 +98,10 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
       .pipe(filter(e => !!e))
       .pipe(takeUntil(this.$onDestroyed))
       .subscribe(originalData => {
-        const hasBeenInitedBefore = this.dataSource && this.dataSource.data && this.dataSource.data.length;
+        const hasBeenInitedBefore =
+          this.dataSource &&
+          this.dataSource.data &&
+          this.dataSource.data.length;
         this.log("ngx-auto-table, subscribed: ", { originalData });
         this.dataSource = new MatTableDataSource(originalData);
         this.dataSource.paginator = this.paginator;
@@ -244,6 +251,9 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     this.setDisplayedColumns(displayed);
     // Set currently enabled items
     this.filterControl.setValue(this.headerKeysDisplayed);
+    if (this.config.cacheId) {
+      this.columnsCacheSetFromCache();
+    }
   }
 
   initColumnDefinitions(firstDataItem: T) {
@@ -349,9 +359,31 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     );
   }
 
-  onColumnFilterChange($event) {
-    this.log('onColumnFilterChange: ', { $event });
+  private columnsCacheSetFromCache() {
+    const cacheKey = this.config.cacheId + "-columns";
+    const selectedValsString = localStorage.getItem(cacheKey);
+    try {
+      const vals = JSON.parse(selectedValsString);
+      this.log("getting cached columns", { vals, cacheKey });
+      this.filterControl.setValue(vals);
+      this.setDisplayedColumns(vals);
+    } catch (error) {
+      console.warn("error parsing JSON in columns cache");
+    }
+  }
+  private columnsCacheSetToCache() {
+    const cacheKey = this.config.cacheId + "-columns";
     const selectedValues = this.filterControl.value;
+    localStorage.setItem(cacheKey, JSON.stringify(selectedValues));
+    this.log("setting cached columns", { cacheKey, selectedValues });
+  }
+
+  onColumnFilterChange($event) {
+    this.log("onColumnFilterChange: ", { $event });
+    const selectedValues = this.filterControl.value;
+    if (this.config.cacheId) {
+      this.columnsCacheSetToCache();
+    }
     this.setDisplayedColumns(selectedValues);
     this.initFilter(this.dataSource.data);
   }

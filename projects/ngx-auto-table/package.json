@@ -6,7 +6,7 @@
     "@angular/cdk": "^7.x",
     "@angular/material": "^7.x",
     "@ctrl/ngx-csv": "^1.x",
-    "uuid": "^3.3.2"
+    "uuid": "^3.4.0"
   },
   "peerDependencies": {
     "@angular/animations": "^7.x",
