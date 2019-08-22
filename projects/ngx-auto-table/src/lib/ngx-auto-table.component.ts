@@ -371,6 +371,9 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   private columnsCacheSetFromCache() {
     const cacheKey = this.config.cacheId + "-columns";
     const selectedValsString = localStorage.getItem(cacheKey);
+    if (!selectedValsString) {
+      return;
+    }
     try {
       const vals = JSON.parse(selectedValsString);
       this.log("getting cached columns", { vals, cacheKey });
