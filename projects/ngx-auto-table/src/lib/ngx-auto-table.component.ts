@@ -195,7 +195,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
       }
       for (const key of Array.from(keysHeader)) {
         const dataVal = data[key];
-        const str = JSON.stringify(dataVal);
+        const str = JSON.stringify(dataVal) || '';
         const isFound = str.toLowerCase().includes(filterText);
         if (isFound) {
           return true;
