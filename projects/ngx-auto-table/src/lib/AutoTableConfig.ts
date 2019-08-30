@@ -54,4 +54,5 @@ export interface AutoTableConfig<T> {
   selectFirstOnInit?: boolean;
   $triggerClearSelected?: Observable<void>;
   $triggerSelectItem?: Observable<T>;
+  disableMobileScroll?: boolean;
 }

@@ -137,6 +137,9 @@ td {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+}
+
+.isMobile {
   overflow-x: hidden;
 }
 
