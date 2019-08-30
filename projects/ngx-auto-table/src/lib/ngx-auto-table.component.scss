@@ -139,6 +139,10 @@ td {
   overflow-y: auto;
 }
 
+.isMobile {
+  overflow-x: hidden;
+}
+
 .overflow-x-auto {
   overflow-x: auto;
 }
