@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, OnDestroy, ViewChild } from '@angular/core';
 import { MatTableDataSource, MatPaginator, MatSort } from '@angular/material';
-import { Subject } from 'rxjs';
+import { Subject, BehaviorSubject } from 'rxjs';
 import { FormControl } from '@angular/forms';
 import { SelectionModel } from '@angular/cdk/collections';
 import { filter, takeUntil, throttleTime } from 'rxjs/operators';
@@ -56,7 +56,6 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
 
   dataSource: MatTableDataSource<any>;
   @ViewChild(MatPaginator, { static: false }) paginator: MatPaginator;
-  pageSize = 25;
   @ViewChild(MatSort, { static: false }) sort: MatSort;
 
   exportData: any[];
@@ -114,9 +113,6 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
         }
         if (this.config.onDataUpdated) {
           this.config.onDataUpdated(originalData);
-        }
-        if (this.config.pageSize) {
-          this.pageSize = this.config.pageSize;
         }
         if (!hasBeenInitedBefore) {
           const firstDataItem = originalData[0];

@@ -223,7 +223,7 @@
       ></app-table-csv-export>
       <mat-paginator
         *ngIf="!config.hidePaginator"
-        [pageSize]="pageSize"
+        [pageSize]="config.pageSize"
         [pageSizeOptions]="[5, 10, 25, 100]"
       >
       </mat-paginator>

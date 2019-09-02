@@ -69,6 +69,10 @@ export class AppComponent implements OnInit {
       MakeRandomRow(),
       MakeRandomRow(),
       MakeRandomRow(),
+      MakeRandomRow(),
+      MakeRandomRow(),
+      MakeRandomRow(),
+      MakeRandomRow(),
       MakeRandomRow()
     ]);
   }
@@ -136,7 +140,8 @@ export class AppComponent implements OnInit {
       ],
       selectFirstOnInit: true,
       hidePaginator: false,
-      cacheId: 'some-table'
+      cacheId: 'some-table',
+      pageSize: 10,
       // disableSelect: true,
       // disableHoverEffect: true
     };
