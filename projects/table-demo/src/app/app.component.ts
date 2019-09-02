@@ -1,5 +1,5 @@
 import { Component, OnInit } from "@angular/core";
-import { AutoTableConfig } from "ngx-auto-table/public_api";
+import { AutoTableConfig } from "../../../ngx-auto-table/src/public_api";
 import { BehaviorSubject } from "rxjs";
 import { take } from "rxjs/operators";
 
