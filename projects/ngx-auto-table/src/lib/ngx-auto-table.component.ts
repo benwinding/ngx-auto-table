@@ -63,6 +63,8 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
 
   hasNoItems: boolean;
 
+  defaultPageSize = 25;
+
   isPerformingBulkAction = false;
 
   autoCompleteObscureName = uuidv4();
