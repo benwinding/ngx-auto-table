@@ -1,4 +1,7 @@
-<div [class.isMobile]="config.disableMobileScroll" class="table-container mat-elevation-z8">
+<div
+  [class.isMobile]="config.disableMobileScroll"
+  class="table-container mat-elevation-z8"
+>
   <div
     class="table-header auto-elevation overflow-hidden"
     [class.addRightPixel]="config.hideHeader"
@@ -138,6 +141,7 @@
       <td mat-cell *matCellDef="let row">
         <div *ngIf="config.actions">
           <button
+            *ngIf="(config?.actionsVisibleCount || 0) < config.actions.length"
             mat-mini-fab
             color="secondary"
             class="float-right"
@@ -147,7 +151,15 @@
             <mat-icon color="dark">more_vert</mat-icon>
           </button>
           <mat-menu #rowMenu="matMenu" class="row-menu">
-            <div mat-menu-item *ngFor="let action of config.actions">
+            <div
+              mat-menu-item
+              *ngFor="
+                let action of config.actions
+                  | slice
+                    : config?.actionsVisibleCount || 0
+                    : config.actions.length
+              "
+            >
               <button
                 mat-menu-item
                 *ngIf="action.onClick"
@@ -175,6 +187,38 @@
               </a>
             </div>
           </mat-menu>
+          <div *ngIf="config?.actionsVisibleCount as visibleCount">
+            <div *ngFor="let action of config.actions | slice: 0:visibleCount">
+              <button
+                mat-mini-fab
+                class="float-right"
+                *ngIf="action.onClick"
+                (click)="onClickedAction(action, row)"
+                [matTooltip]="action.label"
+              >
+                <mat-icon>{{ action.icon }}</mat-icon>
+              </button>
+              <a
+                mat-mini-fab
+                class="float-right"
+                *ngIf="action.onRouterLink && !action.routerLinkQuery"
+                [routerLink]="['/' + action.onRouterLink(row)]"
+                [matTooltip]="action.label"
+              >
+                <mat-icon>{{ action.icon }}</mat-icon>
+              </a>
+              <a
+                mat-mini-fab
+                class="float-right"
+                *ngIf="action.onRouterLink && action.routerLinkQuery"
+                [routerLink]="['/' + action.onRouterLink(row)]"
+                [queryParams]="action.routerLinkQuery(row)"
+                [matTooltip]="action.label"
+              >
+                <mat-icon>{{ action.icon }}</mat-icon>
+              </a>
+            </div>
+          </div>
         </div>
       </td>
     </ng-container>

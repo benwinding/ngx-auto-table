@@ -30,6 +30,7 @@ export interface AutoTableConfig<T> {
   actions?: ActionDefinition<T>[];
   actionsBulk?: ActionDefinitionBulk<T>[];
   bulkSelectMaxCount?: number;
+  actionsVisibleCount?: number;
   // Sorting and pagination
   initialSort?: string;
   initialSortDir?: "asc" | "desc";

@@ -17,7 +17,8 @@ import {
   MatSortModule,
   MatTableModule,
   MatToolbarModule,
-  MatMenuModule
+  MatMenuModule,
+  MatTooltipModule
 } from "@angular/material";
 
 import { CsvModule } from "@ctrl/ngx-csv";
@@ -57,6 +58,7 @@ const sharedComponents = [AutoTableComponent];
     MatSelectModule,
     MatSortModule,
     MatTableModule,
+    MatTooltipModule,
     MatToolbarModule,
     CommonModule,
     RouterModule
