@@ -139,12 +139,11 @@
     <ng-container matColumnDef="__star" stickyEnd>
       <th mat-header-cell *matHeaderCellDef></th>
       <td mat-cell *matCellDef="let row">
-        <div *ngIf="config.actions">
+        <div *ngIf="config.actions" class="flex flex-row-reverse items-center content-start">
           <button
             *ngIf="(config?.actionsVisibleCount || 0) < config.actions.length"
             mat-mini-fab
             color="secondary"
-            class="float-right"
             [disabled]="isPerformingBulkAction"
             [matMenuTriggerFor]="rowMenu"
           >
@@ -191,7 +190,6 @@
             <div *ngFor="let action of config.actions | slice: 0:visibleCount">
               <button
                 mat-mini-fab
-                class="float-right"
                 *ngIf="action.onClick"
                 (click)="onClickedAction(action, row)"
                 [matTooltip]="action.label"
@@ -200,7 +198,6 @@
               </button>
               <a
                 mat-mini-fab
-                class="float-right"
                 *ngIf="action.onRouterLink && !action.routerLinkQuery"
                 [routerLink]="['/' + action.onRouterLink(row)]"
                 [matTooltip]="action.label"
@@ -209,7 +206,6 @@
               </a>
               <a
                 mat-mini-fab
-                class="float-right"
                 *ngIf="action.onRouterLink && action.routerLinkQuery"
                 [routerLink]="['/' + action.onRouterLink(row)]"
                 [queryParams]="action.routerLinkQuery(row)"
