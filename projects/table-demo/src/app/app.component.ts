@@ -6,6 +6,8 @@ import { take } from "rxjs/operators";
 interface TestRow {
   name: string;
   age: number;
+  next_birthday: number;
+  id_taken_from_db: string;
 }
 
 const randomNames = [
@@ -36,7 +38,9 @@ function MakeRandomRow(): TestRow {
   const randomAge = Math.round(Math.random() * 25 + 20);
   return {
     name: randomName,
-    age: randomAge
+    age: randomAge,
+    id_taken_from_db: randomAge + randomName,
+    next_birthday: randomAge + 1
   };
 }
 

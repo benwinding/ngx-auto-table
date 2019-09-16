@@ -224,7 +224,8 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   }
 
   private toTitleCase(str) {
-    return str.replace('_', ' ').replace(/\w\S*/g, function(txt) {
+    const spacedStr = str.replace(new RegExp('_', 'g'), ' ')
+    return spacedStr.replace(/\w\S*/g, function(txt) {
       return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
     });
   }
