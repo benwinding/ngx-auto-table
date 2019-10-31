@@ -17,7 +17,7 @@ A simple to use data table for Angular. (Wrapper around the Material Table)
 Then add to your imports
 
 ``` typescript
-import { AutoTableModule } from 'ngx-auto-table/dist';
+import { AutoTableModule } from 'ngx-auto-table';
 
 imports: [
   ...
