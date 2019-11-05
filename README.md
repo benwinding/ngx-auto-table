@@ -1,4 +1,12 @@
 # ngx-auto-table
+
+<!-- [START badges] -->
+[![NPM Version](https://img.shields.io/npm/v/ngx-auto-table.svg)](https://www.npmjs.com/package/ngx-auto-table) 
+[![License](https://img.shields.io/npm/l/ngx-auto-table.svg)](https://github.com/benwinding/ngx-auto-table/blob/master/LICENSE) 
+[![Downloads/week](https://img.shields.io/npm/dm/ngx-auto-table.svg)](https://www.npmjs.com/package/ngx-auto-table) 
+[![Github Issues](https://img.shields.io/github/issues/benwinding/ngx-auto-table.svg)](https://github.com/benwinding/ngx-auto-table)
+<!-- [END badges] -->
+
 A simple to use data table for Angular. (Wrapper around the Material Table)
 
 ## [Demo](https://benwinding.github.io/ngx-auto-table/index.html)
