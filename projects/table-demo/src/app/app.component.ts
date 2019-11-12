@@ -1,7 +1,7 @@
-import { Component, OnInit } from "@angular/core";
-import { AutoTableConfig } from "../../../ngx-auto-table/src/public_api";
-import { BehaviorSubject } from "rxjs";
-import { take } from "rxjs/operators";
+import { Component, OnInit } from '@angular/core';
+import { AutoTableConfig } from '../../../ngx-auto-table/src/public_api';
+import { BehaviorSubject } from 'rxjs';
+import { take } from 'rxjs/operators';
 
 interface TestRow {
   name: string;
@@ -11,26 +11,26 @@ interface TestRow {
 }
 
 const randomNames = [
-  "Betty",
-  "Sherlene",
-  "Holli",
-  "Jacinto",
-  "Dewayne",
-  "Maureen",
-  "Gwyneth",
-  "Ellis",
-  "Iva",
-  "Treena",
-  "Cordia",
-  "Kirsten",
-  "Tora",
-  "Nelida",
-  "Rosella",
-  "Ronnie",
-  "Shena",
-  "Darcey",
-  "Tad",
-  "Ellsworth"
+  'Betty',
+  'Sherlene',
+  'Holli',
+  'Jacinto',
+  'Dewayne',
+  'Maureen',
+  'Gwyneth',
+  'Ellis',
+  'Iva',
+  'Treena',
+  'Cordia',
+  'Kirsten',
+  'Tora',
+  'Nelida',
+  'Rosella',
+  'Ronnie',
+  'Shena',
+  'Darcey',
+  'Tad',
+  'Ellsworth'
 ];
 function MakeRandomRow(): TestRow {
   const randomName =
@@ -45,7 +45,7 @@ function MakeRandomRow(): TestRow {
 }
 
 @Component({
-  selector: "app-root",
+  selector: 'app-root',
   template: `
     <div style="text-align:center">
       NGX Auto Table Testing
@@ -59,9 +59,14 @@ function MakeRandomRow(): TestRow {
       [config]="config"
       [columnDefinitions]="{
         name: {},
-        age: {}
+        age: {},
+        mobile: { template: mobileTemplate, hide: true}
       }"
     ></ngx-auto-table>
+
+    <ng-template #mobileTemplate let-row>
+      <strong>{{ row.name }}</strong>
+    </ng-template>
   `
 })
 export class AppComponent implements OnInit {
@@ -82,13 +87,13 @@ export class AppComponent implements OnInit {
   }
 
   async fakeDelay(ms: number) {
-    console.log('fake delay: begin for: ' + ms + 'ms')
-    return new Promise((resolve) => {
+    console.log('fake delay: begin for: ' + ms + 'ms');
+    return new Promise(resolve => {
       setTimeout(() => {
-        console.log('fake delay: end...')
+        console.log('fake delay: end...');
         resolve();
       }, ms);
-    })
+    });
   }
 
   async ngOnInit() {
@@ -100,8 +105,8 @@ export class AppComponent implements OnInit {
       bulkSelectMaxCount: 5,
       actionsBulk: [
         {
-          label: "Long Delete (30s)",
-          icon: "delete",
+          label: 'Long Delete (30s)',
+          icon: 'delete',
           onClick: async (rows: TestRow[]) => {
             await this.fakeDelay(30000);
             await this.removeItems(rows);
@@ -109,8 +114,8 @@ export class AppComponent implements OnInit {
           }
         },
         {
-          label: "Quick Delete (1s)",
-          icon: "delete",
+          label: 'Quick Delete (1s)',
+          icon: 'delete',
           onClick: async (rows: TestRow[]) => {
             await this.fakeDelay(1000);
             await this.removeItems(rows);
@@ -118,25 +123,25 @@ export class AppComponent implements OnInit {
           }
         },
         {
-          label: "Instant Delete",
-          icon: "delete",
+          label: 'Instant Delete',
+          icon: 'delete',
           onClick: async (rows: TestRow[]) => {
             await this.removeItems(rows);
             console.log({ rows });
           }
-        },
+        }
       ],
       actions: [
         {
-          label: "Delete",
-          icon: "delete",
+          label: 'Delete',
+          icon: 'delete',
           onClick: async (row: TestRow) => {
             await this.removeItem(row);
           }
         },
         {
-          label: "Show",
-          icon: "remove_red_eye",
+          label: 'Show',
+          icon: 'remove_red_eye',
           onClick: (row: TestRow) => {
             console.log({ row });
           }
@@ -147,7 +152,7 @@ export class AppComponent implements OnInit {
       cacheId: 'some-table',
       pageSize: 10,
       actionsVisibleCount: 1,
-      mobileFields: ['name']
+      mobileFields: ['mobile']
       // disableSelect: true,
       // disableHoverEffect: true
     };
@@ -156,23 +161,27 @@ export class AppComponent implements OnInit {
   async onClickAddRandomTake1() {
     const currentItems = await this.data$.pipe(take(1)).toPromise();
     const randomItem = MakeRandomRow();
-    console.log("app: adding random item", { currentItems, randomItem });
+    console.log('app: adding random item', { currentItems, randomItem });
     currentItems.push(randomItem);
     this.data$.next(currentItems);
   }
 
   async removeItem(row: TestRow) {
-    console.log("app: removing item", { row });
+    console.log('app: removing item', { row });
     const currentItems = await this.data$.pipe(take(1)).toPromise();
-    const itemsAfterDelete = currentItems.filter(r => JSON.stringify(r) != JSON.stringify(row));
+    const itemsAfterDelete = currentItems.filter(
+      r => JSON.stringify(r) != JSON.stringify(row)
+    );
     this.data$.next(itemsAfterDelete);
   }
 
   async removeItems(rows: TestRow[]) {
-    console.log("app: removing items", { rows });
+    console.log('app: removing items', { rows });
     const currentItems = await this.data$.pipe(take(1)).toPromise();
     const removeSet = new Set(rows.map(r => JSON.stringify(r)));
-    const itemsAfterDelete = currentItems.filter(r => !removeSet.has(JSON.stringify(r)));
+    const itemsAfterDelete = currentItems.filter(
+      r => !removeSet.has(JSON.stringify(r))
+    );
     this.data$.next(itemsAfterDelete);
   }
 }
