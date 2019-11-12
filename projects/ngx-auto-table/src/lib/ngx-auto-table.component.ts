@@ -15,11 +15,14 @@ import {
 import {
   AutoTableConfig,
   ColumnDefinition,
-  ActionDefinitionBulk
+  ActionDefinitionBulk,
+  ColumnDefinitionMap
 } from './AutoTableConfig';
 
 import { v4 as uuidv4 } from 'uuid';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { HeaderManager } from './header-manager';
+import { SimpleLogger } from './SimpleLogger';
 
 function blankConfig<T>(): AutoTableConfig<T> {
   return {
@@ -51,18 +54,10 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     return this._config || this._blankConfig;
   }
   @Input()
-  columnDefinitions: {
-    [field: string]: ColumnDefinition;
-  } = {};
-  columnDefinitionsAll: {
-    [field: string]: ColumnDefinition;
-  } = {};
-  columnDefinitionsAllArray: ColumnDefinitionInternal[] = [];
+  columnDefinitions: ColumnDefinitionMap = {};
 
-  headerKeysAll = [];
-  headerKeysAllVisible = [];
-  headerKeysDisplayed = [];
-  headerKeysDisplayedMap = {};
+  columnDefinitionsAll: ColumnDefinitionMap = {};
+  columnDefinitionsAllArray: ColumnDefinitionInternal[] = [];
 
   dataSource: MatTableDataSource<any>;
   @ViewChild(MatPaginator, { static: false }) paginator: MatPaginator;
@@ -72,6 +67,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   exportFilename: string;
 
   hasNoItems: boolean;
+  headerManager = new HeaderManager();
 
   defaultPageSize = 25;
 
@@ -84,17 +80,17 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   selectionSingle = new SelectionModel<any>(false, []);
 
   $onDestroyed = new Subject();
+  isMobile: boolean;
   $setDisplayedColumnsTrigger = new Subject<string[]>();
+
+  private logger: SimpleLogger;
 
   constructor(private breakpointObserver: BreakpointObserver) {}
 
   reInitializeVariables() {
     this.columnDefinitionsAll = {};
     this.columnDefinitionsAllArray = [];
-    this.headerKeysAll = [];
-    this.headerKeysAllVisible = [];
-    this.headerKeysDisplayed = [];
-    this.headerKeysDisplayedMap = [];
+    this.headerManager = new HeaderManager();
     this.filterControl = new FormControl();
     this.selectionMultiple = new SelectionModel<any>(true, []);
     this.selectionSingle = new SelectionModel<any>(false, []);
@@ -102,22 +98,20 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.logger = new SimpleLogger(this.config.debug);
     this.breakpointObserver
       .observe([Breakpoints.HandsetLandscape, Breakpoints.HandsetPortrait])
       .pipe(
-        tap(val => this.log(val)),
+        tap(val => this.logger.log(val)),
         takeUntil(this.$onDestroyed),
         map(result => result.matches),
         debounceTime(200),
         distinctUntilChanged()
       )
       .subscribe(isMobile => {
-        this.log('this.breakpointObserver', { isMobile });
-        if (isMobile && this.config.mobileFields) {
-          this.$setDisplayedColumnsTrigger.next(this.config.mobileFields);
-        } else {
-          this.$setDisplayedColumnsTrigger.next(this.getDisplayedDefault());
-        }
+        this.logger.log('this.breakpointObserver', { isMobile });
+        this.isMobile = isMobile;
+        this.refreshDefaultColumns();
       });
     this.$setDisplayedColumnsTrigger
       .pipe(takeUntil(this.$onDestroyed))
@@ -126,7 +120,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
       });
 
     if (!this.config) {
-      this.log('no [config] set on auto-table component');
+      this.logger.log('no [config] set on auto-table component');
       return;
     }
     this.reInitializeVariables();
@@ -138,7 +132,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
           this.dataSource &&
           this.dataSource.data &&
           this.dataSource.data.length;
-        this.log('ngx-auto-table, subscribed: ', { originalData });
+        this.logger.log('ngx-auto-table, subscribed: ', { originalData });
         this.dataSource = new MatTableDataSource(originalData);
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
@@ -159,7 +153,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
           }
         }
         this.initExport(originalData);
-        this.initFilter(originalData);
+        this.initFilterPredicate(originalData);
       });
 
     if (this.config.$triggerSelectItem) {
@@ -167,12 +161,12 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
         .pipe(throttleTime(300))
         .pipe(takeUntil(this.$onDestroyed))
         .subscribe(item => {
-          this.log('$triggerSelectItem: selecting item', { item });
+          this.logger.log('$triggerSelectItem: selecting item', { item });
           const str = JSON.stringify(item);
           const foundItem = this.dataSource.data.find(
             row => JSON.stringify(row) === str
           );
-          this.log('$triggerSelectItem: found item:', { foundItem });
+          this.logger.log('$triggerSelectItem: found item:', { foundItem });
           if (foundItem) {
             this.selectionSingle.select(foundItem);
           }
@@ -183,7 +177,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
       this.config.$triggerClearSelected
         .pipe(takeUntil(this.$onDestroyed))
         .subscribe(() => {
-          this.log('$triggerClearSelected: clearing selection');
+          this.logger.log('$triggerClearSelected: clearing selection');
           this.selectionMultiple.clear();
           this.selectionSingle.clear();
         });
@@ -194,29 +188,37 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     this.$onDestroyed.next();
   }
 
+  refreshDefaultColumns() {
+    if (this.isMobile && this.config.mobileFields) {
+      this.$setDisplayedColumnsTrigger.next(this.config.mobileFields);
+    } else {
+      this.$setDisplayedColumnsTrigger.next(this.getDisplayedDefault());
+    }
+  }
+
   applyFilter(filterValue: string) {
     this.dataSource.filter = filterValue.trim().toLowerCase();
     this.selectionMultiple.clear();
     this.selectionSingle.clear();
   }
 
-  initFilter(originalData: T[]) {
+  initFilterPredicate(originalData: T[]) {
     if (!originalData.length) {
       return;
     }
     const firstRow = originalData[0];
     const keysData = new Set(Object.keys(firstRow));
-    const keysHeader = new Set(this.headerKeysDisplayed);
+    const keysHeader = this.headerManager.GetDisplayHeaderKeysSet();
     keysHeader.delete('__bulk');
     keysHeader.delete('__star');
     const allFieldsExist = Array.from(keysHeader).reduce((acc, cur) => {
       return keysData.has(cur) && acc;
     }, true);
 
-    this.log('initFilter()', {
+    this.logger.log('initFilter()', {
       rowFields: keysData,
       allFieldsExist,
-      headerKeysDisplayed: this.headerKeysDisplayed
+      headerKeysDisplayed: keysHeader
     });
     this.dataSource.filterPredicate = (data: T, filterText: string) => {
       if (!filterText) {
@@ -267,10 +269,13 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
 
   initDisplayedColumns(firstDataItem: T) {
     this.initColumnDefinitions(firstDataItem);
-    this.initHeaderKeys();
-    this.$setDisplayedColumnsTrigger.next(this.getDisplayedDefault());
+    this.headerManager.InitHeaderKeys(
+      this.config.hideFields,
+      this.columnDefinitionsAll
+    );
+    this.refreshDefaultColumns();
     // Set currently enabled items
-    this.filterControl.setValue(this.headerKeysDisplayed);
+    this.filterControl.setValue(this.headerManager.headerKeysDisplayed);
     if (this.config.cacheId) {
       this.columnsCacheSetFromCache();
     }
@@ -282,21 +287,10 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
       .map(d => d.field);
   }
 
-  initHeaderKeys() {
-    this.headerKeysAll = Object.keys(this.columnDefinitionsAll);
-    this.headerKeysAllVisible = this.headerKeysAll;
-    if (this.config.hideFields) {
-      // Hide fields if specified
-      const hideFields = new Set(this.config.hideFields);
-      this.headerKeysAllVisible = this.headerKeysAll.filter(
-        x => !hideFields.has(x)
-      );
-    }
-  }
-
-  initColumnDefinitions(firstDataItem: T) {
+  initFromDefinitions() {
     // Set all column defintions, which were explicitly set in config
     const inputDefintionFields = Object.keys(this.columnDefinitions);
+    this.logger.log('initFromDefinitions', {inputDefintionFields});
     inputDefintionFields.forEach((field: string) => {
       const inputDefintion = this.columnDefinitions[field];
       this.columnDefinitionsAll[field] = {
@@ -306,7 +300,21 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
         forceWrap: inputDefintion.forceWrap
       };
     });
+  }
 
+  columnDefinitionMapToArray() {
+    // Make array that template headers use
+    this.columnDefinitionsAllArray = Object.keys(this.columnDefinitionsAll).map(
+      k => {
+        return {
+          ...this.columnDefinitionsAll[k],
+          field: k
+        };
+      }
+    );
+  }
+
+  initColumnDefinitions(firstDataItem: T) {
     // Set all column defintions read from the "input data"
     const inputDataKeys = Object.keys(firstDataItem);
     inputDataKeys.forEach((field: string) => {
@@ -319,40 +327,24 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
         hide: true
       };
     });
-
-    this.columnDefinitionsAllArray = Object.keys(this.columnDefinitionsAll).map(
-      k => {
-        return {
-          ...this.columnDefinitionsAll[k],
-          field: k
-        };
-      }
-    );
-    this.log('initColumnDefinitions', {
+    this.logger.log('initColumnDefinitions', {
       firstDataItem,
-      inputDefintionFields
     });
   }
 
   // Sets the displayed columns from a set of fieldnames
   setDisplayedColumns(selected: string[]) {
-    // Initialize all keys as false
-    this.headerKeysAllVisible.forEach(
-      k => (this.headerKeysDisplayedMap[k] = false)
+    this.headerManager.SetDisplayed<T>(
+      selected,
+      this.config.actions,
+      this.config.actionsBulk
     );
-    // Set selected as true
-    selected.forEach(c => (this.headerKeysDisplayedMap[c] = true));
-    this.headerKeysDisplayed = Object.keys(this.headerKeysDisplayedMap).filter(
-      k => this.headerKeysDisplayedMap[k]
-    );
-    // Add bulk select column at start
-    if (this.config.actionsBulk) {
-      this.headerKeysDisplayed.unshift('__bulk');
-    }
-    // Add actions column at end
-    if (this.config.actions) {
-      this.headerKeysDisplayed.push('__star');
-    }
+    this.initFromDefinitions();
+    this.columnDefinitionMapToArray();
+    this.logger.log('setDisplayedColumns', {
+      selected,
+      columnDefinitionsAllArray: this.columnDefinitionsAllArray
+    });
   }
 
   /** Whether the number of selected elements matches the total number of rows. */
@@ -414,28 +406,29 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     }
     try {
       const vals = JSON.parse(selectedValsString);
-      this.log('getting cached columns', { vals, cacheKey });
+      this.logger.log('getting cached columns', { vals, cacheKey });
       this.filterControl.setValue(vals);
       this.$setDisplayedColumnsTrigger.next(vals);
     } catch (error) {
       console.warn('error parsing JSON in columns cache');
     }
   }
+
   private columnsCacheSetToCache() {
     const cacheKey = this.config.cacheId + '-columns';
     const selectedValues = this.filterControl.value;
     localStorage.setItem(cacheKey, JSON.stringify(selectedValues));
-    this.log('setting cached columns', { cacheKey, selectedValues });
+    this.logger.log('setting cached columns', { cacheKey, selectedValues });
   }
 
   onColumnFilterChange($event) {
-    this.log('onColumnFilterChange: ', { $event });
+    this.logger.log('onColumnFilterChange: ', { $event });
     const selectedValues = this.filterControl.value;
     if (this.config.cacheId) {
       this.columnsCacheSetToCache();
     }
     this.$setDisplayedColumnsTrigger.next(selectedValues);
-    this.initFilter(this.dataSource.data);
+    this.initFilterPredicate(this.dataSource.data);
   }
 
   onClickBulkItem($event, item) {
@@ -447,7 +440,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
         if (isSelected) {
           this.selectionMultiple.deselect(item);
         } else {
-          this.warn();
+          this.logger.warn('');
         }
       }
       if (this.config.onSelectedBulk) {
@@ -457,7 +450,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   }
 
   onClickRow($event, row: T) {
-    this.log('onClickRow()', { $event, row });
+    this.logger.log('onClickRow()', { $event, row });
     this.selectionSingle.select(row);
     if (this.config.onSelectItem) {
       this.config.onSelectItem(row);
@@ -466,7 +459,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
 
   onDoubleClickRow($event, row: T) {
     if (this.config.onSelectItemDoubleClick) {
-      this.log('onDoubleClickRow()', { $event, row });
+      this.logger.log('onDoubleClickRow()', { $event, row });
       this.selectionSingle.select(row);
       this.config.onSelectItemDoubleClick(row);
     }
@@ -491,11 +484,4 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     }
     this.isPerformingBulkAction = false;
   }
-
-  private log(...args: any) {
-    if (this.config.debug) {
-      console.log('<ngx-auto-table> : ', args);
-    }
-  }
-  private warn() {}
 }

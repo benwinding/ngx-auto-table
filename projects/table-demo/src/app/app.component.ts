@@ -60,7 +60,7 @@ function MakeRandomRow(): TestRow {
       [columnDefinitions]="{
         name: {},
         age: {},
-        mobile: { template: mobileTemplate, hide: true}
+        mobile: { template: mobileTemplate, hide: true }
       }"
     ></ngx-auto-table>
 
@@ -71,20 +71,9 @@ function MakeRandomRow(): TestRow {
 })
 export class AppComponent implements OnInit {
   config: AutoTableConfig<TestRow>;
-  data$ = new BehaviorSubject<TestRow[]>(null);
+  data$ = new BehaviorSubject<TestRow[]>([]);
 
-  constructor() {
-    this.data$.next([
-      MakeRandomRow(),
-      MakeRandomRow(),
-      MakeRandomRow(),
-      MakeRandomRow(),
-      MakeRandomRow(),
-      MakeRandomRow(),
-      MakeRandomRow(),
-      MakeRandomRow()
-    ]);
-  }
+  constructor() {}
 
   async fakeDelay(ms: number) {
     console.log('fake delay: begin for: ' + ms + 'ms');
@@ -97,8 +86,20 @@ export class AppComponent implements OnInit {
   }
 
   async ngOnInit() {
+    this.makeCofig();
     await this.fakeDelay(1000);
-    // await this.fakeDelay(400000);
+    this.data$.next([
+      MakeRandomRow(),
+      MakeRandomRow(),
+      MakeRandomRow(),
+      MakeRandomRow(),
+      MakeRandomRow(),
+      MakeRandomRow(),
+      MakeRandomRow(),
+      MakeRandomRow()
+    ]);
+  }
+  async makeCofig() {
     this.config = {
       data$: this.data$,
       debug: true,
@@ -149,7 +150,7 @@ export class AppComponent implements OnInit {
       ],
       selectFirstOnInit: true,
       hidePaginator: false,
-      cacheId: 'some-table',
+      // cacheId: 'some-table',
       pageSize: 10,
       actionsVisibleCount: 1,
       mobileFields: ['mobile']

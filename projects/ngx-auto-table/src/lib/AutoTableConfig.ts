@@ -20,6 +20,9 @@ export interface ColumnDefinition {
   hide?: boolean;
   forceWrap?: boolean;
 }
+export interface ColumnDefinitionMap {
+  [field: string]: ColumnDefinition;
+}
 
 export interface AutoTableConfig<T> {
   data$: Observable<T[]>;

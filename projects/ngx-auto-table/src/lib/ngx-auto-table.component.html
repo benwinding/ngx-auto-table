@@ -42,7 +42,7 @@
               multiple
             >
               <mat-option
-                *ngFor="let key of headerKeysAllVisible"
+                *ngFor="let key of this.headerManager.headerKeysAllVisible"
                 [value]="key"
               >
                 {{ getKeyHeader(key) }}
@@ -61,7 +61,7 @@
             ({{ selectionMultiple.selected.length }} Selected)
           </span>
           <span *ngIf="!isPerformingBulkAction" class="item-count">
-            {{ isMaxReached() ? " Max Reached!" : "" }}
+            {{ isMaxReached() ? ' Max Reached!' : '' }}
           </span>
           <span *ngIf="isPerformingBulkAction" class="item-count">
             Performing action...
@@ -139,7 +139,10 @@
     <ng-container matColumnDef="__star" stickyEnd>
       <th mat-header-cell *matHeaderCellDef></th>
       <td mat-cell *matCellDef="let row">
-        <div *ngIf="config.actions" class="flex flex-row-reverse items-center content-start">
+        <div
+          *ngIf="config.actions"
+          class="flex flex-row-reverse items-center content-start"
+        >
           <button
             *ngIf="(config?.actionsVisibleCount || 0) < config.actions.length"
             mat-mini-fab
@@ -221,12 +224,12 @@
 
     <tr
       mat-header-row
-      *matHeaderRowDef="headerKeysDisplayed"
+      *matHeaderRowDef="this.headerManager.headerKeysDisplayed"
       [hidden]="config.hideHeader"
     ></tr>
     <tr
       mat-row
-      *matRowDef="let row; columns: headerKeysDisplayed"
+      *matRowDef="let row; columns: this.headerManager.headerKeysDisplayed"
       (click)="onClickRow($event, row)"
       (dblclick)="onDoubleClickRow($event, row)"
       [class.selected-row-multiple]="
