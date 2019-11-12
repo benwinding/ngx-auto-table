@@ -29,6 +29,7 @@ import { AutoTableComponent } from "./ngx-auto-table.component";
 import { AppToolbarLoaderComponent } from "./loaders/toolbar-loader.component";
 import { AppBtnLoaderComponent } from "./loaders/btn-loader.component";
 import { AppTableLoaderComponent } from './loaders/table-loader.component';
+import { LayoutModule } from "@angular/cdk/layout";
 
 const sharedComponents = [AutoTableComponent];
 
@@ -44,6 +45,7 @@ const sharedComponents = [AutoTableComponent];
   imports: [
     CsvModule,
     ReactiveFormsModule,
+    LayoutModule,
     MatAutocompleteModule,
     MatButtonModule,
     MatButtonToggleModule,

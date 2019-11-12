@@ -1,16 +1,25 @@
 import { Component, OnInit, Input, OnDestroy, ViewChild } from '@angular/core';
 import { MatTableDataSource, MatPaginator, MatSort } from '@angular/material';
-import { Subject, BehaviorSubject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { FormControl } from '@angular/forms';
 import { SelectionModel } from '@angular/cdk/collections';
-import { filter, takeUntil, throttleTime } from 'rxjs/operators';
+import {
+  filter,
+  takeUntil,
+  throttleTime,
+  distinctUntilChanged,
+  debounceTime,
+  map,
+  tap
+} from 'rxjs/operators';
 import {
   AutoTableConfig,
   ColumnDefinition,
   ActionDefinitionBulk
 } from './AutoTableConfig';
 
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4 } from 'uuid';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 function blankConfig<T>(): AutoTableConfig<T> {
   return {
@@ -34,6 +43,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   set config(newConfig) {
     this._config = newConfig;
     setTimeout(() => {
+      this.$onDestroyed.next();
       this.ngOnInit();
     });
   }
@@ -74,6 +84,9 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   selectionSingle = new SelectionModel<any>(false, []);
 
   $onDestroyed = new Subject();
+  $setDisplayedColumnsTrigger = new Subject<string[]>();
+
+  constructor(private breakpointObserver: BreakpointObserver) {}
 
   reInitializeVariables() {
     this.columnDefinitionsAll = {};
@@ -89,9 +102,31 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.$onDestroyed.next();
+    this.breakpointObserver
+      .observe([Breakpoints.HandsetLandscape, Breakpoints.HandsetPortrait])
+      .pipe(
+        tap(val => this.log(val)),
+        takeUntil(this.$onDestroyed),
+        map(result => result.matches),
+        debounceTime(200),
+        distinctUntilChanged()
+      )
+      .subscribe(isMobile => {
+        this.log('this.breakpointObserver', { isMobile });
+        if (isMobile && this.config.mobileFields) {
+          this.$setDisplayedColumnsTrigger.next(this.config.mobileFields);
+        } else {
+          this.$setDisplayedColumnsTrigger.next(this.getDisplayedDefault());
+        }
+      });
+    this.$setDisplayedColumnsTrigger
+      .pipe(takeUntil(this.$onDestroyed))
+      .subscribe(newHeaders => {
+        this.setDisplayedColumns(newHeaders);
+      });
+
     if (!this.config) {
-      this.log("no [config] set on auto-table component");
+      this.log('no [config] set on auto-table component');
       return;
     }
     this.reInitializeVariables();
@@ -224,7 +259,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   }
 
   private toTitleCase(str) {
-    const spacedStr = str.replace(new RegExp('_', 'g'), ' ')
+    const spacedStr = str.replace(new RegExp('_', 'g'), ' ');
     return spacedStr.replace(/\w\S*/g, function(txt) {
       return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
     });
@@ -232,7 +267,22 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
 
   initDisplayedColumns(firstDataItem: T) {
     this.initColumnDefinitions(firstDataItem);
+    this.initHeaderKeys();
+    this.$setDisplayedColumnsTrigger.next(this.getDisplayedDefault());
+    // Set currently enabled items
+    this.filterControl.setValue(this.headerKeysDisplayed);
+    if (this.config.cacheId) {
+      this.columnsCacheSetFromCache();
+    }
+  }
 
+  getDisplayedDefault(): string[] {
+    return this.columnDefinitionsAllArray
+      .filter(def => !def.hide)
+      .map(d => d.field);
+  }
+
+  initHeaderKeys() {
     this.headerKeysAll = Object.keys(this.columnDefinitionsAll);
     this.headerKeysAllVisible = this.headerKeysAll;
     if (this.config.hideFields) {
@@ -241,17 +291,6 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
       this.headerKeysAllVisible = this.headerKeysAll.filter(
         x => !hideFields.has(x)
       );
-    }
-
-    const displayed = this.columnDefinitionsAllArray
-      .filter(def => !def.hide)
-      .map(d => d.field);
-
-    this.setDisplayedColumns(displayed);
-    // Set currently enabled items
-    this.filterControl.setValue(this.headerKeysDisplayed);
-    if (this.config.cacheId) {
-      this.columnsCacheSetFromCache();
     }
   }
 
@@ -368,34 +407,34 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   }
 
   private columnsCacheSetFromCache() {
-    const cacheKey = this.config.cacheId + "-columns";
+    const cacheKey = this.config.cacheId + '-columns';
     const selectedValsString = localStorage.getItem(cacheKey);
     if (!selectedValsString) {
       return;
     }
     try {
       const vals = JSON.parse(selectedValsString);
-      this.log("getting cached columns", { vals, cacheKey });
+      this.log('getting cached columns', { vals, cacheKey });
       this.filterControl.setValue(vals);
-      this.setDisplayedColumns(vals);
+      this.$setDisplayedColumnsTrigger.next(vals);
     } catch (error) {
-      console.warn("error parsing JSON in columns cache");
+      console.warn('error parsing JSON in columns cache');
     }
   }
   private columnsCacheSetToCache() {
-    const cacheKey = this.config.cacheId + "-columns";
+    const cacheKey = this.config.cacheId + '-columns';
     const selectedValues = this.filterControl.value;
     localStorage.setItem(cacheKey, JSON.stringify(selectedValues));
-    this.log("setting cached columns", { cacheKey, selectedValues });
+    this.log('setting cached columns', { cacheKey, selectedValues });
   }
 
   onColumnFilterChange($event) {
-    this.log("onColumnFilterChange: ", { $event });
+    this.log('onColumnFilterChange: ', { $event });
     const selectedValues = this.filterControl.value;
     if (this.config.cacheId) {
       this.columnsCacheSetToCache();
     }
-    this.setDisplayedColumns(selectedValues);
+    this.$setDisplayedColumnsTrigger.next(selectedValues);
     this.initFilter(this.dataSource.data);
   }
 
@@ -453,9 +492,9 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     this.isPerformingBulkAction = false;
   }
 
-  private log(str: string, obj?: any) {
+  private log(...args: any) {
     if (this.config.debug) {
-      console.log('<ngx-auto-table> : ' + str, obj);
+      console.log('<ngx-auto-table> : ', args);
     }
   }
   private warn() {}
