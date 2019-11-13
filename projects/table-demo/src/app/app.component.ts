@@ -153,7 +153,6 @@ export class AppComponent implements OnInit {
       // cacheId: 'some-table',
       pageSize: 10,
       actionsVisibleCount: 1,
-      mobileFields: ['mobile']
       // disableSelect: true,
       // disableHoverEffect: true
     };

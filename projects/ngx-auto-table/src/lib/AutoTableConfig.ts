@@ -59,6 +59,4 @@ export interface AutoTableConfig<T> {
   $triggerClearSelected?: Observable<void>;
   $triggerSelectItem?: Observable<T>;
   disableMobileScroll?: boolean;
-  // Responsive
-  mobileFields?: string[];
 }

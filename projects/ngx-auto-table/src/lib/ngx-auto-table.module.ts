@@ -30,6 +30,7 @@ import { AppToolbarLoaderComponent } from "./loaders/toolbar-loader.component";
 import { AppBtnLoaderComponent } from "./loaders/btn-loader.component";
 import { AppTableLoaderComponent } from './loaders/table-loader.component';
 import { LayoutModule } from "@angular/cdk/layout";
+import { NgxTableViewComponent } from "./table-view.component";
 
 const sharedComponents = [AutoTableComponent];
 
@@ -39,6 +40,7 @@ const sharedComponents = [AutoTableComponent];
     AppToolbarLoaderComponent,
     AppExportCsvExportComponent,
     AppBtnLoaderComponent,
+    NgxTableViewComponent,
     ...sharedComponents,
   ],
   exports: sharedComponents,
