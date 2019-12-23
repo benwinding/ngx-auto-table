@@ -82,6 +82,7 @@ export class ColumnsManager<T> {
       });
     });
     this.columnDefinitions.push(...newDefintions);
+    // this.SetDisplayed(inputDataKeys)
     this.logger.log('InitializeDefinitionsFromRow', {
       row,
       columnDefinitions: this.columnDefinitions

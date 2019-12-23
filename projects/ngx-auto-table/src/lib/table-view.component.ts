@@ -19,21 +19,21 @@ import { ColumnsManager } from './columns-manager';
   selector: 'ngx-table-viewer',
   template: `
     <div
-      *ngIf="false"
-      [class.isMobile]="config.disableMobileScroll"
+      *ngIf="config"
+      [class.disable-mobile-scroll]="config.disableMobileScroll"
       class="table-container mat-elevation-z8"
     >
       <div
         class="table-header auto-elevation overflow-hidden"
         [class.addRightPixel]="config.hideHeader"
-        *ngIf="(!config.hideFilter || !config.hideChooseColumns) && !hasNoItems"
+        *ngIf="(!config.hideFilter || !config.hideChooseColumns) && !HasNoItems"
       >
         <div class="relative">
           <mat-toolbar class="mat-elevation-z8">
             <mat-toolbar-row class="flex-h align-center space-between">
               <mat-form-field
                 class="filter-search"
-                *ngIf="!hasNoItems && !config.hideFilter"
+                *ngIf="!HasNoItems && !config.hideFilter"
               >
                 <mat-icon matPrefix>search</mat-icon>
                 <input
@@ -55,7 +55,7 @@ import { ColumnsManager } from './columns-manager';
               </mat-form-field>
               <mat-form-field
                 class="filter-columns overflow-hidden"
-                *ngIf="!hasNoItems && !config.hideChooseColumns"
+                *ngIf="!HasNoItems && !config.hideChooseColumns"
               >
                 <mat-icon matPrefix>view_column</mat-icon>
                 <mat-select
@@ -113,9 +113,10 @@ import { ColumnsManager } from './columns-manager';
         mat-table
         #table
         matSort
+        *ngIf="dataSource"
         [matSortActive]="config.initialSort"
         [matSortDirection]="config.initialSortDir"
-        [dataSource]="this.dataSource"
+        [dataSource]="dataSource"
         style="width:100%;"
         class="mat-elevation-z8"
       >
@@ -215,7 +216,10 @@ import { ColumnsManager } from './columns-manager';
                   </a>
                 </div>
               </mat-menu>
-              <div *ngIf="config?.actionsVisibleCount as visibleCount">
+              <div
+                class="flex-h"
+                *ngIf="config?.actionsVisibleCount as visibleCount"
+              >
                 <div *ngFor="let action of config.actions">
                   <!-- <div *ngFor="let action of config.actions | slice: 0:visibleCount"> -->
                   <button
@@ -272,6 +276,11 @@ import { ColumnsManager } from './columns-manager';
         ></tr>
       </table>
 
+      <pre>
+      {{ HeaderKeysDisplayed | json }}
+</pre
+      >
+
       <mat-toolbar class="mat-elevation-z8 overflow-hidden expansion-joint">
         <mat-toolbar-row> </mat-toolbar-row>
       </mat-toolbar>
@@ -309,17 +318,13 @@ export class NgxTableViewComponent implements OnDestroy {
   @Input()
   isMobile: boolean;
   @Input()
-  desktopColumns: ColumnDefinitionInternal[];
-  @Input()
-  mobileColumns: ColumnDefinitionInternal[];
-  @Input()
   actions: ActionDefinition<any>;
   @Input()
   actionsBulk: ActionDefinitionBulk<any>;
   @Input()
   set data(newData: any[]) {
-    this.$onDestroyed.next();
     setTimeout(() => {
+      this.$onDestroyed.next();
       this.initTable(newData);
     });
   }
@@ -356,21 +361,30 @@ export class NgxTableViewComponent implements OnDestroy {
   get HasItems() {
     return (
       !!this.dataSource &&
-      !!Array.isArray(this.dataSource.data) &&
+      Array.isArray(this.dataSource.data) &&
       !!this.dataSource.data.length
     );
   }
   get AllColumnsVisible() {
-    return this.columnsManager.CurrentColumns;
+    return !!this.columnsManager && this.columnsManager.CurrentColumns;
   }
   get HeaderKeysDisplayed() {
+    if (!this.columnsManager) {
+      return [];
+    }
     return this.columnsManager.GetDisplayed();
   }
   get HeaderKeyOptions() {
-    return this.columnsManager.AllFilterOptions();
+    return !!this.columnsManager && this.columnsManager.AllFilterOptions();
   }
   get IsMaxReached() {
+    if (!this.config) {
+      return false;
+    }
     if (!this.config.bulkSelectMaxCount) {
+      return false;
+    }
+    if (!this.selectionMultiple) {
       return false;
     }
     return (
@@ -401,18 +415,33 @@ export class NgxTableViewComponent implements OnDestroy {
     }
     this.dataSource.data = newData;
     this.filterControl = new FormControl();
+    this.initColumns(newData);
     this.initExport(newData);
     this.initFilterPredicate(newData);
-    this.columnsManager = new ColumnsManager(this.config);
     this.logger = new SimpleLogger(this.config.debug, 'table-view');
     this.initSelectionTriggers();
   }
 
-  private initExport(originalData: any[]) {
-    if (this.config.exportFilename) {
+  private initColumns(dataArray: any[]) {
+    if (!this.config) {
+      return 
+    }
+    if (!Array.isArray(dataArray)) {
       return;
     }
-    this.exportData = originalData.map(dataItem => {
+    const firstRow = dataArray[0];
+    if (!firstRow) {
+      return;
+    }
+    this.columnsManager = new ColumnsManager(this.config);
+    this.columnsManager.InitializeDefinitionsFromRow(firstRow);
+  }
+
+  private initExport(dataArray: any[]) {
+    if (!Array.isArray(dataArray) || this.config.exportFilename) {
+      return;
+    }
+    this.exportData = dataArray.map(dataItem => {
       if (!this.config.exportRowFormat) {
         return dataItem;
       }
@@ -449,11 +478,14 @@ export class NgxTableViewComponent implements OnDestroy {
     }
   }
 
-  private initFilterPredicate(originalData: any[]) {
-    if (!originalData.length) {
+  private initFilterPredicate(dataArray: any[]) {
+    if (!Array.isArray(dataArray)) {
       return;
     }
-    const firstRow = originalData[0];
+    const firstRow = dataArray[0];
+    if (!firstRow) {
+      return;
+    }
     const keysFromData = new Set(Object.keys(firstRow));
     const keysHeader = new Set(this.HeaderKeysDisplayed);
     keysHeader.delete('__bulk');
