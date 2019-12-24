@@ -189,7 +189,7 @@
               </a>
             </div>
           </mat-menu>
-          <div *ngIf="config?.actionsVisibleCount as visibleCount">
+          <div class="flex" *ngIf="config?.actionsVisibleCount as visibleCount">
             <div *ngFor="let action of config.actions | slice: 0:visibleCount">
               <button
                 mat-mini-fab

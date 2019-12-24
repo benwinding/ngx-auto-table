@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { AutoTableConfig } from '../../../ngx-auto-table/src/public_api';
 import { BehaviorSubject } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { take, debounceTime, startWith } from 'rxjs/operators';
+import { FormGroup, FormControl } from '@angular/forms';
 
 interface TestRow {
   name: string;
@@ -39,7 +40,9 @@ function MakeRandomRow(): TestRow {
   return {
     name: randomName,
     age: randomAge,
-    id_taken_from_db: randomAge + randomName,
+    id_taken_from_db: Math.random()
+      .toString(32)
+      .slice(2),
     next_birthday: randomAge + 1
   };
 }
@@ -51,11 +54,58 @@ function MakeRandomRow(): TestRow {
       NGX Auto Table Testing
     </div>
 
-    <button (click)="this.onClickAddRandomTake1()">
+    <form
+      [formGroup]="formGroup"
+      style="display: grid; grid-template-columns: 50% 50%;"
+    >
+      <div class="">
+        <form-number formControlName="bulkSelectMaxCount"></form-number>
+        <form-number formControlName="actionsVisibleCount"></form-number>
+        <form-select-string
+          [selections]="['name', 'age']"
+          formControlName="initialSort"
+        ></form-select-string>
+        <form-select-string
+          [selections]="['asc', 'desc']"
+          formControlName="initialSortDir"
+        ></form-select-string>
+        <form-number formControlName="pageSize"></form-number>
+        <form-select-string-multiple
+          [selections]="['name', 'age']"
+          formControlName="hideFields"
+        ></form-select-string-multiple>
+        <form-text formControlName="filterText"></form-text>
+        <form-text formControlName="exportFilename"></form-text>
+      </div>
+      <div class="">
+        <h2>Flags</h2>
+        <form-toggle formControlName="hideFilter"></form-toggle>
+        <form-toggle formControlName="hideHeader"></form-toggle>
+        <form-toggle formControlName="hidePaginator"></form-toggle>
+        <form-toggle formControlName="hideChooseColumns"></form-toggle>
+        <form-toggle formControlName="disableSelect"></form-toggle>
+        <form-toggle formControlName="disableHoverEffect"></form-toggle>
+        <form-toggle formControlName="selectFirstOnInit"></form-toggle>
+        <form-toggle formControlName="disableMobileScroll"></form-toggle>
+        <form-toggle formControlName="debug"></form-toggle>
+      </div>
+    </form>
+
+    <pre>
+    {{ { config: formGroup.value } | json }}
+    </pre
+    >
+
+    <button
+      color="primary"
+      mat-raised-button
+      (click)="this.onClickAddRandomTake1()"
+    >
       Add Random Name
     </button>
 
     <ngx-auto-table
+      *ngIf="config"
       [config]="config"
       [columnDefinitions]="{
         name: {},
@@ -73,6 +123,26 @@ export class AppComponent implements OnInit {
   config: AutoTableConfig<TestRow>;
   data$ = new BehaviorSubject<TestRow[]>([]);
 
+  formGroup = new FormGroup({
+    bulkSelectMaxCount: new FormControl(5),
+    actionsVisibleCount: new FormControl(1),
+    initialSort: new FormControl(),
+    initialSortDir: new FormControl(),
+    pageSize: new FormControl(10),
+    hideFields: new FormControl(),
+    hideFilter: new FormControl(),
+    hideHeader: new FormControl(),
+    hidePaginator: new FormControl(),
+    hideChooseColumns: new FormControl(),
+    filterText: new FormControl(),
+    exportFilename: new FormControl(),
+    disableSelect: new FormControl(),
+    disableHoverEffect: new FormControl(),
+    selectFirstOnInit: new FormControl(true),
+    disableMobileScroll: new FormControl(),
+    debug: new FormControl(true)
+  });
+
   constructor() {}
 
   async fakeDelay(ms: number) {
@@ -86,7 +156,11 @@ export class AppComponent implements OnInit {
   }
 
   async ngOnInit() {
-    this.makeCofig();
+    this.formGroup.valueChanges
+      .pipe(startWith(null), debounceTime(300))
+      .subscribe(newConfigFlags => {
+        this.makeCofig(this.formGroup.value);
+      });
     await this.fakeDelay(1000);
     this.data$.next([
       MakeRandomRow(),
@@ -99,11 +173,12 @@ export class AppComponent implements OnInit {
       MakeRandomRow()
     ]);
   }
-  async makeCofig() {
+  async makeCofig(newConfigFlags) {
+    this.config = null;
+    await new Promise(res => setTimeout(res, 100));
     this.config = {
+      ...newConfigFlags,
       data$: this.data$,
-      debug: true,
-      bulkSelectMaxCount: 5,
       actionsBulk: [
         {
           label: 'Long Delete (30s)',
@@ -147,15 +222,7 @@ export class AppComponent implements OnInit {
             console.log({ row });
           }
         }
-      ],
-      selectFirstOnInit: true,
-      hidePaginator: false,
-      // cacheId: 'some-table',
-      pageSize: 10,
-      actionsVisibleCount: 1,
-      mobileFields: ['mobile']
-      // disableSelect: true,
-      // disableHoverEffect: true
+      ]
     };
   }
 

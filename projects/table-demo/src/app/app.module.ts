@@ -7,25 +7,7 @@ import { AutoTableModule } from "../../../ngx-auto-table/src/public_api";
 import { CommonModule } from "@angular/common";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { HttpClientModule } from "@angular/common/http";
-import {
-  MatAutocompleteModule,
-  MatButtonModule,
-  MatButtonToggleModule,
-  MatCheckboxModule,
-  MatFormFieldModule,
-  MatIconModule,
-  MatInputModule,
-  MatMenuModule,
-  MatPaginatorModule,
-  MatProgressBarModule,
-  MatProgressSpinnerModule,
-  MatSelectModule,
-  MatSortModule,
-  MatTableModule,
-  MatToolbarModule,
-  MatTooltipModule,
-  MatSidenavModule
-} from "@angular/material";
+import { MatReduceCoreModule } from 'mat-reduce/src/core'
 
 @NgModule({
   declarations: [AppComponent],
@@ -39,23 +21,7 @@ import {
     BrowserAnimationsModule,
     BrowserModule,
     AutoTableModule,
-    MatAutocompleteModule,
-    MatButtonModule,
-    MatButtonToggleModule,
-    MatCheckboxModule,
-    MatFormFieldModule,
-    MatIconModule,
-    MatInputModule,
-    MatMenuModule,
-    MatPaginatorModule,
-    MatProgressBarModule,
-    MatProgressSpinnerModule,
-    MatSelectModule,
-    MatSortModule,
-    MatTableModule,
-    MatToolbarModule,
-    MatTooltipModule,
-    MatSidenavModule
+    MatReduceCoreModule
   ],
   providers: [],
   bootstrap: [AppComponent]
