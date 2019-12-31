@@ -21,7 +21,7 @@
             <mat-icon matPrefix>search</mat-icon>
             <input
               matInput
-              (keyup)="applyFilter($event.target.value)"
+              [formControl]="searchControl"
               [placeholder]="this.config.filterText || 'Search Rows...'"
               [name]="autoCompleteObscureName"
               autocomplete="dontcompleteme"
@@ -30,7 +30,7 @@
             <mat-icon
               class="has-pointer"
               matSuffix
-              (click)="filterField.value = ''; applyFilter(filterField.value)"
+              (click)="filterField.value = ''; searchControl.reset()"
               >clear</mat-icon
             >
           </mat-form-field>
@@ -41,7 +41,7 @@
             <mat-icon matPrefix>view_column</mat-icon>
             <mat-select
               placeholder="Choose Columns..."
-              [formControl]="filterControl"
+              [formControl]="chooseColumnsControl"
               (selectionChange)="onColumnFilterChange($event)"
               multiple
             >
@@ -77,7 +77,7 @@
               <mat-icon matPrefix>search</mat-icon>
               <input
                 matInput
-                (keyup)="applyFilter($event.target.value)"
+                [formControl]="searchControl"
                 [placeholder]="this.config.filterText || 'Search Rows...'"
                 [name]="autoCompleteObscureName"
                 autocomplete="dontcompleteme"
@@ -87,7 +87,7 @@
                 class="has-pointer"
                 matSuffix
                 (click)="
-                  filterFieldBulk.value = ''; applyFilter(filterFieldBulk.value)
+                  filterFieldBulk.value = ''; searchControl.reset()
                 "
                 >clear</mat-icon
               >

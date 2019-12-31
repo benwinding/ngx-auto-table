@@ -75,7 +75,8 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   isPerformingBulkAction = false;
 
   autoCompleteObscureName = uuidv4();
-  filterControl = new FormControl();
+  chooseColumnsControl = new FormControl();
+  searchControl = new FormControl();
   // Bulk items selection
   selectionMultiple = new SelectionModel<any>(true, []);
   selectionSingle = new SelectionModel<any>(false, []);
@@ -92,7 +93,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     this.columnDefinitionsAll = {};
     this.columnDefinitionsAllArray = [];
     this.headerManager = new HeaderManager();
-    this.filterControl = new FormControl();
+    this.chooseColumnsControl = new FormControl();
     this.selectionMultiple = new SelectionModel<any>(true, []);
     this.selectionSingle = new SelectionModel<any>(false, []);
     this.dataSource = undefined;
@@ -183,6 +184,11 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
           this.selectionSingle.clear();
         });
     }
+    this.searchControl.valueChanges
+      .pipe(takeUntil(this.$onDestroyed), debounceTime(200))
+      .subscribe(searchString => {
+        this.applyFilter(searchString);
+      });
   }
 
   ngOnDestroy() {
@@ -197,8 +203,9 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     }
   }
 
-  applyFilter(filterValue: string) {
-    this.dataSource.filter = filterValue.trim().toLowerCase();
+  private applyFilter(inputValue: string) {
+    const parsedString = inputValue || '';
+    this.dataSource.filter = parsedString.trim().toLowerCase();
     this.selectionSingle.clear();
   }
 
@@ -265,7 +272,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     return this.toTitleCase(key);
   }
 
-  private toTitleCase(str) {
+  private toTitleCase(str: string) {
     const spacedStr = str.replace(new RegExp('_', 'g'), ' ');
     return spacedStr.replace(/\w\S*/g, function(txt) {
       return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
@@ -280,7 +287,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     );
     this.refreshDefaultColumns();
     // Set currently enabled items
-    this.filterControl.setValue(this.headerManager.HeadersDisplayed);
+    this.chooseColumnsControl.setValue(this.headerManager.HeadersDisplayed);
     if (this.config.cacheId) {
       this.columnsCacheSetFromCache();
     }
@@ -412,7 +419,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     try {
       const vals = JSON.parse(selectedValsString);
       this.logger.log('getting cached columns', { vals, cacheKey });
-      this.filterControl.setValue(vals);
+      this.chooseColumnsControl.setValue(vals);
       this.$setDisplayedColumnsTrigger.next(vals);
     } catch (error) {
       console.warn('error parsing JSON in columns cache');
@@ -421,14 +428,14 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
 
   private columnsCacheSetToCache() {
     const cacheKey = this.config.cacheId + '-columns';
-    const selectedValues = this.filterControl.value;
+    const selectedValues = this.chooseColumnsControl.value;
     localStorage.setItem(cacheKey, JSON.stringify(selectedValues));
     this.logger.log('setting cached columns', { cacheKey, selectedValues });
   }
 
   onColumnFilterChange($event) {
     this.logger.log('onColumnFilterChange: ', { $event });
-    const selectedValues = this.filterControl.value;
+    const selectedValues = this.chooseColumnsControl.value;
     if (this.config.cacheId) {
       this.columnsCacheSetToCache();
     }
