@@ -6,30 +6,34 @@ import {
 import { SimpleLogger } from './SimpleLogger';
 
 export class HeaderManager {
-  private headerKeysAll: string[] = [];
-  private headerKeysAllVisible: string[] = [];
-  private headerKeysDisplayed: string[] = [];
-  private headerKeysDisplayedSet: Set<string> = new Set();
-  private headerKeysDisplayedMap: {} = {};
+  private _headerKeysAll: string[] = [];
+  private _headerKeysAllVisible: string[] = [];
+  private _headerKeysDisplayed: string[] = [];
+  private _headerKeysDisplayedSet: Set<string> = new Set();
+  private _headerKeysDisplayedMap: {} = {};
 
-  GetDisplayHeaderKeysSet(): Set<string> {
-    return this.headerKeysDisplayedSet;
+  get HeadersAllVisible(): string[] {
+    return this._headerKeysAllVisible;
   }
 
-  GetDisplayHeaderKeys(): Array<string> {
-    return this.headerKeysDisplayed;
+  get HeadersDisplayedSet(): Set<string> {
+    return this._headerKeysDisplayedSet;
+  }
+
+  get HeadersDisplayed(): Array<string> {
+    return this._headerKeysDisplayed;
   }
 
   InitHeaderKeys(
     hideTheseFields: string[],
     allColumnDefinitions: ColumnDefinitionMap
   ) {
-    this.headerKeysAll = Object.keys(allColumnDefinitions);
-    this.headerKeysAllVisible = this.headerKeysAll;
+    this._headerKeysAll = Object.keys(allColumnDefinitions);
+    this._headerKeysAllVisible = this._headerKeysAll;
     if (hideTheseFields) {
       // Hide fields if specified
       const hideFields = new Set(hideTheseFields);
-      this.headerKeysAllVisible = this.headerKeysAll.filter(
+      this._headerKeysAllVisible = this._headerKeysAll.filter(
         x => !hideFields.has(x)
       );
     }
@@ -41,29 +45,29 @@ export class HeaderManager {
     actionsBulk: ActionDefinitionBulk<T>[]
   ) {
     // Initialize all keys as false
-    this.headerKeysAllVisible.forEach(
-      k => (this.headerKeysDisplayedMap[k] = false)
+    this._headerKeysAllVisible.forEach(
+      k => (this._headerKeysDisplayedMap[k] = false)
     );
     // Set selected as true
-    selected.forEach(c => (this.headerKeysDisplayedMap[c] = true));
-    this.headerKeysDisplayed = Object.keys(this.headerKeysDisplayedMap).filter(
-      k => this.headerKeysDisplayedMap[k]
-    );
+    selected.forEach(c => (this._headerKeysDisplayedMap[c] = true));
+    this._headerKeysDisplayed = Object.keys(
+      this._headerKeysDisplayedMap
+    ).filter(k => this._headerKeysDisplayedMap[k]);
     // Add bulk select column at start
     if (actionsBulk) {
-      this.headerKeysDisplayed.unshift('__bulk');
+      this._headerKeysDisplayed.unshift('__bulk');
     }
     // Add actions column at end
     if (actions) {
-      this.headerKeysDisplayed.push('__star');
+      this._headerKeysDisplayed.push('__star');
     }
-    this.updateHeaderKeySet(this.headerKeysDisplayed);
+    this.updateHeaderKeySet(this._headerKeysDisplayed);
   }
 
   private updateHeaderKeySet(newDisplayed: string[]) {
-    this.headerKeysDisplayedSet.clear();
+    this._headerKeysDisplayedSet.clear();
     newDisplayed.forEach(k => {
-      this.headerKeysDisplayedSet.add(k);
+      this._headerKeysDisplayedSet.add(k);
     });
   }
 }

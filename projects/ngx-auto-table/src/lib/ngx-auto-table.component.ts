@@ -209,7 +209,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     const firstRow = originalData[0];
     const firstRowKeys = Object.keys(firstRow);
     const firstRowKeysSet = new Set(firstRowKeys);
-    const keysHeader = this.headerManager.GetDisplayHeaderKeysSet();
+    const keysHeader = this.headerManager.HeadersDisplayedSet;
     keysHeader.delete('__bulk');
     keysHeader.delete('__star');
     const allFieldsExist = Array.from(keysHeader).reduce((acc, cur) => {
@@ -232,7 +232,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
         const lower = JSON.stringify(data).toLowerCase();
         return lower.includes(filterText);
       }
-      const keysHeader = this.headerManager.GetDisplayHeaderKeysSet();
+      const keysHeader = this.headerManager.HeadersDisplayedSet;
       for (const key of Array.from(keysHeader)) {
         const dataVal = data[key];
         const str = JSON.stringify(dataVal) || '';
@@ -280,7 +280,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     );
     this.refreshDefaultColumns();
     // Set currently enabled items
-    this.filterControl.setValue(this.headerManager.GetDisplayHeaderKeys());
+    this.filterControl.setValue(this.headerManager.HeadersDisplayed);
     if (this.config.cacheId) {
       this.columnsCacheSetFromCache();
     }

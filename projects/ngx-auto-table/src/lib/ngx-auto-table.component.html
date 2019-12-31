@@ -46,7 +46,7 @@
               multiple
             >
               <mat-option
-                *ngFor="let key of this.headerManager.headerKeysAllVisible"
+                *ngFor="let key of this.headerManager.HeadersAllVisible"
                 [value]="key"
               >
                 {{ getKeyHeader(key) }}
@@ -260,12 +260,12 @@
 
     <tr
       mat-header-row
-      *matHeaderRowDef="this.headerManager.headerKeysDisplayed"
+      *matHeaderRowDef="this.headerManager.HeadersDisplayed"
       [hidden]="config.hideHeader"
     ></tr>
     <tr
       mat-row
-      *matRowDef="let row; columns: this.headerManager.headerKeysDisplayed"
+      *matRowDef="let row; columns: this.headerManager.HeadersDisplayed"
       (click)="onClickRow($event, row)"
       (dblclick)="onDoubleClickRow($event, row)"
       [class.selected-row-multiple]="
