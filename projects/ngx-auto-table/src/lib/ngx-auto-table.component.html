@@ -8,7 +8,7 @@
     *ngIf="
       (!config.hideFilter || !config.hideChooseColumns) &&
       !config.hideHeader &&
-      !hasNoItems
+      !HasNoItems
     "
   >
     <div class="relative">
@@ -16,7 +16,7 @@
         <mat-toolbar-row class="flex-h align-center space-between">
           <mat-form-field
             class="filter-search"
-            *ngIf="!hasNoItems && !config.hideFilter"
+            *ngIf="!HasNoItems && !config.hideFilter"
           >
             <mat-icon matPrefix>search</mat-icon>
             <input
@@ -36,7 +36,7 @@
           </mat-form-field>
           <mat-form-field
             class="filter-columns overflow-hidden"
-            *ngIf="!hasNoItems && !config.hideChooseColumns"
+            *ngIf="!HasNoItems && !config.hideChooseColumns"
           >
             <mat-icon matPrefix>view_column</mat-icon>
             <mat-select
@@ -72,7 +72,7 @@
             </button>
             <mat-form-field
               class="filter-search"
-              *ngIf="!hasNoItems && !config.hideFilter"
+              *ngIf="!HasNoItems && !config.hideFilter"
             >
               <mat-icon matPrefix>search</mat-icon>
               <input
@@ -155,7 +155,7 @@
     <ng-container matColumnDef="__bulk" stickyEnd>
       <th mat-header-cell *matHeaderCellDef>
         <mat-checkbox
-          [disabled]="isPerformingBulkAction || hasNoItems"
+          [disabled]="isPerformingBulkAction || HasNoItems"
           (change)="masterToggle()"
           [checked]="selectionMultiple.hasValue() && isAllSelected()"
           [indeterminate]="selectionMultiple.hasValue() && !isAllSelected()"
@@ -292,7 +292,7 @@
     <mat-toolbar-row *ngIf="!IsLoaded">
       <h1 class="no-items">Loading...</h1>
     </mat-toolbar-row>
-    <mat-toolbar-row *ngIf="hasNoItems">
+    <mat-toolbar-row *ngIf="HasNoItems">
       <h1 class="no-items">No items found</h1>
     </mat-toolbar-row>
     <mat-toolbar-row class="paginator-row">

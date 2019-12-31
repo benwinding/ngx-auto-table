@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, OnDestroy, ViewChild } from '@angular/core';
-import { MatTableDataSource, MatPaginator, MatSort } from '@angular/material';
+import { MatTableDataSource, MatPaginator, MatSort, MatCheckboxChange } from '@angular/material';
 import { Subject } from 'rxjs';
 import { FormControl } from '@angular/forms';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -67,7 +67,8 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   exportData: any[];
   exportFilename: string;
 
-  hasNoItems: boolean;
+  HasNoItems: boolean;
+
   headerManager = new HeaderManager();
 
   defaultPageSize = 25;
@@ -150,8 +151,8 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
         this.dataSource = new MatTableDataSource(originalData);
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
-        this.hasNoItems = !originalData.length;
-        if (this.hasNoItems) {
+        this.HasNoItems = !originalData.length;
+        if (this.HasNoItems) {
           return;
         }
         if (this.config.onDataUpdated) {
@@ -376,7 +377,10 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     if (numSelected >= numInData) {
       return true;
     }
-    if (numSelected >= this.config.bulkSelectMaxCount) {
+    if (
+      this.config.bulkSelectMaxCount &&
+      numSelected >= this.config.bulkSelectMaxCount
+    ) {
       return true;
     }
     return false;
@@ -395,10 +399,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   }
 
   private selectAll() {
-    this.dataSource.sortData(
-      this.dataSource.filteredData,
-      this.sort
-    );
+    this.dataSource.sortData(this.dataSource.filteredData, this.sort);
     let cutArray = this.dataSource.filteredData;
     if (this.config.bulkSelectMaxCount) {
       cutArray = this.dataSource.filteredData.slice(
@@ -406,18 +407,16 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
         this.config.bulkSelectMaxCount
       );
     }
-    cutArray.forEach(row => {
-      this.selectionMultiple.select(row);
-    });
+    this.selectionMultiple.select(...cutArray);
   }
 
   isMaxReached() {
     if (!this.config.bulkSelectMaxCount) {
       return false;
     }
-    return (
-      this.selectionMultiple.selected.length >= this.config.bulkSelectMaxCount
-    );
+    const maxReached =
+      this.selectionMultiple.selected.length >= this.config.bulkSelectMaxCount;
+    return maxReached;
   }
 
   private columnsCacheSetFromCache() {
@@ -457,21 +456,24 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     this.selectionMultiple.clear();
   }
 
-  onClickBulkItem($event, item) {
-    if ($event) {
-      const isSelected = this.selectionMultiple.isSelected(item);
-      if (!this.isMaxReached()) {
-        this.selectionMultiple.toggle(item);
-      } else {
-        if (isSelected) {
-          this.selectionMultiple.deselect(item);
-        } else {
-          this.logger.warn('');
-        }
-      }
-      if (this.config.onSelectedBulk) {
-        this.config.onSelectedBulk(this.selectionMultiple.selected);
-      }
+  onClickBulkItem($event: MatCheckboxChange, item) {
+    if (!$event) {
+      return;
+    }
+    const isSelected = this.selectionMultiple.isSelected(item);
+    const maxReached = this.isMaxReached();
+    if (maxReached) {
+      $event.source.writeValue(false);
+    }
+    console.log('onClickBulkItem()', { isSelected, maxReached, $event });
+    if (!maxReached) {
+      this.selectionMultiple.toggle(item);
+    }
+    if (maxReached && isSelected) {
+      this.selectionMultiple.deselect(item);
+    }
+    if (this.config.onSelectedBulk) {
+      this.config.onSelectedBulk(this.selectionMultiple.selected);
     }
   }
 
