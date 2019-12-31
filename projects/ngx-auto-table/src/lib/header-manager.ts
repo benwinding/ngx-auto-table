@@ -3,15 +3,17 @@ import {
   ActionDefinition,
   ActionDefinitionBulk
 } from './AutoTableConfig';
+import { SimpleLogger } from './SimpleLogger';
 
 export class HeaderManager {
-  headerKeysAll: string[] = [];
-  headerKeysAllVisible: string[] = [];
-  headerKeysDisplayed: string[] = [];
-  headerKeysDisplayedMap: {} = {};
+  private headerKeysAll: string[] = [];
+  private headerKeysAllVisible: string[] = [];
+  private headerKeysDisplayed: string[] = [];
+  private headerKeysDisplayedSet: Set<string> = new Set();
+  private headerKeysDisplayedMap: {} = {};
 
   GetDisplayHeaderKeysSet(): Set<string> {
-    return new Set(this.headerKeysDisplayed);
+    return this.headerKeysDisplayedSet;
   }
 
   GetDisplayHeaderKeys(): Array<string> {
@@ -55,5 +57,13 @@ export class HeaderManager {
     if (actions) {
       this.headerKeysDisplayed.push('__star');
     }
+    this.updateHeaderKeySet(this.headerKeysDisplayed);
+  }
+
+  private updateHeaderKeySet(newDisplayed: string[]) {
+    this.headerKeysDisplayedSet.clear();
+    newDisplayed.forEach(k => {
+      this.headerKeysDisplayedSet.add(k);
+    });
   }
 }

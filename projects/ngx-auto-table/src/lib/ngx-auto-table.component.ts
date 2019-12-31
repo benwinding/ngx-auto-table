@@ -10,7 +10,8 @@ import {
   distinctUntilChanged,
   debounceTime,
   map,
-  tap
+  tap,
+  auditTime
 } from 'rxjs/operators';
 import {
   AutoTableConfig,
@@ -114,7 +115,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
         this.refreshDefaultColumns();
       });
     this.$setDisplayedColumnsTrigger
-      .pipe(takeUntil(this.$onDestroyed))
+      .pipe(takeUntil(this.$onDestroyed), auditTime(100))
       .subscribe(newHeaders => {
         this.setDisplayedColumns(newHeaders);
       });
@@ -198,7 +199,6 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
 
   applyFilter(filterValue: string) {
     this.dataSource.filter = filterValue.trim().toLowerCase();
-    this.selectionMultiple.clear();
     this.selectionSingle.clear();
   }
 
@@ -207,27 +207,32 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
       return;
     }
     const firstRow = originalData[0];
-    const keysData = new Set(Object.keys(firstRow));
+    const firstRowKeys = Object.keys(firstRow);
+    const firstRowKeysSet = new Set(firstRowKeys);
     const keysHeader = this.headerManager.GetDisplayHeaderKeysSet();
     keysHeader.delete('__bulk');
     keysHeader.delete('__star');
     const allFieldsExist = Array.from(keysHeader).reduce((acc, cur) => {
-      return keysData.has(cur) && acc;
+      return firstRowKeysSet.has(cur) && acc;
     }, true);
 
-    this.logger.log('initFilter()', {
-      rowFields: keysData,
+    this.logger.log('initFilterPredicate()', {
+      firstRowKeysSet,
       allFieldsExist,
-      headerKeysDisplayed: keysHeader
+      keysHeader
     });
     this.dataSource.filterPredicate = (data: T, filterText: string) => {
       if (!filterText) {
+        return true;
+      }
+      if (this.selectionMultiple.isSelected(data)) {
         return true;
       }
       if (!allFieldsExist) {
         const lower = JSON.stringify(data).toLowerCase();
         return lower.includes(filterText);
       }
+      const keysHeader = this.headerManager.GetDisplayHeaderKeysSet();
       for (const key of Array.from(keysHeader)) {
         const dataVal = data[key];
         const str = JSON.stringify(dataVal) || '';
@@ -275,7 +280,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     );
     this.refreshDefaultColumns();
     // Set currently enabled items
-    this.filterControl.setValue(this.headerManager.headerKeysDisplayed);
+    this.filterControl.setValue(this.headerManager.GetDisplayHeaderKeys());
     if (this.config.cacheId) {
       this.columnsCacheSetFromCache();
     }
@@ -290,7 +295,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   initFromDefinitions() {
     // Set all column defintions, which were explicitly set in config
     const inputDefintionFields = Object.keys(this.columnDefinitions);
-    this.logger.log('initFromDefinitions', {inputDefintionFields});
+    this.logger.log('initFromDefinitions', { inputDefintionFields });
     inputDefintionFields.forEach((field: string) => {
       const inputDefintion = this.columnDefinitions[field];
       this.columnDefinitionsAll[field] = {
@@ -328,7 +333,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
       };
     });
     this.logger.log('initColumnDefinitions', {
-      firstDataItem,
+      firstDataItem
     });
   }
 
@@ -429,6 +434,10 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     }
     this.$setDisplayedColumnsTrigger.next(selectedValues);
     this.initFilterPredicate(this.dataSource.data);
+  }
+
+  onClickCancelBulk() {
+    this.selectionMultiple.clear();
   }
 
   onClickBulkItem($event, item) {

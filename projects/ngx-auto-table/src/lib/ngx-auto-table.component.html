@@ -5,7 +5,11 @@
   <div
     class="table-header auto-elevation overflow-hidden"
     [class.addRightPixel]="config.hideHeader"
-    *ngIf="(!config.hideFilter || !config.hideChooseColumns) && !hasNoItems"
+    *ngIf="
+      (!config.hideFilter || !config.hideChooseColumns) &&
+      !config.hideHeader &&
+      !hasNoItems
+    "
   >
     <div class="relative">
       <mat-toolbar class="mat-elevation-z8">
@@ -57,15 +61,47 @@
         [class.hidden]="!selectionMultiple.hasValue()"
       >
         <mat-toolbar-row class="flex-h align-center space-between">
-          <span class="item-count">
-            ({{ selectionMultiple.selected.length }} Selected)
-          </span>
-          <span *ngIf="!isPerformingBulkAction" class="item-count">
-            {{ isMaxReached() ? ' Max Reached!' : '' }}
-          </span>
-          <span *ngIf="isPerformingBulkAction" class="item-count">
-            Performing action...
-          </span>
+          <div class="flex-h align-center">
+            <button
+              mat-raised-button
+              [disabled]="isPerformingBulkAction"
+              (click)="onClickCancelBulk()"
+            >
+              <mat-icon>clear</mat-icon>
+              <span>Cancel</span>
+            </button>
+            <mat-form-field
+              class="filter-search"
+              *ngIf="!hasNoItems && !config.hideFilter"
+            >
+              <mat-icon matPrefix>search</mat-icon>
+              <input
+                matInput
+                (keyup)="applyFilter($event.target.value)"
+                [placeholder]="this.config.filterText || 'Search Rows...'"
+                [name]="autoCompleteObscureName"
+                autocomplete="dontcompleteme"
+                #filterFieldBulk
+              />
+              <mat-icon
+                class="has-pointer"
+                matSuffix
+                (click)="
+                  filterFieldBulk.value = ''; applyFilter(filterFieldBulk.value)
+                "
+                >clear</mat-icon
+              >
+            </mat-form-field>
+            <span class="item-count">
+              ({{ selectionMultiple.selected.length }} Selected)
+            </span>
+            <span *ngIf="!isPerformingBulkAction" class="item-count">
+              {{ isMaxReached() ? ' Max Reached!' : '' }}
+            </span>
+            <span *ngIf="isPerformingBulkAction" class="item-count">
+              Performing action...
+            </span>
+          </div>
           <span class="buttons flex-h align-center">
             <button
               mat-raised-button

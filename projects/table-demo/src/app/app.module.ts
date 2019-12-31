@@ -7,7 +7,7 @@ import { AutoTableModule } from "../../../ngx-auto-table/src/public_api";
 import { CommonModule } from "@angular/common";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { HttpClientModule } from "@angular/common/http";
-import { MatReduceCoreModule } from 'mat-reduce/src/core'
+import { MatReduceCoreModule } from 'mat-reduce-core'
 
 @NgModule({
   declarations: [AppComponent],
