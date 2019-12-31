@@ -160,6 +160,8 @@ export class AppComponent implements OnInit {
       .subscribe(newConfigFlags => {
         this.makeCofig(this.formGroup.value);
       });
+    await this.fakeDelay(1000);
+    this.data$.next([]);
     await this.fakeDelay(3000);
     this.data$.next([
       MakeRandomRow(),

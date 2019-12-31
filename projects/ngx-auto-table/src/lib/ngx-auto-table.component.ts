@@ -124,7 +124,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
       });
 
     if (!this.config) {
-      this.logger.log('no [config] set on auto-table component');
+      this.logger.log('ngOnInit(), no [config] set on auto-table component');
       return;
     }
     this.reInitializeVariables();
@@ -147,7 +147,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
         setTimeout(() => {
           this.IsLoaded = true;
         }, 200);
-        this.logger.log('ngx-auto-table, subscribed: ', { originalData });
+        this.logger.log('config.data$.subscribe: ', { originalData });
         this.dataSource = new MatTableDataSource(originalData);
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
@@ -174,12 +174,12 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
         .pipe(throttleTime(300))
         .pipe(takeUntil(this.$onDestroyed))
         .subscribe(item => {
-          this.logger.log('$triggerSelectItem: selecting item', { item });
+          this.logger.log('config.$triggerSelectItem.subscribe: selecting item', { item });
           const str = JSON.stringify(item);
           const foundItem = this.dataSource.data.find(
             row => JSON.stringify(row) === str
           );
-          this.logger.log('$triggerSelectItem: found item:', { foundItem });
+          this.logger.log('config.$triggerSelectItem.subscribe: found item:', { foundItem });
           if (foundItem) {
             this.selectionSingle.select(foundItem);
           }
@@ -190,7 +190,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
       this.config.$triggerClearSelected
         .pipe(takeUntil(this.$onDestroyed))
         .subscribe(() => {
-          this.logger.log('$triggerClearSelected: clearing selection');
+          this.logger.log('config.$triggerClearSelected.subscribe: clearing selection');
           this.selectionMultiple.clear();
           this.selectionSingle.clear();
         });
@@ -313,7 +313,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   initFromDefinitions() {
     // Set all column defintions, which were explicitly set in config
     const inputDefintionFields = Object.keys(this.columnDefinitions);
-    this.logger.log('initFromDefinitions', { inputDefintionFields });
+    this.logger.log('initFromDefinitions()', { inputDefintionFields });
     inputDefintionFields.forEach((field: string) => {
       const inputDefintion = this.columnDefinitions[field];
       this.columnDefinitionsAll[field] = {
@@ -350,7 +350,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
         hide: true
       };
     });
-    this.logger.log('initColumnDefinitions', {
+    this.logger.log('initColumnDefinitions()', {
       firstDataItem
     });
   }
@@ -364,7 +364,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     );
     this.initFromDefinitions();
     this.columnDefinitionMapToArray();
-    this.logger.log('setDisplayedColumns', {
+    this.logger.log('setDisplayedColumns()', {
       selected,
       columnDefinitionsAllArray: this.columnDefinitionsAllArray
     });
@@ -427,7 +427,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     }
     try {
       const vals = JSON.parse(selectedValsString);
-      this.logger.log('getting cached columns', { vals, cacheKey });
+      this.logger.log('columnsCacheSetFromCache(): getting cached columns', { vals, cacheKey });
       this.chooseColumnsControl.setValue(vals);
       this.$setDisplayedColumnsTrigger.next(vals);
     } catch (error) {
@@ -439,11 +439,11 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     const cacheKey = this.config.cacheId + '-columns';
     const selectedValues = this.chooseColumnsControl.value;
     localStorage.setItem(cacheKey, JSON.stringify(selectedValues));
-    this.logger.log('setting cached columns', { cacheKey, selectedValues });
+    this.logger.log('columnsCacheSetToCache():, setting cached columns', { cacheKey, selectedValues });
   }
 
   onColumnFilterChange($event) {
-    this.logger.log('onColumnFilterChange: ', { $event });
+    this.logger.log('onColumnFilterChange(): ', { $event });
     const selectedValues = this.chooseColumnsControl.value;
     if (this.config.cacheId) {
       this.columnsCacheSetToCache();
