@@ -83,6 +83,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
 
   $onDestroyed = new Subject();
   isMobile: boolean;
+  IsLoaded: boolean;
   $setDisplayedColumnsTrigger = new Subject<string[]>();
 
   private logger: SimpleLogger;
@@ -127,22 +128,31 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     }
     this.reInitializeVariables();
     this.config.data$
-      .pipe(filter(e => !!e))
+      .pipe(
+        filter(originalData => {
+          const isArray = Array.isArray(originalData);
+          if (!isArray) {
+            this.IsLoaded = false;
+          }
+          return isArray;
+        })
+      )
       .pipe(takeUntil(this.$onDestroyed))
       .subscribe(originalData => {
         const hasBeenInitedBefore =
           this.dataSource &&
           this.dataSource.data &&
           this.dataSource.data.length;
+        setTimeout(() => {
+          this.IsLoaded = true;
+        }, 200);
         this.logger.log('ngx-auto-table, subscribed: ', { originalData });
         this.dataSource = new MatTableDataSource(originalData);
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
-        if (originalData && !originalData.length) {
-          this.hasNoItems = true;
+        this.hasNoItems = !originalData.length;
+        if (this.hasNoItems) {
           return;
-        } else {
-          this.hasNoItems = false;
         }
         if (this.config.onDataUpdated) {
           this.config.onDataUpdated(originalData);
@@ -387,7 +397,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   private selectAll() {
     this.dataSource.sortData(
       this.dataSource.filteredData,
-      this.dataSource.sort
+      this.sort
     );
     let cutArray = this.dataSource.filteredData;
     if (this.config.bulkSelectMaxCount) {

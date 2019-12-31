@@ -126,6 +126,7 @@
     mat-table
     #table
     matSort
+    *ngIf="IsLoaded"
     [matSortActive]="config.initialSort"
     [matSortDirection]="config.initialSortDir"
     [dataSource]="this.dataSource"
@@ -283,12 +284,12 @@
     <mat-toolbar-row> </mat-toolbar-row>
   </mat-toolbar>
   <mat-toolbar class="mat-elevation-z8 overflow-hidden">
-    <mat-toolbar-row *ngIf="!dataSource">
+    <mat-toolbar-row *ngIf="!IsLoaded">
       <ngx-auto-app-toolbar-loader
         class="full-width"
       ></ngx-auto-app-toolbar-loader>
     </mat-toolbar-row>
-    <mat-toolbar-row *ngIf="!dataSource">
+    <mat-toolbar-row *ngIf="!IsLoaded">
       <h1 class="no-items">Loading...</h1>
     </mat-toolbar-row>
     <mat-toolbar-row *ngIf="hasNoItems">

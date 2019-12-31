@@ -105,7 +105,6 @@ function MakeRandomRow(): TestRow {
     </button>
 
     <ngx-auto-table
-      *ngIf="config"
       [config]="config"
       [columnDefinitions]="{
         name: {},
@@ -121,7 +120,7 @@ function MakeRandomRow(): TestRow {
 })
 export class AppComponent implements OnInit {
   config: AutoTableConfig<TestRow>;
-  data$ = new BehaviorSubject<TestRow[]>([]);
+  data$ = new BehaviorSubject<TestRow[]>(null);
 
   formGroup = new FormGroup({
     bulkSelectMaxCount: new FormControl(5),
@@ -161,7 +160,7 @@ export class AppComponent implements OnInit {
       .subscribe(newConfigFlags => {
         this.makeCofig(this.formGroup.value);
       });
-    await this.fakeDelay(1000);
+    await this.fakeDelay(3000);
     this.data$.next([
       MakeRandomRow(),
       MakeRandomRow(),
