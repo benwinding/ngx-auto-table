@@ -79,6 +79,7 @@ export class ColumnsManager {
     hideTheseFields: string[],
     allColumnDefinitions: ColumnDefinitionInternal[]
   ): KeyValue<string, string>[] {
+    console.log('getHeaderKeys', {hideTheseFields})
     const hideThese = new Set(hideTheseFields || []);
     const allChoices = [];
     // Add to all choices array

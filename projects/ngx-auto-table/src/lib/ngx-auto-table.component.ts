@@ -228,8 +228,9 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
       firstDataItem
     );
     const initialKeys = Object.keys(columnDefinitions).filter(
-      k => !columnDefinitions[k].hide
+      k => !columnDefinitions[k].hide && !(config.hideFields || []).includes(k)
     );
+    console.log('initialKeys', {initialKeys})
     this.columnsManager.SetDisplayed(
       initialKeys,
       !!this.config.actions,

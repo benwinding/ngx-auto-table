@@ -136,7 +136,7 @@ export class AppComponent implements OnInit {
     initialSort: new FormControl(),
     initialSortDir: new FormControl(),
     pageSize: new FormControl(10),
-    hideFields: new FormControl(),
+    hideFields: new FormControl(['name']),
     hideFilter: new FormControl(),
     hideHeader: new FormControl(),
     hidePaginator: new FormControl(),
@@ -180,7 +180,7 @@ export class AppComponent implements OnInit {
   }
   async makeCofig(newConfigFlags) {
     this.config = null;
-    // await this.fakeDelay(100);
+    await this.fakeDelay(100);
     this.config = {
       ...newConfigFlags,
       data$: this.data$,
