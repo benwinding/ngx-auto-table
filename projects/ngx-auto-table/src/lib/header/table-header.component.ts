@@ -129,7 +129,11 @@ export class NgxAutoTableHeaderComponent implements OnInit {
     }
     // const nativeRef = btnBulkAction._elementRef.nativeElement;
     // nativeRef.style.filter = 'brightness(0.8) hue-rotate(15deg);';
-    await action.onClick(this.selectionMultiple.selected);
+    try {
+      await action.onClick(this.selectionMultiple.selected);
+    } catch (error) {
+      console.error('ngx-auto-table: Error Executing Bulk Action', error);
+    }
     this.selectionMultiple.clear();
     // nativeRef.style.filter = '';
     if (btnBulkAction) {

@@ -89,17 +89,21 @@ export class NgxAutoTableActionsMenuComponent implements OnInit {
   @Input()
   row: any;
   @Input()
-  actions: ActionDefinition<any>[] = []
+  actions: ActionDefinition<any>[] = [];
   @Input()
-  actionsVisibleCount: number
+  actionsVisibleCount: number;
   @Input()
-  isPerformingBulkAction: boolean
+  isPerformingBulkAction: boolean;
 
   constructor() {}
 
   ngOnInit() {}
-  
+
   async onClickedAction(action: ActionDefinition<any>, row: any) {
-    return action.onClick(row);
+    try {
+      await action.onClick(row);
+    } catch (error) {
+      console.error('ngx-auto-table: Error Executing Bulk Action', error);
+    }
   }
 }

@@ -217,7 +217,7 @@ export class AppComponent implements OnInit {
           label: 'Delete',
           icon: 'delete',
           onClick: async (row: TestRow) => {
-            await this.removeItem(row);
+            await this.removeItems([row]);
           }
         },
         {
@@ -239,22 +239,11 @@ export class AppComponent implements OnInit {
     this.data$.next(currentItems);
   }
 
-  async removeItem(row: TestRow) {
-    console.log('app: removing item', { row });
-    const currentItems = await this.data$.pipe(take(1)).toPromise();
-    const itemsAfterDelete = currentItems.filter(
-      r => JSON.stringify(r) != JSON.stringify(row)
-    );
-    this.data$.next(itemsAfterDelete);
-  }
-
   async removeItems(rows: TestRow[]) {
     console.log('app: removing items', { rows });
-    const currentItems = await this.data$.pipe(take(1)).toPromise();
-    const removeSet = new Set(rows.map(r => JSON.stringify(r)));
-    const itemsAfterDelete = currentItems.filter(
-      r => !removeSet.has(JSON.stringify(r))
-    );
-    this.data$.next(itemsAfterDelete);
+    const deleteIds = new Set(rows.map(r => r.id_taken_from_db));
+    const dataBefore = await this.data$.pipe(take(1)).toPromise();
+    const dataAfter = dataBefore.filter(d => !deleteIds.has(d.id_taken_from_db));
+    this.data$.next(dataAfter);
   }
 }

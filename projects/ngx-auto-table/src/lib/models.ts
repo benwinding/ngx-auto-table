@@ -3,7 +3,7 @@ import { Observable } from "rxjs";
 export interface ActionDefinition<T> {
   label: string;
   icon?: string;
-  onClick?: (row: T) => void;
+  onClick?: (row: T) => void | Promise<any>;
   onRouterLink?: (row: T) => string;
   routerLinkQuery?: (row: T) => {};
 }
@@ -11,7 +11,7 @@ export interface ActionDefinition<T> {
 export interface ActionDefinitionBulk<T> {
   label: string;
   icon?: string;
-  onClick?: (row: T[]) => void;
+  onClick?: (row: T[]) => void | Promise<any>;
 }
 
 export interface ColumnDefinition {
