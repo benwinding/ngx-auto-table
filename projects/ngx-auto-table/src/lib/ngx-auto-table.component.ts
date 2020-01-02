@@ -3,25 +3,15 @@ import { MatTableDataSource } from '@angular/material';
 import { Subject } from 'rxjs';
 import { SelectionModel } from '@angular/cdk/collections';
 import { filter, takeUntil, debounceTime } from 'rxjs/operators';
-import {
-  AutoTableConfig,
-  ColumnDefinition,
-  ColumnDefinitionMap
-} from './AutoTableConfig';
+import { AutoTableConfig, ColumnDefinitionMap } from './models';
 
-import { HeaderManager } from './header-manager';
+import { ColumnsManager } from './columns-manager';
 import { SimpleLogger } from '../utils/SimpleLogger';
-import { formatPretty } from '../utils/utils';
 
 function blankConfig<T>(): AutoTableConfig<T> {
   return {
     data$: new Subject<T[]>()
   };
-}
-
-interface ColumnDefinitionInternal extends ColumnDefinition {
-  field: string;
-  header_pretty: string;
 }
 
 @Component({
@@ -36,9 +26,11 @@ interface ColumnDefinitionInternal extends ColumnDefinition {
         [IsPerformingBulkAction]="IsPerformingBulkAction"
         [HasNoItems]="HasNoItems"
         [IsMaxReached]="IsMaxReached"
-        [AllColumnStrings]="headerManager.HeadersDisplayedChoices"
+        [headerKeyValues]="columnsManager.HeadersChoicesKeyValues"
         [selectionMultiple]="selectionMultiple"
-        (searchChanged)="applyFilterToDatasource($event)"
+        [selectedHeaderKeys]="columnsManager.HeadersVisible"
+        (searchChanged)="onSearchChanged($event)"
+        (columnsChanged)="onColumnsChanged($event)"
         (bulkActionStatus)="IsPerformingBulkAction = $event"
       ></ngx-auto-table-header>
       <ngx-auto-table-content
@@ -46,13 +38,13 @@ interface ColumnDefinitionInternal extends ColumnDefinition {
         [IsAllSelected]="IsAllSelected"
         [IsMaxReached]="IsMaxReached"
         [HasNoItems]="HasNoItems"
-        [HeadersVisible]="headerManager.HeadersVisible"
+        [HeadersVisible]="columnsManager.HeadersVisible"
         [config]="config"
         [debug]="config?.debug"
         [dataSource]="dataSource"
         [selectionMultiple]="selectionMultiple"
         [selectionSingle]="selectionSingle"
-        [columnDefinitions]="columnDefinitions"
+        [columnDefinitionsAll]="columnsManager.AllColumnDefinitions"
       ></ngx-auto-table-content>
       <ngx-auto-table-footer
         [HasNoItems]="HasNoItems"
@@ -81,12 +73,9 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   @Input()
   columnDefinitions: ColumnDefinitionMap = {};
 
-  columnDefinitionsAll: ColumnDefinitionMap = {};
-  columnDefinitionsAllArray: ColumnDefinitionInternal[] = [];
-
   dataSource: MatTableDataSource<any>;
 
-  headerManager = new HeaderManager();
+  columnsManager = new ColumnsManager();
 
   IsPerformingBulkAction = false;
 
@@ -99,17 +88,6 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   $setDisplayedColumnsTrigger = new Subject<string[]>();
 
   private logger: SimpleLogger;
-
-  constructor() {}
-
-  reInitializeVariables() {
-    this.columnDefinitionsAll = {};
-    this.columnDefinitionsAllArray = [];
-    this.headerManager = new HeaderManager();
-    this.selectionMultiple = new SelectionModel<any>(true, []);
-    this.selectionSingle = new SelectionModel<any>(false, []);
-    this.dataSource = undefined;
-  }
 
   get HasNoItems(): boolean {
     return (
@@ -130,7 +108,6 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     return maxReached;
   }
 
-  /** Whether the number of selected elements matches the total number of rows. */
   get IsAllSelected() {
     const numSelected = this.selectionMultiple.selected.length;
     if (!this.dataSource || !this.dataSource.filteredData) {
@@ -160,7 +137,12 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     this.$setDisplayedColumnsTrigger
       .pipe(takeUntil(this.$onDestroyed), debounceTime(100))
       .subscribe(newHeaders => {
-        this.setDisplayedColumns(newHeaders);
+        console.log('setDisplayedColumnsTrigger', { newHeaders });
+        this.columnsManager.SetDisplayed<T>(
+          newHeaders,
+          !!this.config.actions,
+          !!this.config.actionsBulk
+        );
       });
 
     this.reInitializeVariables();
@@ -171,30 +153,32 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
       )
       .pipe(takeUntil(this.$onDestroyed))
       .subscribe(originalData => {
-        const alreadyInited =
-          this.dataSource &&
-          this.dataSource.data &&
-          this.dataSource.data.length;
         this.logger.log('config.data$.subscribe: ', { originalData });
         this.dataSource = new MatTableDataSource(originalData);
         if (this.config.onDataUpdated) {
           this.config.onDataUpdated(originalData);
         }
-        if (!alreadyInited) {
-          const firstDataItem = originalData[0];
-          this.initDisplayedColumns(firstDataItem);
-          if (this.config.selectFirstOnInit) {
-            this.selectionSingle.select(firstDataItem);
-          }
+        const firstDataItem = originalData[0];
+        if (this.config.selectFirstOnInit) {
+          this.selectionSingle.select(firstDataItem);
         }
-        this.initFilterPredicate(originalData);
+        this.initTable(this.columnDefinitions, this.config, firstDataItem);
+        this.initFilterPredicate(
+          originalData,
+          this.columnsManager.HeadersVisibleSet
+        );
       });
-
     this.initializeConfigTriggers();
   }
 
   ngOnDestroy() {
     this.$onDestroyed.next();
+  }
+
+  reInitializeVariables() {
+    this.selectionMultiple = new SelectionModel<any>(true, []);
+    this.selectionSingle = new SelectionModel<any>(false, []);
+    this.dataSource = undefined;
   }
 
   initializeConfigTriggers() {
@@ -233,36 +217,59 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     }
   }
 
+  initTable(
+    columnDefinitions: ColumnDefinitionMap,
+    config: AutoTableConfig<T>,
+    firstDataItem: T
+  ) {
+    this.columnsManager.InitializeColumns(
+      config,
+      columnDefinitions,
+      firstDataItem
+    );
+    const initialKeys = Object.keys(columnDefinitions).filter(
+      k => !columnDefinitions[k].hide
+    );
+    this.columnsManager.SetDisplayed(
+      initialKeys,
+      !!this.config.actions,
+      !!this.config.actionsBulk
+    );
+    this.refreshDefaultColumns();
+  }
+
   refreshDefaultColumns() {
     const setMobile = this.isMobile && this.config.mobileFields;
     let columns: string[] = [];
     if (setMobile) {
       columns = this.config.mobileFields;
     } else {
-      columns = this.getDisplayedDefault();
+      columns = [...this.columnsManager.HeadersVisible];
     }
     this.logger.log('refreshDefaultColumns()', {
       setMobile,
-      columns,
-      columnDefinitionsAllArray: this.columnDefinitionsAllArray
+      columns
     });
     this.$setDisplayedColumnsTrigger.next(columns);
   }
 
-  public applyFilterToDatasource(inputValue: string) {
+  public onSearchChanged(inputValue: string) {
     const parsedString = inputValue || '';
     this.dataSource.filter = parsedString.trim().toLowerCase();
     this.selectionSingle.clear();
   }
 
-  initFilterPredicate(originalData: T[]) {
+  public onColumnsChanged(columns: string[]) {
+    this.$setDisplayedColumnsTrigger.next(columns);
+  }
+
+  initFilterPredicate(originalData: T[], keysHeader: Set<string>) {
     if (!originalData.length) {
       return;
     }
     const firstRow = originalData[0];
     const firstRowKeys = Object.keys(firstRow);
     const firstRowKeysSet = new Set(firstRowKeys);
-    const keysHeader = this.headerManager.HeadersDisplayedSet;
     keysHeader.delete('__bulk');
     keysHeader.delete('__star');
     const allFieldsExist = Array.from(keysHeader).reduce((acc, cur) => {
@@ -285,7 +292,6 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
         const lower = JSON.stringify(data).toLowerCase();
         return lower.includes(filterText);
       }
-      const keysHeader = this.headerManager.HeadersDisplayedSet;
       for (const key of Array.from(keysHeader)) {
         const dataVal = data[key];
         const str = JSON.stringify(dataVal) || '';
@@ -295,82 +301,5 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
         }
       }
     };
-  }
-
-  initDisplayedColumns(firstDataItem: T) {
-    this.initColumnDefinitions(firstDataItem);
-    this.headerManager.InitHeaderKeys(
-      this.config.hideFields,
-      this.columnDefinitionsAll
-    );
-    this.refreshDefaultColumns();
-    // Set currently enabled items
-  }
-
-  getDisplayedDefault(): string[] {
-    return this.columnDefinitionsAllArray
-      .filter(def => !def.hide)
-      .map(d => d.field);
-  }
-
-  initFromDefinitions() {
-    // Set all column defintions, which were explicitly set in config
-    const inputDefintionFields = Object.keys(this.columnDefinitions);
-    this.logger.log('initFromDefinitions()', { inputDefintionFields });
-    inputDefintionFields.forEach((field: string) => {
-      const inputDefintion = this.columnDefinitions[field];
-      this.columnDefinitionsAll[field] = {
-        header: inputDefintion.header,
-        template: inputDefintion.template,
-        hide: inputDefintion.hide,
-        forceWrap: inputDefintion.forceWrap
-      };
-    });
-  }
-
-  columnDefinitionMapToArray() {
-    // Make array that template headers use
-    this.columnDefinitionsAllArray = Object.keys(this.columnDefinitionsAll).map(
-      k => {
-        const columnDef = this.columnDefinitionsAll[k];
-        return {
-          ...columnDef,
-          header_pretty: columnDef.header || formatPretty(k),
-          field: k
-        };
-      }
-    );
-  }
-
-  initColumnDefinitions(firstDataItem: T) {
-    // Set all column defintions read from the "input data"
-    const inputDataKeys = Object.keys(firstDataItem);
-    inputDataKeys.forEach((field: string) => {
-      if (!!this.columnDefinitionsAll[field]) {
-        // skip if definition exists
-        return;
-      }
-      this.columnDefinitionsAll[field] = {
-        hide: true
-      };
-    });
-    this.logger.log('initColumnDefinitions()', {
-      firstDataItem
-    });
-  }
-
-  // Sets the displayed columns from a set of fieldnames
-  setDisplayedColumns(columnsToDisplay: string[]) {
-    this.headerManager.SetDisplayed<T>(
-      columnsToDisplay,
-      this.config.actions,
-      this.config.actionsBulk
-    );
-    this.initFromDefinitions();
-    this.columnDefinitionMapToArray();
-    this.logger.log('setDisplayedColumns()', {
-      columnsToDisplay,
-      columnDefinitionsAllArray: this.columnDefinitionsAllArray
-    });
   }
 }

@@ -11,6 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { FormControl } from '@angular/forms';
 import { takeUntil, debounceTime } from 'rxjs/operators';
 import { Subject } from 'rxjs';
+import { KeyValue } from '@angular/common';
 
 @Component({
   selector: 'ngx-auto-table-header-columns-chooser',
@@ -22,8 +23,8 @@ import { Subject } from 'rxjs';
         [formControl]="chooseColumnsControl"
         multiple
       >
-        <mat-option *ngFor="let key of allColumnStrings" [value]="key">
-          {{ key }}
+        <mat-option *ngFor="let h of headerKeyValues" [value]="h.key">
+          {{ h.value }}
         </mat-option>
       </mat-select>
     </mat-form-field>
@@ -33,9 +34,14 @@ import { Subject } from 'rxjs';
 export class NgxAutoTableHeaderColumnsChooserComponent
   implements OnInit, OnDestroy {
   @Input()
-  allColumnStrings: string[];
+  headerKeyValues: KeyValue<string, string>[] = [];
   @Input()
   cacheId: string;
+  @Input()
+  set selectedHeaderKeys(newSelected: string[]) {
+    console.log('NgxAutoTableHeaderColumnsChooserComponent', { newSelected });
+    this.chooseColumnsControl.setValue(newSelected, { emitEvent: false });
+  }
 
   @Output()
   columnsChanged: EventEmitter<string> = new EventEmitter();
@@ -47,7 +53,7 @@ export class NgxAutoTableHeaderColumnsChooserComponent
 
   ngOnInit() {
     this.chooseColumnsControl.valueChanges
-      .pipe(takeUntil(this.$onDestroyed), debounceTime(200))
+      .pipe(takeUntil(this.$onDestroyed), debounceTime(100))
       .subscribe(columnHeadersSelected => {
         if (this.cacheId) {
           this.columnsCacheSetToCache();
@@ -63,7 +69,7 @@ export class NgxAutoTableHeaderColumnsChooserComponent
   }
 
   private getCacheId() {
-    return this.cacheId + '-columns2'
+    return this.cacheId + '-columns2';
   }
 
   private columnsSetFromCache() {

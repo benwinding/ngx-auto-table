@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, Input, ViewChild } from '@angular/core';
 import { Subject } from 'rxjs';
-import { AutoTableConfig, ColumnDefinitionMap } from '../AutoTableConfig';
+import { AutoTableConfig, ColumnDefinitionMap } from '../models';
 import {
   MatTableDataSource,
   MatCheckboxChange,
@@ -17,6 +17,7 @@ import {
 } from 'rxjs/operators';
 import { SimpleLogger } from '../../utils/SimpleLogger';
 import { TableNotifyService } from '../table-notify.service';
+import { ColumnDefinitionInternal } from '../models.internal';
 
 @Component({
   selector: 'ngx-auto-table-content',
@@ -33,11 +34,11 @@ import { TableNotifyService } from '../table-notify.service';
     >
       <!-- All header definitions given to ngx-auto-table -->
       <ng-container
-        *ngFor="let def of columnDefinitionsAllArray"
+        *ngFor="let def of columnDefinitionsAll"
         [matColumnDef]="def.field"
       >
         <th mat-header-cell mat-sort-header *matHeaderCellDef>
-          {{ def.header }}
+          {{ def.header_pretty }}
         </th>
         <td mat-cell *matCellDef="let row">
           <div *ngIf="!def.template" [class.break-words]="def.forceWrap">
@@ -120,7 +121,7 @@ export class NgxAutoTableContentComponent implements OnInit, OnDestroy {
   @Input()
   HeadersVisible: string[];
   @Input()
-  set columnDefinitions(newDefs: ColumnDefinitionMap) {}
+  columnDefinitionsAll: ColumnDefinitionInternal[] = []
 
   @Input()
   config: AutoTableConfig<any>;
@@ -148,8 +149,6 @@ export class NgxAutoTableContentComponent implements OnInit, OnDestroy {
   set debug(newDebug: boolean) {
     this.logger = new SimpleLogger(newDebug);
   }
-
-  public columnDefinitionsAllArray: [] = [];
 
   private $onDestroyed = new Subject();
 

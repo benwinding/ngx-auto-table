@@ -1,9 +1,10 @@
 import { Component, OnInit, EventEmitter, Input, Output } from '@angular/core';
-import { ActionDefinitionBulk, AutoTableConfig } from '../AutoTableConfig';
+import { ActionDefinitionBulk, AutoTableConfig } from '../models';
 
 import { v4 as uuidv4 } from 'uuid';
 import { FormControl } from '@angular/forms';
 import { SelectionModel } from '@angular/cdk/collections';
+import { KeyValue } from '@angular/common';
 
 @Component({
   selector: 'ngx-auto-table-header',
@@ -11,31 +12,32 @@ import { SelectionModel } from '@angular/cdk/collections';
     <div
       class="table-header auto-elevation overflow-hidden"
       [class.addRightPixel]="config?.hideHeader"
-      *ngIf="
-        !(config?.hideFilter && config?.hideChooseColumns) &&
-        !config?.hideHeader &&
-        !HasNoItems
+      [hidden]="
+        (config?.hideFilter && config?.hideChooseColumns) ||
+        config?.hideHeader ||
+        HasNoItems
       "
     >
       <div class="relative">
         <mat-toolbar class="mat-elevation-z8">
           <mat-toolbar-row class="flex-h align-center space-between">
             <ngx-auto-table-header-search
-              *ngIf="!HasNoItems && !config?.hideFilter"
+              [hidden]="HasNoItems || config?.hideFilter"
               [filterText]="config?.filterText"
               (searchChanged)="onSearchChanged($event)"
             ></ngx-auto-table-header-search>
             <ngx-auto-table-header-columns-chooser
-              *ngIf="!HasNoItems && !config?.hideChooseColumns"
-              [allColumnStrings]="AllColumnStrings"
+              [hidden]="HasNoItems || config?.hideChooseColumns"
+              [headerKeyValues]="headerKeyValues"
               [cacheId]="config?.cacheId"
+              [selectedHeaderKeys]="selectedHeaderKeys"
               (columnsChanged)="onColumnsChanged($event)"
             ></ngx-auto-table-header-columns-chooser>
           </mat-toolbar-row>
         </mat-toolbar>
         <mat-toolbar
           class="bulk-actions flex-h align-center mat-primary overflow-x-auto"
-          *ngIf="config?.actionsBulk?.length"
+          [hidden]="!config?.actionsBulk?.length"
           [class.hidden]="!selectionMultiple.hasValue()"
         >
           <mat-toolbar-row class="flex-h align-center space-between">
@@ -96,14 +98,18 @@ export class NgxAutoTableHeaderComponent implements OnInit {
   @Input()
   IsMaxReached: boolean;
   @Input()
-  AllColumnStrings: string[];
+  headerKeyValues: KeyValue<string, string>[];
+  @Input()
+  selectedHeaderKeys: string[];
   @Input()
   selectionMultiple: SelectionModel<any>;
 
   @Output()
-  searchChanged = new EventEmitter();
+  searchChanged = new EventEmitter<string>();
   @Output()
-  bulkActionStatus = new EventEmitter();
+  columnsChanged = new EventEmitter<string[]>();
+  @Output()
+  bulkActionStatus = new EventEmitter<boolean>();
 
   autoCompleteObscureName = uuidv4();
   searchControl = new FormControl();
@@ -140,7 +146,9 @@ export class NgxAutoTableHeaderComponent implements OnInit {
     console.log('onSearchChanged', { newSearchString });
     this.searchChanged.next(newSearchString);
   }
+
   onColumnsChanged(newColumnsArray: string[]) {
     console.log('onColumnsChanged', { newColumnsArray });
+    this.columnsChanged.next(newColumnsArray);
   }
 }

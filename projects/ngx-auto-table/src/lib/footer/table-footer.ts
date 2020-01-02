@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, OnDestroy, ViewChild } from '@angular/core';
-import { AutoTableConfig } from '../AutoTableConfig';
+import { AutoTableConfig } from '../models';
 
 import { Subject } from 'rxjs';
 import { MatPaginator, MatTableDataSource } from '@angular/material';
