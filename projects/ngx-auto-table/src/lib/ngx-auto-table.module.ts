@@ -23,7 +23,7 @@ import {
 } from "@angular/material";
 
 import { CsvModule } from "@ctrl/ngx-csv";
-import { AppExportCsvExportComponent } from "./app-table-csv-export.component";
+import { AppExportCsvExportComponent } from "./subcomponents/app-table-csv-export.component";
 import { CommonModule } from "@angular/common";
 import { RouterModule } from "@angular/router";
 import { AutoTableComponent } from "./ngx-auto-table.component";
@@ -32,11 +32,11 @@ import { AppBtnLoaderComponent } from "./loaders/btn-loader.component";
 import { AppTableLoaderComponent } from './loaders/table-loader.component';
 import { LayoutModule } from "@angular/cdk/layout";
 import { TableNotifyService } from "./table-notify.service";
-import { NgxAutoTableActionsMenuComponent } from "./actions-menu.component";
-import { NgxAutoTableHeaderComponent } from "./table-header.component";
-import { NgxAutoTableHeaderColumnsChooserComponent } from "./table-header-columns-chooser";
-import { NgxAutoTableHeaderSearchComponent } from "./table-header-search.component";
-import { NgxAutoTableFooterComponent } from "./table-footer";
+import { NgxAutoTableActionsMenuComponent } from "./subcomponents/actions-menu.component";
+import { NgxAutoTableHeaderComponent } from "./subcomponents/table-header.component";
+import { NgxAutoTableHeaderColumnsChooserComponent } from "./subcomponents/table-header-columns-chooser";
+import { NgxAutoTableHeaderSearchComponent } from "./subcomponents/table-header-search.component";
+import { NgxAutoTableFooterComponent } from "./subcomponents/table-footer";
 
 const sharedComponents = [AutoTableComponent];
 

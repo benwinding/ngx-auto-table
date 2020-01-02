@@ -3,7 +3,7 @@ import {
   ActionDefinition,
   ActionDefinitionBulk
 } from './AutoTableConfig';
-import { SimpleLogger } from './SimpleLogger';
+import { SimpleLogger } from '../utils/SimpleLogger';
 
 export class HeaderManager {
   private _headerKeysAll: string[] = [];

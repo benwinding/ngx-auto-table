@@ -23,9 +23,9 @@ import {
 
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { HeaderManager } from './header-manager';
-import { SimpleLogger } from './SimpleLogger';
+import { SimpleLogger } from '../utils/SimpleLogger';
 import { TableNotifyService } from './table-notify.service';
-import { formatPretty } from './utils';
+import { formatPretty } from '../utils/utils';
 
 function blankConfig<T>(): AutoTableConfig<T> {
   return {
@@ -257,7 +257,6 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
             this.selectionSingle.select(firstDataItem);
           }
         }
-        this.initExport(originalData);
         this.initFilterPredicate(originalData);
       });
 

@@ -5,7 +5,7 @@ import {
   OnDestroy,
   ViewChild
 } from '@angular/core';
-import { AutoTableConfig } from './AutoTableConfig';
+import { AutoTableConfig } from '../AutoTableConfig';
 
 import { Subject } from 'rxjs';
 import { MatPaginator, MatSort, MatTableDataSource } from '@angular/material';

@@ -1,5 +1,5 @@
 import { Component, OnInit, EventEmitter, Input, Output, OnDestroy } from '@angular/core';
-import { ActionDefinitionBulk } from './AutoTableConfig';
+import { ActionDefinitionBulk } from '../AutoTableConfig';
 
 import { v4 as uuidv4 } from 'uuid';
 import { FormControl } from '@angular/forms';

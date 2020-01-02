@@ -1,5 +1,5 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { ActionDefinition } from './AutoTableConfig';
+import { ActionDefinition } from '../AutoTableConfig';
 
 @Component({
   selector: 'ngx-auto-table-actions-menu',
