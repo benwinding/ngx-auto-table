@@ -11,3 +11,14 @@ export function sortObjectArrayCase(fieldName, direction?: 'asc' | 'desc') {
     return 0;
   };
 }
+
+export function formatPretty(input: string) {
+  let str = input;
+  if (typeof str !== 'string') {
+    str = '';
+  }
+  const spacedStr = str.replace(new RegExp('_', 'g'), ' ');
+  return spacedStr.replace(/\w\S*/g, function(txt) {
+    return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+  });
+}

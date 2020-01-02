@@ -165,7 +165,7 @@ export class AppComponent implements OnInit {
   async ngOnInit() {
     // await this.fakeDelay(500);
     this.formGroup.valueChanges
-      .pipe(startWith(null), debounceTime(300))
+      .pipe(startWith(null), debounceTime(500))
       .subscribe(newConfigFlags => {
         this.makeCofig(this.formGroup.value);
       });

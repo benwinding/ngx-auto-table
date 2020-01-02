@@ -6,30 +6,26 @@ import {
   MatCheckboxChange
 } from '@angular/material';
 import { Subject } from 'rxjs';
-import { FormControl } from '@angular/forms';
 import { SelectionModel } from '@angular/cdk/collections';
 import {
   filter,
   takeUntil,
-  throttleTime,
   distinctUntilChanged,
   debounceTime,
   map,
-  tap,
-  auditTime
+  tap
 } from 'rxjs/operators';
 import {
   AutoTableConfig,
   ColumnDefinition,
-  ActionDefinitionBulk,
   ColumnDefinitionMap
 } from './AutoTableConfig';
 
-import { v4 as uuidv4 } from 'uuid';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { HeaderManager } from './header-manager';
 import { SimpleLogger } from './SimpleLogger';
 import { TableNotifyService } from './table-notify.service';
+import { formatPretty } from './utils';
 
 function blankConfig<T>(): AutoTableConfig<T> {
   return {
@@ -39,11 +35,122 @@ function blankConfig<T>(): AutoTableConfig<T> {
 
 interface ColumnDefinitionInternal extends ColumnDefinition {
   field: string;
+  header_pretty: string;
 }
 
 @Component({
   selector: 'ngx-auto-table',
-  templateUrl: './ngx-auto-table.component.html',
+  template: `
+    <div
+      [class.isMobile]="config.disableMobileScroll"
+      class="table-container mat-elevation-z8"
+    >
+      <ngx-auto-table-header
+        [config]="config"
+        [IsPerformingBulkAction]="IsPerformingBulkAction"
+        [HasNoItems]="HasNoItems"
+        [IsMaxReached]="IsMaxReached"
+        [AllColumnStrings]="headerManager.HeadersDisplayedChoices"
+        [selectionMultiple]="selectionMultiple"
+        (searchChanged)="applyFilter($event)"
+        (bulkActionStatus)="IsPerformingBulkAction = $event"
+      ></ngx-auto-table-header>
+      <table
+        mat-table
+        #table
+        matSort
+        *ngIf="this.dataSource?.data"
+        [matSortActive]="config.initialSort"
+        [matSortDirection]="config.initialSortDir"
+        [dataSource]="this.dataSource"
+        style="width:100%;"
+        class="mat-elevation-z8"
+      >
+        <!-- All header definitions given to ngx-auto-table -->
+        <ng-container
+          *ngFor="let def of columnDefinitionsAllArray"
+          [matColumnDef]="def.field"
+        >
+          <th mat-header-cell mat-sort-header *matHeaderCellDef>
+            {{ def.header }}
+          </th>
+          <td mat-cell *matCellDef="let row">
+            <div *ngIf="!def.template" [class.break-words]="def.forceWrap">
+              {{ row[def.field] }}
+            </div>
+            <div *ngIf="def.template">
+              <div
+                *ngTemplateOutlet="def.template; context: { $implicit: row }"
+              ></div>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="__bulk" stickyEnd>
+          <th mat-header-cell *matHeaderCellDef>
+            <mat-checkbox
+              [disabled]="IsPerformingBulkAction || HasNoItems"
+              (change)="masterToggle()"
+              [checked]="selectionMultiple.hasValue() && isAllSelected()"
+              [indeterminate]="selectionMultiple.hasValue() && !isAllSelected()"
+            >
+            </mat-checkbox>
+          </th>
+          <td mat-cell *matCellDef="let row">
+            <mat-checkbox
+              [disabled]="IsPerformingBulkAction"
+              (click)="$event.stopPropagation()"
+              (change)="onClickBulkItem($event, row)"
+              [checked]="selectionMultiple.isSelected(row)"
+            >
+            </mat-checkbox>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="__star" stickyEnd>
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let row">
+            <ngx-auto-table-actions-menu
+              [row]="row"
+              [actions]="config?.actions"
+              [actionsVisibleCount]="config?.actionsVisibleCount"
+              [isPerformingBulkAction]="IsPerformingBulkAction"
+            ></ngx-auto-table-actions-menu>
+          </td>
+        </ng-container>
+
+        <!-- Show only visible definitions -->
+        <tr
+          mat-header-row
+          *matHeaderRowDef="this.headerManager.HeadersDisplayed"
+          [hidden]="config.hideHeader"
+        ></tr>
+        <tr
+          mat-row
+          *matRowDef="let row; columns: this.headerManager.HeadersDisplayed"
+          (click)="onClickRow($event, row)"
+          (dblclick)="onDoubleClickRow($event, row)"
+          [class.selected-row-multiple]="
+            !config.disableSelect && selectionMultiple.isSelected(row)
+          "
+          [class.selected-row-single]="
+            !config.disableSelect && selectionSingle.isSelected(row)
+          "
+          [class.has-pointer]="!config.disableSelect && config.onSelectItem"
+          [class.hover-row]="
+            !(config.disableSelect && config.disableHoverEffect)
+          "
+        ></tr>
+      </table>
+
+      <ngx-auto-table-footer
+        [HasNoItems]="HasNoItems"
+        [IsLoading]="!dataSource?.data"
+        [config]="config"
+        [dataSource]="dataSource"
+      ></ngx-auto-table-footer>
+    </div>
+  `,
   styleUrls: ['./ngx-auto-table.component.scss']
 })
 export class AutoTableComponent<T> implements OnInit, OnDestroy {
@@ -67,23 +174,11 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   columnDefinitionsAllArray: ColumnDefinitionInternal[] = [];
 
   dataSource: MatTableDataSource<any>;
-  @ViewChild(MatPaginator, { static: false }) paginator: MatPaginator;
-  @ViewChild(MatSort, { static: false }) sort: MatSort;
-
-  exportData: any[];
-  exportFilename: string;
-
-  HasNoItems: boolean;
 
   headerManager = new HeaderManager();
 
-  defaultPageSize = 25;
+  IsPerformingBulkAction = false;
 
-  isPerformingBulkAction = false;
-
-  autoCompleteObscureName = uuidv4();
-  chooseColumnsControl = new FormControl();
-  searchControl = new FormControl();
   // Bulk items selection
   selectionMultiple = new SelectionModel<any>(true, []);
   selectionSingle = new SelectionModel<any>(false, []);
@@ -94,13 +189,15 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
 
   private logger: SimpleLogger;
 
-  constructor(private breakpointObserver: BreakpointObserver, private notify: TableNotifyService) {}
+  constructor(
+    private breakpointObserver: BreakpointObserver,
+    private notify: TableNotifyService
+  ) {}
 
   reInitializeVariables() {
     this.columnDefinitionsAll = {};
     this.columnDefinitionsAllArray = [];
     this.headerManager = new HeaderManager();
-    this.chooseColumnsControl = new FormControl();
     this.selectionMultiple = new SelectionModel<any>(true, []);
     this.selectionSingle = new SelectionModel<any>(false, []);
     this.dataSource = undefined;
@@ -121,9 +218,11 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
         map(result => result.matches),
         distinctUntilChanged(),
         debounceTime(100),
-        tap(isMobile => this.logger.log('this.breakpointObserver$', {isMobile})),
+        tap(isMobile =>
+          this.logger.log('this.breakpointObserver$', { isMobile })
+        )
       )
-      .subscribe(isMobile => {
+      .subscribe(() => {
         // this.isMobile = isMobile;
         // this.refreshDefaultColumns();
       });
@@ -148,12 +247,6 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
           this.dataSource.data.length;
         this.logger.log('config.data$.subscribe: ', { originalData });
         this.dataSource = new MatTableDataSource(originalData);
-        this.dataSource.paginator = this.paginator;
-        this.dataSource.sort = this.sort;
-        this.HasNoItems = !originalData.length;
-        if (this.HasNoItems) {
-          return;
-        }
         if (this.config.onDataUpdated) {
           this.config.onDataUpdated(originalData);
         }
@@ -201,11 +294,6 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
           this.selectionSingle.clear();
         });
     }
-    this.searchControl.valueChanges
-      .pipe(takeUntil(this.$onDestroyed), debounceTime(200))
-      .subscribe(searchString => {
-        this.applyFilter(searchString);
-      });
   }
 
   ngOnDestroy() {
@@ -228,7 +316,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     this.$setDisplayedColumnsTrigger.next(columns);
   }
 
-  private applyFilter(inputValue: string) {
+  public applyFilter(inputValue: string) {
     const parsedString = inputValue || '';
     this.dataSource.filter = parsedString.trim().toLowerCase();
     this.selectionSingle.clear();
@@ -276,34 +364,6 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     };
   }
 
-  initExport(originalData: T[]) {
-    this.exportFilename = this.config.exportFilename;
-    if (!this.exportFilename) {
-      return;
-    }
-    this.exportData = originalData.map(dataItem => {
-      if (!this.config.exportRowFormat) {
-        return dataItem;
-      }
-      return this.config.exportRowFormat(dataItem);
-    });
-  }
-
-  public getKeyHeader(key: string) {
-    const inputDef = this.columnDefinitions[key];
-    if (inputDef && inputDef.header != null) {
-      return inputDef.header;
-    }
-    return this.toTitleCase(key);
-  }
-
-  private toTitleCase(str: string) {
-    const spacedStr = str.replace(new RegExp('_', 'g'), ' ');
-    return spacedStr.replace(/\w\S*/g, function(txt) {
-      return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-    });
-  }
-
   initDisplayedColumns(firstDataItem: T) {
     this.initColumnDefinitions(firstDataItem);
     this.headerManager.InitHeaderKeys(
@@ -312,10 +372,6 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     );
     this.refreshDefaultColumns();
     // Set currently enabled items
-    this.chooseColumnsControl.setValue(this.headerManager.HeadersDisplayed);
-    if (this.config.cacheId) {
-      this.columnsCacheSetFromCache();
-    }
   }
 
   getDisplayedDefault(): string[] {
@@ -331,7 +387,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     inputDefintionFields.forEach((field: string) => {
       const inputDefintion = this.columnDefinitions[field];
       this.columnDefinitionsAll[field] = {
-        header: this.getKeyHeader(field),
+        header: inputDefintion.header,
         template: inputDefintion.template,
         hide: inputDefintion.hide,
         forceWrap: inputDefintion.forceWrap
@@ -343,8 +399,10 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     // Make array that template headers use
     this.columnDefinitionsAllArray = Object.keys(this.columnDefinitionsAll).map(
       k => {
+        const columnDef = this.columnDefinitionsAll[k];
         return {
-          ...this.columnDefinitionsAll[k],
+          ...columnDef,
+          header_pretty: columnDef.header || formatPretty(k),
           field: k
         };
       }
@@ -360,7 +418,6 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
         return;
       }
       this.columnDefinitionsAll[field] = {
-        header: this.toTitleCase(field),
         hide: true
       };
     });
@@ -413,7 +470,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   }
 
   private selectAll() {
-    this.dataSource.sortData(this.dataSource.filteredData, this.sort);
+    this.dataSource.sortData(this.dataSource.filteredData, this.dataSource.sort);
     let cutArray = this.dataSource.filteredData;
     if (this.config.bulkSelectMaxCount) {
       cutArray = this.dataSource.filteredData.slice(
@@ -424,52 +481,19 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     this.selectionMultiple.select(...cutArray);
   }
 
-  isMaxReached() {
+  get HasNoItems(): boolean {
+    return (
+      !this.dataSource || !this.dataSource.data || !this.dataSource.data.length
+    );
+  }
+
+  get IsMaxReached(): boolean {
     if (!this.config.bulkSelectMaxCount) {
       return false;
     }
     const maxReached =
       this.selectionMultiple.selected.length >= this.config.bulkSelectMaxCount;
     return maxReached;
-  }
-
-  private columnsCacheSetFromCache() {
-    const cacheKey = this.config.cacheId + '-columns';
-    const selectedValsString = localStorage.getItem(cacheKey);
-    if (!selectedValsString) {
-      return;
-    }
-    try {
-      const vals = JSON.parse(selectedValsString);
-      this.logger.log('columnsCacheSetFromCache(): getting cached columns', {
-        vals,
-        cacheKey
-      });
-      this.chooseColumnsControl.setValue(vals);
-      this.$setDisplayedColumnsTrigger.next(vals);
-    } catch (error) {
-      console.warn('error parsing JSON in columns cache');
-    }
-  }
-
-  private columnsCacheSetToCache() {
-    const cacheKey = this.config.cacheId + '-columns';
-    const selectedValues = this.chooseColumnsControl.value;
-    localStorage.setItem(cacheKey, JSON.stringify(selectedValues));
-    this.logger.log('columnsCacheSetToCache():, setting cached columns', {
-      cacheKey,
-      selectedValues
-    });
-  }
-
-  onColumnFilterChange($event) {
-    this.logger.log('onColumnFilterChange(): ', { $event });
-    const selectedValues = this.chooseColumnsControl.value;
-    if (this.config.cacheId) {
-      this.columnsCacheSetToCache();
-    }
-    this.$setDisplayedColumnsTrigger.next(selectedValues);
-    this.initFilterPredicate(this.dataSource.data);
   }
 
   onClickCancelBulk() {
@@ -481,7 +505,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
       return;
     }
     const isSelected = this.selectionMultiple.isSelected(item);
-    const maxReached = this.isMaxReached();
+    const maxReached = this.IsMaxReached;
     if (maxReached) {
       $event.source.writeValue(false);
     }
@@ -493,7 +517,9 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
       this.selectionMultiple.deselect(item);
     }
     if (maxReached && !isSelected) {
-      this.notify.warn(`Cannot select! (maxium of ${this.config.bulkSelectMaxCount} items)`)
+      this.notify.warn(
+        `Cannot select! (maxium of ${this.config.bulkSelectMaxCount} items)`
+      );
     }
     if (this.config.onSelectedBulk) {
       this.config.onSelectedBulk(this.selectionMultiple.selected);
@@ -514,21 +540,5 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
       this.selectionSingle.select(row);
       this.config.onSelectItemDoubleClick(row);
     }
-  }
-
-  async onClickBulkAction(action: ActionDefinitionBulk<T>, btnBulkAction) {
-    this.isPerformingBulkAction = true;
-    if (btnBulkAction) {
-      btnBulkAction.disabled = false;
-    }
-    // const nativeRef = btnBulkAction._elementRef.nativeElement;
-    // nativeRef.style.filter = 'brightness(0.8) hue-rotate(15deg);';
-    await action.onClick(this.selectionMultiple.selected);
-    this.selectionMultiple.clear();
-    // nativeRef.style.filter = '';
-    if (btnBulkAction) {
-      btnBulkAction.disabled = true;
-    }
-    this.isPerformingBulkAction = false;
   }
 }

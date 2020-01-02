@@ -33,6 +33,10 @@ import { AppTableLoaderComponent } from './loaders/table-loader.component';
 import { LayoutModule } from "@angular/cdk/layout";
 import { TableNotifyService } from "./table-notify.service";
 import { NgxAutoTableActionsMenuComponent } from "./actions-menu.component";
+import { NgxAutoTableHeaderComponent } from "./table-header.component";
+import { NgxAutoTableHeaderColumnsChooserComponent } from "./table-header-columns-chooser";
+import { NgxAutoTableHeaderSearchComponent } from "./table-header-search.component";
+import { NgxAutoTableFooterComponent } from "./table-footer";
 
 const sharedComponents = [AutoTableComponent];
 
@@ -43,6 +47,10 @@ const sharedComponents = [AutoTableComponent];
     AppExportCsvExportComponent,
     AppBtnLoaderComponent,
     NgxAutoTableActionsMenuComponent,
+    NgxAutoTableHeaderComponent,
+    NgxAutoTableHeaderSearchComponent,
+    NgxAutoTableHeaderColumnsChooserComponent,
+    NgxAutoTableFooterComponent,
     ...sharedComponents,
   ],
   providers: [TableNotifyService],
