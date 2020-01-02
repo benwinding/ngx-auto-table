@@ -1,30 +1,16 @@
-import { Component, OnInit, Input, OnDestroy, ViewChild } from '@angular/core';
-import {
-  MatTableDataSource,
-  MatPaginator,
-  MatSort,
-  MatCheckboxChange
-} from '@angular/material';
+import { Component, OnInit, Input, OnDestroy } from '@angular/core';
+import { MatTableDataSource } from '@angular/material';
 import { Subject } from 'rxjs';
 import { SelectionModel } from '@angular/cdk/collections';
-import {
-  filter,
-  takeUntil,
-  distinctUntilChanged,
-  debounceTime,
-  map,
-  tap
-} from 'rxjs/operators';
+import { filter, takeUntil, debounceTime } from 'rxjs/operators';
 import {
   AutoTableConfig,
   ColumnDefinition,
   ColumnDefinitionMap
 } from './AutoTableConfig';
 
-import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { HeaderManager } from './header-manager';
 import { SimpleLogger } from '../utils/SimpleLogger';
-import { TableNotifyService } from './table-notify.service';
 import { formatPretty } from '../utils/utils';
 
 function blankConfig<T>(): AutoTableConfig<T> {
@@ -52,100 +38,25 @@ interface ColumnDefinitionInternal extends ColumnDefinition {
         [IsMaxReached]="IsMaxReached"
         [AllColumnStrings]="headerManager.HeadersDisplayedChoices"
         [selectionMultiple]="selectionMultiple"
-        (searchChanged)="applyFilter($event)"
+        (searchChanged)="applyFilterToDatasource($event)"
         (bulkActionStatus)="IsPerformingBulkAction = $event"
       ></ngx-auto-table-header>
-      <table
-        mat-table
-        #table
-        matSort
-        *ngIf="this.dataSource?.data"
-        [matSortActive]="config.initialSort"
-        [matSortDirection]="config.initialSortDir"
-        [dataSource]="this.dataSource"
-        style="width:100%;"
-        class="mat-elevation-z8"
-      >
-        <!-- All header definitions given to ngx-auto-table -->
-        <ng-container
-          *ngFor="let def of columnDefinitionsAllArray"
-          [matColumnDef]="def.field"
-        >
-          <th mat-header-cell mat-sort-header *matHeaderCellDef>
-            {{ def.header }}
-          </th>
-          <td mat-cell *matCellDef="let row">
-            <div *ngIf="!def.template" [class.break-words]="def.forceWrap">
-              {{ row[def.field] }}
-            </div>
-            <div *ngIf="def.template">
-              <div
-                *ngTemplateOutlet="def.template; context: { $implicit: row }"
-              ></div>
-            </div>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="__bulk" stickyEnd>
-          <th mat-header-cell *matHeaderCellDef>
-            <mat-checkbox
-              [disabled]="IsPerformingBulkAction || HasNoItems"
-              (change)="masterToggle()"
-              [checked]="selectionMultiple.hasValue() && isAllSelected()"
-              [indeterminate]="selectionMultiple.hasValue() && !isAllSelected()"
-            >
-            </mat-checkbox>
-          </th>
-          <td mat-cell *matCellDef="let row">
-            <mat-checkbox
-              [disabled]="IsPerformingBulkAction"
-              (click)="$event.stopPropagation()"
-              (change)="onClickBulkItem($event, row)"
-              [checked]="selectionMultiple.isSelected(row)"
-            >
-            </mat-checkbox>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="__star" stickyEnd>
-          <th mat-header-cell *matHeaderCellDef></th>
-          <td mat-cell *matCellDef="let row">
-            <ngx-auto-table-actions-menu
-              [row]="row"
-              [actions]="config?.actions"
-              [actionsVisibleCount]="config?.actionsVisibleCount"
-              [isPerformingBulkAction]="IsPerformingBulkAction"
-            ></ngx-auto-table-actions-menu>
-          </td>
-        </ng-container>
-
-        <!-- Show only visible definitions -->
-        <tr
-          mat-header-row
-          *matHeaderRowDef="this.headerManager.HeadersDisplayed"
-          [hidden]="config.hideHeader"
-        ></tr>
-        <tr
-          mat-row
-          *matRowDef="let row; columns: this.headerManager.HeadersDisplayed"
-          (click)="onClickRow($event, row)"
-          (dblclick)="onDoubleClickRow($event, row)"
-          [class.selected-row-multiple]="
-            !config.disableSelect && selectionMultiple.isSelected(row)
-          "
-          [class.selected-row-single]="
-            !config.disableSelect && selectionSingle.isSelected(row)
-          "
-          [class.has-pointer]="!config.disableSelect && config.onSelectItem"
-          [class.hover-row]="
-            !(config.disableSelect && config.disableHoverEffect)
-          "
-        ></tr>
-      </table>
-
+      <ngx-auto-table-content
+        [IsPerformingBulkAction]="IsPerformingBulkAction"
+        [IsAllSelected]="IsAllSelected"
+        [IsMaxReached]="IsMaxReached"
+        [HasNoItems]="HasNoItems"
+        [HeadersVisible]="headerManager.HeadersVisible"
+        [config]="config"
+        [debug]="config?.debug"
+        [dataSource]="dataSource"
+        [selectionMultiple]="selectionMultiple"
+        [selectionSingle]="selectionSingle"
+        [columnDefinitions]="columnDefinitions"
+      ></ngx-auto-table-content>
       <ngx-auto-table-footer
         [HasNoItems]="HasNoItems"
-        [IsLoading]="!dataSource?.data"
+        [IsLoading]="IsLoading"
         [config]="config"
         [dataSource]="dataSource"
       ></ngx-auto-table-footer>
@@ -189,10 +100,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
 
   private logger: SimpleLogger;
 
-  constructor(
-    private breakpointObserver: BreakpointObserver,
-    private notify: TableNotifyService
-  ) {}
+  constructor() {}
 
   reInitializeVariables() {
     this.columnDefinitionsAll = {};
@@ -203,6 +111,44 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     this.dataSource = undefined;
   }
 
+  get HasNoItems(): boolean {
+    return (
+      this.dataSource && this.dataSource.data && !this.dataSource.data.length
+    );
+  }
+
+  get IsLoading(): boolean {
+    return !this.dataSource || !this.dataSource.data;
+  }
+
+  get IsMaxReached(): boolean {
+    if (!this.config.bulkSelectMaxCount) {
+      return false;
+    }
+    const maxReached =
+      this.selectionMultiple.selected.length >= this.config.bulkSelectMaxCount;
+    return maxReached;
+  }
+
+  /** Whether the number of selected elements matches the total number of rows. */
+  get IsAllSelected() {
+    const numSelected = this.selectionMultiple.selected.length;
+    if (!this.dataSource || !this.dataSource.filteredData) {
+      return false;
+    }
+    const numInData = this.dataSource.filteredData.length;
+    if (numSelected >= numInData) {
+      return true;
+    }
+    if (
+      this.config.bulkSelectMaxCount &&
+      numSelected >= this.config.bulkSelectMaxCount
+    ) {
+      return true;
+    }
+    return false;
+  }
+
   ngOnInit() {
     this.logger = new SimpleLogger(this.config.debug);
 
@@ -210,22 +156,6 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
       this.logger.log('ngOnInit(), no [config] set on auto-table component');
       return;
     }
-
-    this.breakpointObserver
-      .observe([Breakpoints.HandsetLandscape, Breakpoints.HandsetPortrait])
-      .pipe(
-        takeUntil(this.$onDestroyed),
-        map(result => result.matches),
-        distinctUntilChanged(),
-        debounceTime(100),
-        tap(isMobile =>
-          this.logger.log('this.breakpointObserver$', { isMobile })
-        )
-      )
-      .subscribe(() => {
-        // this.isMobile = isMobile;
-        // this.refreshDefaultColumns();
-      });
 
     this.$setDisplayedColumnsTrigger
       .pipe(takeUntil(this.$onDestroyed), debounceTime(100))
@@ -260,6 +190,14 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
         this.initFilterPredicate(originalData);
       });
 
+    this.initializeConfigTriggers();
+  }
+
+  ngOnDestroy() {
+    this.$onDestroyed.next();
+  }
+
+  initializeConfigTriggers() {
     if (this.config.$triggerSelectItem) {
       this.config.$triggerSelectItem
         .pipe(debounceTime(300))
@@ -295,10 +233,6 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     }
   }
 
-  ngOnDestroy() {
-    this.$onDestroyed.next();
-  }
-
   refreshDefaultColumns() {
     const setMobile = this.isMobile && this.config.mobileFields;
     let columns: string[] = [];
@@ -315,7 +249,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     this.$setDisplayedColumnsTrigger.next(columns);
   }
 
-  public applyFilter(inputValue: string) {
+  public applyFilterToDatasource(inputValue: string) {
     const parsedString = inputValue || '';
     this.dataSource.filter = parsedString.trim().toLowerCase();
     this.selectionSingle.clear();
@@ -438,106 +372,5 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
       columnsToDisplay,
       columnDefinitionsAllArray: this.columnDefinitionsAllArray
     });
-  }
-
-  /** Whether the number of selected elements matches the total number of rows. */
-  isAllSelected() {
-    const numSelected = this.selectionMultiple.selected.length;
-    const numInData = this.dataSource.filteredData.length;
-    if (numSelected >= numInData) {
-      return true;
-    }
-    if (
-      this.config.bulkSelectMaxCount &&
-      numSelected >= this.config.bulkSelectMaxCount
-    ) {
-      return true;
-    }
-    return false;
-  }
-
-  /** Selects all rows if they are not all selected; otherwise clear selection. */
-  masterToggle() {
-    if (this.isAllSelected()) {
-      this.selectionMultiple.clear();
-    } else {
-      this.selectAll();
-    }
-    if (this.config.onSelectedBulk) {
-      this.config.onSelectedBulk(this.selectionMultiple.selected);
-    }
-  }
-
-  private selectAll() {
-    this.dataSource.sortData(this.dataSource.filteredData, this.dataSource.sort);
-    let cutArray = this.dataSource.filteredData;
-    if (this.config.bulkSelectMaxCount) {
-      cutArray = this.dataSource.filteredData.slice(
-        0,
-        this.config.bulkSelectMaxCount
-      );
-    }
-    this.selectionMultiple.select(...cutArray);
-  }
-
-  get HasNoItems(): boolean {
-    return (
-      !this.dataSource || !this.dataSource.data || !this.dataSource.data.length
-    );
-  }
-
-  get IsMaxReached(): boolean {
-    if (!this.config.bulkSelectMaxCount) {
-      return false;
-    }
-    const maxReached =
-      this.selectionMultiple.selected.length >= this.config.bulkSelectMaxCount;
-    return maxReached;
-  }
-
-  onClickCancelBulk() {
-    this.selectionMultiple.clear();
-  }
-
-  onClickBulkItem($event: MatCheckboxChange, item) {
-    if (!$event) {
-      return;
-    }
-    const isSelected = this.selectionMultiple.isSelected(item);
-    const maxReached = this.IsMaxReached;
-    if (maxReached) {
-      $event.source.writeValue(false);
-    }
-    console.log('onClickBulkItem()', { isSelected, maxReached, $event });
-    if (!maxReached) {
-      this.selectionMultiple.toggle(item);
-    }
-    if (maxReached && isSelected) {
-      this.selectionMultiple.deselect(item);
-    }
-    if (maxReached && !isSelected) {
-      this.notify.warn(
-        `Cannot select! (maxium of ${this.config.bulkSelectMaxCount} items)`
-      );
-    }
-    if (this.config.onSelectedBulk) {
-      this.config.onSelectedBulk(this.selectionMultiple.selected);
-    }
-  }
-
-  onClickRow($event, row: T) {
-    this.logger.log('onClickRow()', { $event, row });
-    this.selectionSingle.select(row);
-    if (this.config.onSelectItem) {
-      this.config.onSelectItem(row);
-    }
-  }
-
-  onDoubleClickRow($event, row: T) {
-    if (this.config.onSelectItemDoubleClick) {
-      this.logger.log('onDoubleClickRow()', { $event, row });
-      this.selectionSingle.select(row);
-      this.config.onSelectItemDoubleClick(row);
-    }
   }
 }

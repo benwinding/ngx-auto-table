@@ -1,6 +1,5 @@
-import { AutoTableConfig } from '../../../../../dist/ngx-auto-table/lib/AutoTableConfig';
 import { Component, OnInit, EventEmitter, Input, Output } from '@angular/core';
-import { ActionDefinitionBulk } from '../AutoTableConfig';
+import { ActionDefinitionBulk, AutoTableConfig } from '../AutoTableConfig';
 
 import { v4 as uuidv4 } from 'uuid';
 import { FormControl } from '@angular/forms';

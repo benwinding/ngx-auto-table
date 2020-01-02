@@ -1,14 +1,8 @@
-import {
-  Component,
-  OnInit,
-  Input,
-  OnDestroy,
-  ViewChild
-} from '@angular/core';
+import { Component, OnInit, Input, OnDestroy, ViewChild } from '@angular/core';
 import { AutoTableConfig } from '../AutoTableConfig';
 
 import { Subject } from 'rxjs';
-import { MatPaginator, MatSort, MatTableDataSource } from '@angular/material';
+import { MatPaginator, MatTableDataSource } from '@angular/material';
 
 @Component({
   selector: 'ngx-auto-table-footer',
@@ -35,7 +29,7 @@ import { MatPaginator, MatSort, MatTableDataSource } from '@angular/material';
           [filename]="exportFilename"
         ></app-table-csv-export>
         <mat-paginator
-          *ngIf="!config.hidePaginator"
+          [hidden]="config.hidePaginator"
           [pageSize]="config.pageSize || defaultPageSize"
           [pageSizeOptions]="[5, 10, 25, 100]"
         >
@@ -53,12 +47,12 @@ export class NgxAutoTableFooterComponent implements OnInit, OnDestroy {
   @Input()
   config: AutoTableConfig<any>;
   @Input()
-  set dataSource(newDataSource: MatTableDataSource<any>) {
+  dataSource(newDataSource: MatTableDataSource<any>) {
+    console.log('NgxAutoTableFooterComponent', { newDataSource });
     setTimeout(() => {
-      newDataSource.paginator = this.paginator;
-      newDataSource.sort = this.sort;
       this.initExport(newDataSource.data);
-    })
+      newDataSource.paginator = this.paginator;
+    });
   }
 
   defaultPageSize = 25;
@@ -67,12 +61,10 @@ export class NgxAutoTableFooterComponent implements OnInit, OnDestroy {
   exportFilename: string;
 
   @ViewChild(MatPaginator, { static: false }) paginator: MatPaginator;
-  @ViewChild(MatSort, { static: false }) sort: MatSort;
 
   private $onDestroyed = new Subject();
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
   ngOnDestroy() {
     this.$onDestroyed.next();

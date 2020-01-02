@@ -37,6 +37,7 @@ import { NgxAutoTableHeaderComponent } from "./header/table-header.component";
 import { NgxAutoTableHeaderColumnsChooserComponent } from "./header/table-header-columns-chooser";
 import { NgxAutoTableHeaderSearchComponent } from "./header/table-header-search.component";
 import { NgxAutoTableFooterComponent } from "./footer/table-footer";
+import { NgxAutoTableContentComponent } from "./table/table-content.component";
 
 const sharedComponents = [AutoTableComponent];
 
@@ -51,6 +52,7 @@ const sharedComponents = [AutoTableComponent];
     NgxAutoTableHeaderSearchComponent,
     NgxAutoTableHeaderColumnsChooserComponent,
     NgxAutoTableFooterComponent,
+    NgxAutoTableContentComponent,
     ...sharedComponents,
   ],
   providers: [TableNotifyService],

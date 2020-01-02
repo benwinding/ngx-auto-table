@@ -3,7 +3,6 @@ import {
   ActionDefinition,
   ActionDefinitionBulk
 } from './AutoTableConfig';
-import { SimpleLogger } from '../utils/SimpleLogger';
 
 export class HeaderManager {
   private _headerKeysAll: string[] = [];
@@ -20,7 +19,7 @@ export class HeaderManager {
     return this._headerKeysDisplayedSet;
   }
 
-  get HeadersDisplayed(): Array<string> {
+  get HeadersVisible(): Array<string> {
     return this._headerKeysDisplayed;
   }
 
