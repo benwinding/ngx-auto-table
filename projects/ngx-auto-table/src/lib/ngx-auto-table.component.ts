@@ -230,7 +230,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     const initialKeys = Object.keys(columnDefinitions).filter(
       k => !columnDefinitions[k].hide && !(config.hideFields || []).includes(k)
     );
-    console.log('initialKeys', {initialKeys})
+    console.log('initialKeys', { initialKeys });
     this.columnsManager.SetDisplayed(
       initialKeys,
       !!this.config.actions,
@@ -290,15 +290,30 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
         return true;
       }
       if (!allFieldsExist) {
-        const lower = JSON.stringify(data).toLowerCase();
-        return lower.includes(filterText);
+        const values = Object.values(data);
+        for (let value of values) {
+          try {
+            const str = JSON.stringify(value) || '';
+            const isFound = str.toLowerCase().includes(filterText);
+            if (isFound) {
+              return true;
+            }
+          } catch (error) {
+            return false;
+          }
+        }
+        return false;
       }
       for (const key of Array.from(keysHeader)) {
         const dataVal = data[key];
-        const str = JSON.stringify(dataVal) || '';
-        const isFound = str.toLowerCase().includes(filterText);
-        if (isFound) {
-          return true;
+        try {
+          const str = JSON.stringify(dataVal) || '';
+          const isFound = str.toLowerCase().includes(filterText);
+          if (isFound) {
+            return true;
+          }
+        } catch (error) {
+          return false;
         }
       }
     };
