@@ -84,7 +84,7 @@ import { SelectionModel } from '@angular/cdk/collections';
       </div>
     </div>
   `,
-  styleUrls: ['./ngx-auto-table.component.scss']
+  styleUrls: ['../ngx-auto-table.component.scss']
 })
 export class NgxAutoTableHeaderComponent implements OnInit {
   @Input()

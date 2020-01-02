@@ -25,7 +25,7 @@ import { Subject } from 'rxjs';
       >
     </mat-form-field>
   `,
-  styleUrls: ['./ngx-auto-table.component.scss']
+  styleUrls: ['../ngx-auto-table.component.scss']
 })
 export class NgxAutoTableHeaderSearchComponent implements OnInit, OnDestroy {
   @Input()

@@ -83,7 +83,7 @@ import { ActionDefinition } from '../AutoTableConfig';
       </div>
     </div>
   `,
-  styleUrls: ['./ngx-auto-table.component.scss']
+  styleUrls: ['../ngx-auto-table.component.scss']
 })
 export class NgxAutoTableActionsMenuComponent implements OnInit {
   @Input()

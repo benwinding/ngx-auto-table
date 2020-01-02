@@ -28,7 +28,7 @@ import { Subject } from 'rxjs';
       </mat-select>
     </mat-form-field>
   `,
-  styleUrls: ['./ngx-auto-table.component.scss']
+  styleUrls: ['../ngx-auto-table.component.scss']
 })
 export class NgxAutoTableHeaderColumnsChooserComponent
   implements OnInit, OnDestroy {

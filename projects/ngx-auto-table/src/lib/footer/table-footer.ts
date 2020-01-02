@@ -43,7 +43,7 @@ import { MatPaginator, MatSort, MatTableDataSource } from '@angular/material';
       </mat-toolbar-row>
     </mat-toolbar>
   `,
-  styleUrls: ['./ngx-auto-table.component.scss']
+  styleUrls: ['../ngx-auto-table.component.scss']
 })
 export class NgxAutoTableFooterComponent implements OnInit, OnDestroy {
   @Input()
