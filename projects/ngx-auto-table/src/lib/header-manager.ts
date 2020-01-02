@@ -12,7 +12,7 @@ export class HeaderManager {
   private _headerKeysDisplayedSet: Set<string> = new Set();
   private _headerKeysDisplayedMap: {} = {};
 
-  get HeadersAllVisible(): string[] {
+  get HeadersDisplayedChoices(): string[] {
     return this._headerKeysAllVisible;
   }
 

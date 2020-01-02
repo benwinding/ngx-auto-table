@@ -1,5 +1,10 @@
 import { Component, OnInit, Input, OnDestroy, ViewChild } from '@angular/core';
-import { MatTableDataSource, MatPaginator, MatSort, MatCheckboxChange } from '@angular/material';
+import {
+  MatTableDataSource,
+  MatPaginator,
+  MatSort,
+  MatCheckboxChange
+} from '@angular/material';
 import { Subject } from 'rxjs';
 import { FormControl } from '@angular/forms';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -24,6 +29,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { HeaderManager } from './header-manager';
 import { SimpleLogger } from './SimpleLogger';
+import { TableNotifyService } from './table-notify.service';
 
 function blankConfig<T>(): AutoTableConfig<T> {
   return {
@@ -84,12 +90,11 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
 
   $onDestroyed = new Subject();
   isMobile: boolean;
-  IsLoaded: boolean;
   $setDisplayedColumnsTrigger = new Subject<string[]>();
 
   private logger: SimpleLogger;
 
-  constructor(private breakpointObserver: BreakpointObserver) {}
+  constructor(private breakpointObserver: BreakpointObserver, private notify: TableNotifyService) {}
 
   reInitializeVariables() {
     this.columnDefinitionsAll = {};
@@ -103,50 +108,44 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.logger = new SimpleLogger(this.config.debug);
-    this.breakpointObserver
-      .observe([Breakpoints.HandsetLandscape, Breakpoints.HandsetPortrait])
-      .pipe(
-        tap(val => this.logger.log(val)),
-        takeUntil(this.$onDestroyed),
-        map(result => result.matches),
-        debounceTime(200),
-        distinctUntilChanged()
-      )
-      .subscribe(isMobile => {
-        this.logger.log('this.breakpointObserver', { isMobile });
-        this.isMobile = isMobile;
-        this.refreshDefaultColumns();
-      });
-    this.$setDisplayedColumnsTrigger
-      .pipe(takeUntil(this.$onDestroyed), auditTime(100))
-      .subscribe(newHeaders => {
-        this.setDisplayedColumns(newHeaders);
-      });
 
     if (!this.config) {
       this.logger.log('ngOnInit(), no [config] set on auto-table component');
       return;
     }
+
+    this.breakpointObserver
+      .observe([Breakpoints.HandsetLandscape, Breakpoints.HandsetPortrait])
+      .pipe(
+        takeUntil(this.$onDestroyed),
+        map(result => result.matches),
+        distinctUntilChanged(),
+        debounceTime(100),
+        tap(isMobile => this.logger.log('this.breakpointObserver$', {isMobile})),
+      )
+      .subscribe(isMobile => {
+        // this.isMobile = isMobile;
+        // this.refreshDefaultColumns();
+      });
+
+    this.$setDisplayedColumnsTrigger
+      .pipe(takeUntil(this.$onDestroyed), debounceTime(100))
+      .subscribe(newHeaders => {
+        this.setDisplayedColumns(newHeaders);
+      });
+
     this.reInitializeVariables();
     this.config.data$
       .pipe(
-        filter(originalData => {
-          const isArray = Array.isArray(originalData);
-          if (!isArray) {
-            this.IsLoaded = false;
-          }
-          return isArray;
-        })
+        debounceTime(100),
+        filter(originalData => Array.isArray(originalData))
       )
       .pipe(takeUntil(this.$onDestroyed))
       .subscribe(originalData => {
-        const hasBeenInitedBefore =
+        const alreadyInited =
           this.dataSource &&
           this.dataSource.data &&
           this.dataSource.data.length;
-        setTimeout(() => {
-          this.IsLoaded = true;
-        }, 200);
         this.logger.log('config.data$.subscribe: ', { originalData });
         this.dataSource = new MatTableDataSource(originalData);
         this.dataSource.paginator = this.paginator;
@@ -158,7 +157,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
         if (this.config.onDataUpdated) {
           this.config.onDataUpdated(originalData);
         }
-        if (!hasBeenInitedBefore) {
+        if (!alreadyInited) {
           const firstDataItem = originalData[0];
           this.initDisplayedColumns(firstDataItem);
           if (this.config.selectFirstOnInit) {
@@ -171,15 +170,20 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
 
     if (this.config.$triggerSelectItem) {
       this.config.$triggerSelectItem
-        .pipe(throttleTime(300))
+        .pipe(debounceTime(300))
         .pipe(takeUntil(this.$onDestroyed))
         .subscribe(item => {
-          this.logger.log('config.$triggerSelectItem.subscribe: selecting item', { item });
+          this.logger.log(
+            'config.$triggerSelectItem.subscribe: selecting item',
+            { item }
+          );
           const str = JSON.stringify(item);
           const foundItem = this.dataSource.data.find(
             row => JSON.stringify(row) === str
           );
-          this.logger.log('config.$triggerSelectItem.subscribe: found item:', { foundItem });
+          this.logger.log('config.$triggerSelectItem.subscribe: found item:', {
+            foundItem
+          });
           if (foundItem) {
             this.selectionSingle.select(foundItem);
           }
@@ -190,7 +194,9 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
       this.config.$triggerClearSelected
         .pipe(takeUntil(this.$onDestroyed))
         .subscribe(() => {
-          this.logger.log('config.$triggerClearSelected.subscribe: clearing selection');
+          this.logger.log(
+            'config.$triggerClearSelected.subscribe: clearing selection'
+          );
           this.selectionMultiple.clear();
           this.selectionSingle.clear();
         });
@@ -207,11 +213,19 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   }
 
   refreshDefaultColumns() {
-    if (this.isMobile && this.config.mobileFields) {
-      this.$setDisplayedColumnsTrigger.next(this.config.mobileFields);
+    const setMobile = this.isMobile && this.config.mobileFields;
+    let columns: string[] = [];
+    if (setMobile) {
+      columns = this.config.mobileFields;
     } else {
-      this.$setDisplayedColumnsTrigger.next(this.getDisplayedDefault());
+      columns = this.getDisplayedDefault();
     }
+    this.logger.log('refreshDefaultColumns()', {
+      setMobile,
+      columns,
+      columnDefinitionsAllArray: this.columnDefinitionsAllArray
+    });
+    this.$setDisplayedColumnsTrigger.next(columns);
   }
 
   private applyFilter(inputValue: string) {
@@ -356,16 +370,16 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   }
 
   // Sets the displayed columns from a set of fieldnames
-  setDisplayedColumns(selected: string[]) {
+  setDisplayedColumns(columnsToDisplay: string[]) {
     this.headerManager.SetDisplayed<T>(
-      selected,
+      columnsToDisplay,
       this.config.actions,
       this.config.actionsBulk
     );
     this.initFromDefinitions();
     this.columnDefinitionMapToArray();
     this.logger.log('setDisplayedColumns()', {
-      selected,
+      columnsToDisplay,
       columnDefinitionsAllArray: this.columnDefinitionsAllArray
     });
   }
@@ -427,7 +441,10 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     }
     try {
       const vals = JSON.parse(selectedValsString);
-      this.logger.log('columnsCacheSetFromCache(): getting cached columns', { vals, cacheKey });
+      this.logger.log('columnsCacheSetFromCache(): getting cached columns', {
+        vals,
+        cacheKey
+      });
       this.chooseColumnsControl.setValue(vals);
       this.$setDisplayedColumnsTrigger.next(vals);
     } catch (error) {
@@ -439,7 +456,10 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     const cacheKey = this.config.cacheId + '-columns';
     const selectedValues = this.chooseColumnsControl.value;
     localStorage.setItem(cacheKey, JSON.stringify(selectedValues));
-    this.logger.log('columnsCacheSetToCache():, setting cached columns', { cacheKey, selectedValues });
+    this.logger.log('columnsCacheSetToCache():, setting cached columns', {
+      cacheKey,
+      selectedValues
+    });
   }
 
   onColumnFilterChange($event) {
@@ -472,6 +492,9 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     if (maxReached && isSelected) {
       this.selectionMultiple.deselect(item);
     }
+    if (maxReached && !isSelected) {
+      this.notify.warn(`Cannot select! (maxium of ${this.config.bulkSelectMaxCount} items)`)
+    }
     if (this.config.onSelectedBulk) {
       this.config.onSelectedBulk(this.selectionMultiple.selected);
     }
@@ -491,10 +514,6 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
       this.selectionSingle.select(row);
       this.config.onSelectItemDoubleClick(row);
     }
-  }
-
-  async onClickedAction(action, row) {
-    await action.onClick(row);
   }
 
   async onClickBulkAction(action: ActionDefinitionBulk<T>, btnBulkAction) {

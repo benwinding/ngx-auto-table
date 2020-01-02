@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AutoTableConfig } from '../../../ngx-auto-table/src/public_api';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { take, debounceTime, startWith } from 'rxjs/operators';
 import { FormGroup, FormControl } from '@angular/forms';
 
@@ -9,6 +9,7 @@ interface TestRow {
   age: number;
   next_birthday: number;
   id_taken_from_db: string;
+  test$: Observable<string>;
 }
 
 const randomNames = [
@@ -37,13 +38,15 @@ function MakeRandomRow(): TestRow {
   const randomName =
     randomNames[Math.floor(Math.random() * randomNames.length)];
   const randomAge = Math.round(Math.random() * 25 + 20);
+  const randId = Math.random()
+    .toString(32)
+    .slice(2);
   return {
     name: randomName,
     age: randomAge,
-    id_taken_from_db: Math.random()
-      .toString(32)
-      .slice(2),
-    next_birthday: randomAge + 1
+    id_taken_from_db: randId,
+    next_birthday: randomAge + 1,
+    test$: new BehaviorSubject(randId)
   };
 }
 
@@ -108,14 +111,19 @@ function MakeRandomRow(): TestRow {
       [config]="config"
       [columnDefinitions]="{
         name: {},
+        name2: { template: name2Template },
         age: {},
         mobile: { template: mobileTemplate, hide: true }
       }"
-    ></ngx-auto-table>
+    >
+      <ng-template #name2Template let-row>
+        <strong>{{ row.test$ | async }}</strong>
+      </ng-template>    
+      <ng-template #mobileTemplate let-row>
+        <strong>{{ row.name }}</strong>
+      </ng-template>    
+    </ngx-auto-table>
 
-    <ng-template #mobileTemplate let-row>
-      <strong>{{ row.name }}</strong>
-    </ng-template>
   `
 })
 export class AppComponent implements OnInit {
@@ -155,28 +163,24 @@ export class AppComponent implements OnInit {
   }
 
   async ngOnInit() {
+    // await this.fakeDelay(500);
     this.formGroup.valueChanges
       .pipe(startWith(null), debounceTime(300))
       .subscribe(newConfigFlags => {
         this.makeCofig(this.formGroup.value);
       });
-    await this.fakeDelay(1000);
+    // await this.fakeDelay(1000);
     this.data$.next([]);
-    await this.fakeDelay(3000);
-    this.data$.next([
-      MakeRandomRow(),
-      MakeRandomRow(),
-      MakeRandomRow(),
-      MakeRandomRow(),
-      MakeRandomRow(),
-      MakeRandomRow(),
-      MakeRandomRow(),
-      MakeRandomRow()
-    ]);
+    // await this.fakeDelay(1000);
+    this.data$.next(this.makeRandomSet(10));
+  }
+
+  makeRandomSet(count: number) {
+    return Array.from('1'.repeat(count)).map(() => MakeRandomRow());
   }
   async makeCofig(newConfigFlags) {
     this.config = null;
-    await new Promise(res => setTimeout(res, 100));
+    // await this.fakeDelay(100);
     this.config = {
       ...newConfigFlags,
       data$: this.data$,

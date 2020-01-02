@@ -46,7 +46,7 @@
               multiple
             >
               <mat-option
-                *ngFor="let key of this.headerManager.HeadersAllVisible"
+                *ngFor="let key of this.headerManager.HeadersDisplayedChoices"
                 [value]="key"
               >
                 {{ getKeyHeader(key) }}
@@ -126,13 +126,14 @@
     mat-table
     #table
     matSort
-    *ngIf="IsLoaded"
+    *ngIf="this.dataSource?.data"
     [matSortActive]="config.initialSort"
     [matSortDirection]="config.initialSortDir"
     [dataSource]="this.dataSource"
     style="width:100%;"
     class="mat-elevation-z8"
   >
+    <!-- All header definitions given to ngx-auto-table -->
     <ng-container
       *ngFor="let def of columnDefinitionsAllArray"
       [matColumnDef]="def.field"
@@ -176,89 +177,16 @@
     <ng-container matColumnDef="__star" stickyEnd>
       <th mat-header-cell *matHeaderCellDef></th>
       <td mat-cell *matCellDef="let row">
-        <div
-          *ngIf="config.actions"
-          class="flex flex-row-reverse items-center content-start"
-        >
-          <button
-            *ngIf="(config?.actionsVisibleCount || 0) < config.actions.length"
-            mat-mini-fab
-            color="secondary"
-            [disabled]="isPerformingBulkAction"
-            [matMenuTriggerFor]="rowMenu"
-          >
-            <mat-icon color="dark">more_vert</mat-icon>
-          </button>
-          <mat-menu #rowMenu="matMenu" class="row-menu">
-            <div
-              mat-menu-item
-              *ngFor="
-                let action of config.actions
-                  | slice
-                    : config?.actionsVisibleCount || 0
-                    : config.actions.length
-              "
-            >
-              <button
-                mat-menu-item
-                *ngIf="action.onClick"
-                (click)="onClickedAction(action, row)"
-              >
-                <mat-icon>{{ action.icon }}</mat-icon>
-                <span>{{ action.label }}</span>
-              </button>
-              <a
-                mat-menu-item
-                *ngIf="action.onRouterLink && !action.routerLinkQuery"
-                [routerLink]="['/' + action.onRouterLink(row)]"
-              >
-                <mat-icon>{{ action.icon }}</mat-icon>
-                <span>{{ action.label }}</span>
-              </a>
-              <a
-                mat-menu-item
-                *ngIf="action.onRouterLink && action.routerLinkQuery"
-                [routerLink]="['/' + action.onRouterLink(row)]"
-                [queryParams]="action.routerLinkQuery(row)"
-              >
-                <mat-icon>{{ action.icon }}</mat-icon>
-                <span>{{ action.label }}</span>
-              </a>
-            </div>
-          </mat-menu>
-          <div class="flex" *ngIf="config?.actionsVisibleCount as visibleCount">
-            <div *ngFor="let action of config.actions | slice: 0:visibleCount">
-              <button
-                mat-mini-fab
-                *ngIf="action.onClick"
-                (click)="onClickedAction(action, row)"
-                [matTooltip]="action.label"
-              >
-                <mat-icon>{{ action.icon }}</mat-icon>
-              </button>
-              <a
-                mat-mini-fab
-                *ngIf="action.onRouterLink && !action.routerLinkQuery"
-                [routerLink]="['/' + action.onRouterLink(row)]"
-                [matTooltip]="action.label"
-              >
-                <mat-icon>{{ action.icon }}</mat-icon>
-              </a>
-              <a
-                mat-mini-fab
-                *ngIf="action.onRouterLink && action.routerLinkQuery"
-                [routerLink]="['/' + action.onRouterLink(row)]"
-                [queryParams]="action.routerLinkQuery(row)"
-                [matTooltip]="action.label"
-              >
-                <mat-icon>{{ action.icon }}</mat-icon>
-              </a>
-            </div>
-          </div>
-        </div>
+        <ngx-auto-table-actions-menu
+          [row]="row"
+          [actions]="config?.actions"
+          [actionsVisibleCount]="config?.actionsVisibleCount"
+          [isPerformingBulkAction]="isPerformingBulkAction"
+        ></ngx-auto-table-actions-menu>
       </td>
     </ng-container>
 
+    <!-- Show only visible definitions -->
     <tr
       mat-header-row
       *matHeaderRowDef="this.headerManager.HeadersDisplayed"
@@ -284,12 +212,12 @@
     <mat-toolbar-row> </mat-toolbar-row>
   </mat-toolbar>
   <mat-toolbar class="mat-elevation-z8 overflow-hidden">
-    <mat-toolbar-row *ngIf="!IsLoaded">
+    <mat-toolbar-row *ngIf="!dataSource?.data">
       <ngx-auto-app-toolbar-loader
         class="full-width"
       ></ngx-auto-app-toolbar-loader>
     </mat-toolbar-row>
-    <mat-toolbar-row *ngIf="!IsLoaded">
+    <mat-toolbar-row *ngIf="!dataSource?.data">
       <h1 class="no-items">Loading...</h1>
     </mat-toolbar-row>
     <mat-toolbar-row *ngIf="HasNoItems">

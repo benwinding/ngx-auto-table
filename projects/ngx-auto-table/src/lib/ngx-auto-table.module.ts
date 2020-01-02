@@ -18,7 +18,8 @@ import {
   MatTableModule,
   MatToolbarModule,
   MatMenuModule,
-  MatTooltipModule
+  MatTooltipModule,
+  MatSnackBarModule
 } from "@angular/material";
 
 import { CsvModule } from "@ctrl/ngx-csv";
@@ -30,6 +31,8 @@ import { AppToolbarLoaderComponent } from "./loaders/toolbar-loader.component";
 import { AppBtnLoaderComponent } from "./loaders/btn-loader.component";
 import { AppTableLoaderComponent } from './loaders/table-loader.component';
 import { LayoutModule } from "@angular/cdk/layout";
+import { TableNotifyService } from "./table-notify.service";
+import { NgxAutoTableActionsMenuComponent } from "./actions-menu.component";
 
 const sharedComponents = [AutoTableComponent];
 
@@ -39,8 +42,10 @@ const sharedComponents = [AutoTableComponent];
     AppToolbarLoaderComponent,
     AppExportCsvExportComponent,
     AppBtnLoaderComponent,
+    NgxAutoTableActionsMenuComponent,
     ...sharedComponents,
   ],
+  providers: [TableNotifyService],
   exports: sharedComponents,
   imports: [
     CsvModule,
@@ -58,6 +63,7 @@ const sharedComponents = [AutoTableComponent];
     MatProgressBarModule,
     MatProgressSpinnerModule,
     MatSelectModule,
+    MatSnackBarModule,
     MatSortModule,
     MatTableModule,
     MatTooltipModule,
