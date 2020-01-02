@@ -1,4 +1,11 @@
-import { Component, OnInit, EventEmitter, Input, Output, OnDestroy } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  EventEmitter,
+  Input,
+  Output,
+  OnDestroy
+} from '@angular/core';
 import { ActionDefinitionBulk } from '../models';
 
 import { v4 as uuidv4 } from 'uuid';
@@ -30,6 +37,8 @@ import { Subject } from 'rxjs';
 export class NgxAutoTableHeaderSearchComponent implements OnInit, OnDestroy {
   @Input()
   filterText: string;
+  @Input()
+  $clearTrigger: Subject<void>;
 
   @Output()
   searchChanged: EventEmitter<string> = new EventEmitter();
@@ -41,9 +50,13 @@ export class NgxAutoTableHeaderSearchComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.searchControl.valueChanges
-    .pipe(takeUntil(this.$onDestroyed), debounceTime(200))
-    .subscribe(searchString => {
-      this.searchChanged.next(searchString);
+      .pipe(takeUntil(this.$onDestroyed), debounceTime(200))
+      .subscribe(searchString => {
+        this.searchChanged.next(searchString);
+      });
+
+    this.$clearTrigger.pipe(takeUntil(this.$onDestroyed)).subscribe(() => {
+      this.searchControl.reset();
     });
   }
 

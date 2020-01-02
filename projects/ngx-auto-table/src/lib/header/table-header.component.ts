@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { FormControl } from '@angular/forms';
 import { SelectionModel } from '@angular/cdk/collections';
 import { KeyValue } from '@angular/common';
+import { Subject } from 'rxjs';
 
 @Component({
   selector: 'ngx-auto-table-header',
@@ -24,6 +25,7 @@ import { KeyValue } from '@angular/common';
             <ngx-auto-table-header-search
               [hidden]="HasNoItems || config?.hideFilter"
               [filterText]="config?.filterText"
+              [$clearTrigger]="$clearTrigger"
               (searchChanged)="onSearchChanged($event)"
             ></ngx-auto-table-header-search>
             <ngx-auto-table-header-columns-chooser
@@ -52,6 +54,7 @@ import { KeyValue } from '@angular/common';
               </button>
               <ngx-auto-table-header-search
                 [filterText]="config?.filterText"
+                [$clearTrigger]="$clearTrigger"
                 (searchChanged)="onSearchChanged($event)"
               ></ngx-auto-table-header-search>
               <span class="item-count">
@@ -115,6 +118,8 @@ export class NgxAutoTableHeaderComponent implements OnInit {
   searchControl = new FormControl();
   chooseColumnsControl = new FormControl();
 
+  $clearTrigger = new Subject();
+
   constructor() {}
 
   ngOnInit() {}
@@ -144,6 +149,7 @@ export class NgxAutoTableHeaderComponent implements OnInit {
 
   onClickCancelBulk() {
     this.selectionMultiple.clear();
+    this.$clearTrigger.next();
   }
 
   onSearchChanged(newSearchString: string) {
