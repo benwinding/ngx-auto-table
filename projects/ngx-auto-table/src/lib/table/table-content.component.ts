@@ -107,6 +107,28 @@ import { ColumnDefinitionInternal } from '../models.internal';
       ></tr>
     </table>
   `,
+  styles: [
+    `
+      td {
+        background: unset;
+      }
+      .has-pointer {
+        cursor: pointer;
+      }
+      .hover-row:hover {
+        filter: brightness(0.9) hue-rotate(15deg);
+      }
+      .selected-row-single {
+        filter: brightness(0.8) hue-rotate(15deg);
+      }
+      .selected-row-multiple {
+        filter: brightness(0.7) hue-rotate(15deg);
+      }
+      .break-words {
+        word-break: break-all;
+      }
+    `
+  ],
   styleUrls: ['../ngx-auto-table.component.scss']
 })
 export class NgxAutoTableContentComponent implements OnInit, OnDestroy {
@@ -121,7 +143,7 @@ export class NgxAutoTableContentComponent implements OnInit, OnDestroy {
   @Input()
   HeadersVisible: string[];
   @Input()
-  columnDefinitionsAll: ColumnDefinitionInternal[] = []
+  columnDefinitionsAll: ColumnDefinitionInternal[] = [];
 
   @Input()
   config: AutoTableConfig<any>;

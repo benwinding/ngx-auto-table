@@ -37,6 +37,35 @@ import { MatPaginator, MatTableDataSource } from '@angular/material';
       </mat-toolbar-row>
     </mat-toolbar>
   `,
+  styles: [
+    `
+      .no-items,
+      ngx-auto-app-table-loader {
+        text-align: center;
+        padding: 20px;
+        width: 100%;
+      }
+      .no-items {
+        color: #555;
+      }
+      .mat-paginator {
+        background-color: transparent;
+      }
+      .paginator-row {
+        display: flex;
+        align-items: centered;
+        justify-content: space-between;
+        height: unset;
+      }
+      .full-width {
+        width: 100%;
+      }
+      .expansion-joint {
+        flex-grow: 1;
+        min-height: 0px;
+      }
+    `
+  ],
   styleUrls: ['../ngx-auto-table.component.scss']
 })
 export class NgxAutoTableFooterComponent implements OnInit, OnDestroy {
@@ -49,6 +78,9 @@ export class NgxAutoTableFooterComponent implements OnInit, OnDestroy {
   @Input()
   set dataSource(newDataSource: MatTableDataSource<any>) {
     console.log('NgxAutoTableFooterComponent', { newDataSource });
+    if (!newDataSource) {
+      return;
+    }
     setTimeout(() => {
       this.initExport(newDataSource.data);
       newDataSource.paginator = this.paginator;
@@ -71,7 +103,7 @@ export class NgxAutoTableFooterComponent implements OnInit, OnDestroy {
   }
 
   initExport(originalData: any[]) {
-    console.log('NgxAutoTableFooterComponent initExport', {originalData});
+    console.log('NgxAutoTableFooterComponent initExport', { originalData });
     this.exportFilename = this.config.exportFilename;
     if (!this.exportFilename) {
       return;

@@ -54,6 +54,18 @@ function blankConfig<T>(): AutoTableConfig<T> {
       ></ngx-auto-table-footer>
     </div>
   `,
+  styles: [
+    `
+      .table-container {
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+      }
+      .isMobile {
+        overflow-x: hidden;
+      }
+    `
+  ],
   styleUrls: ['./ngx-auto-table.component.scss']
 })
 export class AutoTableComponent<T> implements OnInit, OnDestroy {

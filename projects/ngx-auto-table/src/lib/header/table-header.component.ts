@@ -40,7 +40,7 @@ import { Subject } from 'rxjs';
         <mat-toolbar
           class="bulk-actions flex-h align-center mat-primary overflow-x-auto"
           [hidden]="!config?.actionsBulk?.length"
-          [class.hidden]="!selectionMultiple.hasValue()"
+          [class.hide-header]="!selectionMultiple.hasValue()"
         >
           <mat-toolbar-row class="flex-h align-center space-between">
             <div class="flex-h align-center">
@@ -88,6 +88,52 @@ import { Subject } from 'rxjs';
       </div>
     </div>
   `,
+  styles: [
+    `
+      .addRightPixel {
+        width: calc(100% - 1px);
+      }
+      .relative {
+        position: relative;
+      }
+      .flex-h {
+        display: flex;
+        flex-direction: row;
+      }
+      .space-between {
+        justify-content: space-between;
+      }
+      .align-center {
+        align-items: center;
+      }
+      .auto-elevation {
+        box-shadow: 0px 5px 5px -3px rgba(0, 0, 0, 0.2),
+          0px 8px 10px 1px rgba(0, 0, 0, 0.14),
+          0px 3px 14px 2px rgba(0, 0, 0, 0.12);
+      }
+      .bulk-actions {
+        position: absolute;
+        top: 0px;
+        transition: all 0.7s;
+        width: 100%;
+        height: 100%;
+      }
+      .item-count {
+        padding-left: 10px;
+      }
+      .table-header {
+        width: 100%;
+      }
+      .hide-header {
+        top: -70px !important;
+        overflow: hidden !important;
+        height: 0px;
+      }
+      .overflow-x-auto {
+        overflow-x: auto;
+      }
+    `
+  ],
   styleUrls: ['../ngx-auto-table.component.scss']
 })
 export class NgxAutoTableHeaderComponent implements OnInit {

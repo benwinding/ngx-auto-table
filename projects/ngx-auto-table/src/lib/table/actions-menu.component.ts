@@ -83,6 +83,25 @@ import { ActionDefinition } from '../models';
       </div>
     </div>
   `,
+  styles: [
+    `
+      .flex-row-reverse {
+        flex-direction: row-reverse;
+      }
+      .items-center {
+        align-items: center;
+      }
+      .content-start {
+        justify-content: flex-start;
+      }
+      .flex {
+        display: flex;
+      }
+      button {
+        margin-right: 10px;
+      }
+    `
+  ],
   styleUrls: ['../ngx-auto-table.component.scss']
 })
 export class NgxAutoTableActionsMenuComponent implements OnInit {

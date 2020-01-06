@@ -32,6 +32,18 @@ import { Subject } from 'rxjs';
       >
     </mat-form-field>
   `,
+  styles: [
+    `
+      .filter-search {
+        margin-top: 11px;
+        margin-bottom: -9px;
+        margin-right: 20px;
+      }
+      .has-pointer {
+        cursor: pointer;
+      }
+    `
+  ],
   styleUrls: ['../ngx-auto-table.component.scss']
 })
 export class NgxAutoTableHeaderSearchComponent implements OnInit, OnDestroy {

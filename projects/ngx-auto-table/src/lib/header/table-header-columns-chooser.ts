@@ -29,6 +29,14 @@ import { KeyValue } from '@angular/common';
       </mat-select>
     </mat-form-field>
   `,
+  styles: [
+    `
+      .filter-columns {
+        margin-top: 11px;
+        margin-bottom: -9px;
+      }
+    `
+  ],
   styleUrls: ['../ngx-auto-table.component.scss']
 })
 export class NgxAutoTableHeaderColumnsChooserComponent
