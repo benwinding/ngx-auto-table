@@ -62,7 +62,7 @@ import { ColumnDefinitionInternal } from '../models.internal';
           >
           </mat-checkbox>
         </th>
-        <td mat-cell *matCellDef="let row" class="bulk-checkbox">
+        <td mat-cell *matCellDef="let row" class="bulk-checkbox bg-initial">
           <mat-checkbox
             [disabled]="IsPerformingBulkAction"
             (click)="$event.stopPropagation()"
@@ -75,7 +75,7 @@ import { ColumnDefinitionInternal } from '../models.internal';
 
       <ng-container matColumnDef="__star" stickyEnd>
         <th mat-header-cell *matHeaderCellDef></th>
-        <td mat-cell *matCellDef="let row">
+        <td mat-cell *matCellDef="let row" class="bg-initial">
           <ngx-auto-table-actions-menu
             [row]="row"
             [actions]="config?.actions"
@@ -129,6 +129,8 @@ import { ColumnDefinitionInternal } from '../models.internal';
       }
       .bulk-checkbox {
         width: 30px;
+      }
+      .bg-initial {
         background: initial;
       }
     `
