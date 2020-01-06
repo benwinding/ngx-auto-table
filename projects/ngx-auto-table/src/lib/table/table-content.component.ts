@@ -62,7 +62,7 @@ import { ColumnDefinitionInternal } from '../models.internal';
           >
           </mat-checkbox>
         </th>
-        <td mat-cell *matCellDef="let row">
+        <td mat-cell *matCellDef="let row" class="bulk-checkbox">
           <mat-checkbox
             [disabled]="IsPerformingBulkAction"
             (click)="$event.stopPropagation()"
@@ -126,6 +126,10 @@ import { ColumnDefinitionInternal } from '../models.internal';
       }
       .break-words {
         word-break: break-all;
+      }
+      .bulk-checkbox {
+        width: 30px;
+        background: initial;
       }
     `
   ],
