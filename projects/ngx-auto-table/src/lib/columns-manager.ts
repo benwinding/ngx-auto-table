@@ -46,11 +46,13 @@ export class ColumnsManager {
 
     // Add bulk select column at start
     if (hasActions) {
-      this._headerKeysVisibleArray.unshift('__bulk');
+      this._headerKeysVisibleSet.add('__star');
+      this._headerKeysVisibleArray.push('__star');
     }
     // Add actions column at end
     if (hasActionsBulk) {
-      this._headerKeysVisibleArray.push('__star');
+      this._headerKeysVisibleSet.add('__bulk');
+      this._headerKeysVisibleArray.unshift('__bulk');
     }
   }
 
