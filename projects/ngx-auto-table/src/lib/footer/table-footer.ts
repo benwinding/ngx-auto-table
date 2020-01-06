@@ -47,7 +47,7 @@ export class NgxAutoTableFooterComponent implements OnInit, OnDestroy {
   @Input()
   config: AutoTableConfig<any>;
   @Input()
-  dataSource(newDataSource: MatTableDataSource<any>) {
+  set dataSource(newDataSource: MatTableDataSource<any>) {
     console.log('NgxAutoTableFooterComponent', { newDataSource });
     setTimeout(() => {
       this.initExport(newDataSource.data);
@@ -71,6 +71,7 @@ export class NgxAutoTableFooterComponent implements OnInit, OnDestroy {
   }
 
   initExport(originalData: any[]) {
+    console.log('NgxAutoTableFooterComponent initExport', {originalData});
     this.exportFilename = this.config.exportFilename;
     if (!this.exportFilename) {
       return;
