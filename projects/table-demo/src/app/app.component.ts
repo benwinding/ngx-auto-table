@@ -173,8 +173,7 @@ export class AppComponent implements OnInit {
         this.makeCofig(this.formGroup.value);
       });
     // await this.fakeDelay(1000);
-    this.data$.next([]);
-    // await this.fakeDelay(1000);
+    await this.fakeDelay(1000);
     this.data$.next(this.makeRandomSet(30));
   }
 
@@ -182,8 +181,8 @@ export class AppComponent implements OnInit {
     return Array.from('1'.repeat(count)).map(() => MakeRandomRow());
   }
   async makeCofig(newConfigFlags) {
-    this.config = null;
-    await this.fakeDelay(100);
+    // this.config = null;
+    // await this.fakeDelay(100);
     this.config = {
       ...newConfigFlags,
       data$: this.data$,

@@ -39,7 +39,7 @@ import { Subject } from 'rxjs';
         </mat-toolbar>
         <mat-toolbar
           class="bulk-actions flex-h align-center mat-primary overflow-x-auto"
-          [hidden]="HasNoItems || !config?.actionsBulk?.length"
+          [hidden]="!config?.actionsBulk?.length || !selectionMultiple.selected.length"
           [class.hide-header]="!selectionMultiple.hasValue()"
         >
           <mat-toolbar-row class="flex-h align-center space-between">
