@@ -39,8 +39,9 @@ import { Subject } from 'rxjs';
         </mat-toolbar>
         <mat-toolbar
           class="bulk-actions flex-h align-center mat-primary overflow-x-auto"
-          [hidden]="!config?.actionsBulk?.length || !selectionMultiple.selected.length"
-          [class.hide-header]="!selectionMultiple.hasValue()"
+          *ngIf="hasInitialized && config?.actionsBulk?.length && !HasNoItems"
+          [hidden]="!hasInitialized || HasNoItems || !config?.actionsBulk?.length"
+          [class.hide-header]="!selectionMultiple?.selected?.length"
         >
           <mat-toolbar-row class="flex-h align-center space-between">
             <div class="flex-h align-center">
@@ -166,9 +167,15 @@ export class NgxAutoTableHeaderComponent implements OnInit {
 
   $clearTrigger = new Subject();
 
+  hasInitialized = false;
+
   constructor() {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    setTimeout(() => {
+      this.hasInitialized = true;
+    }, 1000);
+  }
 
   async onClickBulkAction(
     action: ActionDefinitionBulk<any>,
