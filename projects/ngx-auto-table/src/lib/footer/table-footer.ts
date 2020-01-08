@@ -81,10 +81,8 @@ export class NgxAutoTableFooterComponent implements OnInit, OnDestroy {
     if (!newDataSource) {
       return;
     }
-    setTimeout(() => {
-      this.initExport(newDataSource.data);
-      newDataSource.paginator = this.paginator;
-    });
+    newDataSource.paginator = this.paginator;
+    this.initExport(newDataSource.data);
   }
 
   defaultPageSize = 25;

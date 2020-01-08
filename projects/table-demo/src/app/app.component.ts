@@ -53,9 +53,38 @@ function MakeRandomRow(): TestRow {
 @Component({
   selector: 'app-root',
   template: `
-    <div style="text-align:center">
+    <h3 style="text-align:center">
       NGX Auto Table Testing
-    </div>
+    </h3>
+
+    <button
+      color="primary"
+      mat-raised-button
+      (click)="this.onClickAddRandomTake1()"
+    >
+      Add Random Name
+    </button>
+
+    <ngx-auto-table
+      [config]="config"
+      [columnDefinitions]="{
+        name: {},
+        name2: { template: name2Template },
+        age: {},
+        mobile: { template: mobileTemplate, hide: true }
+      }"
+    >
+      <ng-template #name2Template let-row>
+        <strong>{{ row.test$ | async }}</strong>
+      </ng-template>    
+      <ng-template #mobileTemplate let-row>
+        <strong>{{ row.name }}</strong>
+      </ng-template>    
+    </ngx-auto-table>
+
+    <h3 style="text-align:center">
+      Configuration Object
+    </h3>
 
     <form
       [formGroup]="formGroup"
@@ -98,32 +127,6 @@ function MakeRandomRow(): TestRow {
     {{ { config: formGroup.value } | json }}
     </pre
     >
-
-    <button
-      color="primary"
-      mat-raised-button
-      (click)="this.onClickAddRandomTake1()"
-    >
-      Add Random Name
-    </button>
-
-    <ngx-auto-table
-      [config]="config"
-      [columnDefinitions]="{
-        name: {},
-        name2: { template: name2Template },
-        age: {},
-        mobile: { template: mobileTemplate, hide: true }
-      }"
-    >
-      <ng-template #name2Template let-row>
-        <strong>{{ row.test$ | async }}</strong>
-      </ng-template>    
-      <ng-template #mobileTemplate let-row>
-        <strong>{{ row.name }}</strong>
-      </ng-template>    
-    </ngx-auto-table>
-
   `
 })
 export class AppComponent implements OnInit {
@@ -172,7 +175,7 @@ export class AppComponent implements OnInit {
     // await this.fakeDelay(1000);
     this.data$.next([]);
     // await this.fakeDelay(1000);
-    this.data$.next(this.makeRandomSet(10));
+    this.data$.next(this.makeRandomSet(30));
   }
 
   makeRandomSet(count: number) {
