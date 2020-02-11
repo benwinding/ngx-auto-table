@@ -291,48 +291,16 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
       firstRowHasAllHeaderFields,
       keysHeader
     });
-    this.dataSource.filterPredicate = (data: T, filterText: string) => {
-      if (!filterText) {
-        return true;
-      }
-      if (this.selectionMultiple.isSelected(data)) {
-        return true;
-      }
-      if (this.config.searchOnlyVisibleColumns) {
-        const currentHeadersVisible = this.columnsManager.HeadersVisible;
-        for (const key of currentHeadersVisible) {
-          const dataVal = data[key];
-          try {
-            const str = JSON.stringify(dataVal) || '';
-            const isFound = str.toLowerCase().includes(filterText);
-            if (isFound) {
-              return true;
-            }
-          } catch (error) {
-            return false;
-          }
-        }
-        return false;
-      }
-      if (firstRowHasAllHeaderFields) {
-        for (const key of Array.from(keysHeader)) {
-          const dataVal = data[key];
-          try {
-            const str = JSON.stringify(dataVal) || '';
-            const isFound = str.toLowerCase().includes(filterText);
-            if (isFound) {
-              return true;
-            }
-          } catch (error) {
-            return false;
-          }
-        }
-        return false;
-      }
-      const values = Object.values(data);
-      for (let value of values) {
+
+    const doesDataContainText = (
+      data: {},
+      keysToCheck: string[],
+      filterText: string
+    ): boolean => {
+      for (const key of keysToCheck) {
+        const dataVal = data[key];
         try {
-          const str = JSON.stringify(value) || '';
+          const str = JSON.stringify(dataVal) || '';
           const isFound = str.toLowerCase().includes(filterText);
           if (isFound) {
             return true;
@@ -342,6 +310,25 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
         }
       }
       return false;
+    };
+
+    this.dataSource.filterPredicate = (data: T, filterText: string) => {
+      if (!filterText) {
+        return true;
+      }
+      if (this.selectionMultiple.isSelected(data)) {
+        return true;
+      }
+      if (this.config.searchOnlyVisibleColumns) {
+        const currentHeadersVisible = this.columnsManager.HeadersVisible;
+        return doesDataContainText(data, currentHeadersVisible, filterText);
+      }
+      if (firstRowHasAllHeaderFields) {
+        const headerFields = Array.from(keysHeader);
+        return doesDataContainText(data, headerFields, filterText);
+      }
+      const allDataKeys = Object.keys(data);
+      return doesDataContainText(data, allDataKeys, filterText);
     };
   }
 }
