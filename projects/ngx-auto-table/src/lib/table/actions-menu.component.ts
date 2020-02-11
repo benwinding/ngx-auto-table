@@ -9,6 +9,7 @@ import { ActionDefinition } from '../models';
       class="flex flex-row-reverse items-center content-start"
     >
       <button
+        class="mr-10"
         *ngIf="(actionsVisibleCount || 0) < actions.length"
         mat-mini-fab
         color="secondary"
@@ -26,6 +27,7 @@ import { ActionDefinition } from '../models';
           "
         >
           <button
+            class="mr-10"
             mat-menu-item
             *ngIf="action.onClick"
             (click)="onClickedAction(action, row)"
@@ -34,6 +36,7 @@ import { ActionDefinition } from '../models';
             <span>{{ action.label }}</span>
           </button>
           <a
+            class="mr-10"
             mat-menu-item
             *ngIf="action.onRouterLink && !action.routerLinkQuery"
             [routerLink]="['/' + action.onRouterLink(row)]"
@@ -42,6 +45,7 @@ import { ActionDefinition } from '../models';
             <span>{{ action.label }}</span>
           </a>
           <a
+            class="mr-10"
             mat-menu-item
             *ngIf="action.onRouterLink && action.routerLinkQuery"
             [routerLink]="['/' + action.onRouterLink(row)]"
@@ -55,6 +59,7 @@ import { ActionDefinition } from '../models';
       <div class="flex" *ngIf="actionsVisibleCount as visibleCount">
         <div *ngFor="let action of actions | slice: 0:visibleCount">
           <button
+            class="mr-10"
             mat-mini-fab
             *ngIf="action.onClick"
             (click)="onClickedAction(action, row)"
@@ -63,6 +68,7 @@ import { ActionDefinition } from '../models';
             <mat-icon>{{ action.icon }}</mat-icon>
           </button>
           <a
+            class="mr-10"
             mat-mini-fab
             *ngIf="action.onRouterLink && !action.routerLinkQuery"
             [routerLink]="['/' + action.onRouterLink(row)]"
@@ -71,6 +77,7 @@ import { ActionDefinition } from '../models';
             <mat-icon>{{ action.icon }}</mat-icon>
           </a>
           <a
+            class="mr-10"
             mat-mini-fab
             *ngIf="action.onRouterLink && action.routerLinkQuery"
             [routerLink]="['/' + action.onRouterLink(row)]"
@@ -97,7 +104,7 @@ import { ActionDefinition } from '../models';
       .flex {
         display: flex;
       }
-      button {
+      .mr-10 {
         margin-right: 10px;
       }
     `

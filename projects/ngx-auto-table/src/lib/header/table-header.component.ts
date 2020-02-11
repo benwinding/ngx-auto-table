@@ -46,6 +46,7 @@ import { Subject } from 'rxjs';
           <mat-toolbar-row class="flex-h align-center space-between">
             <div class="flex-h align-center">
               <button
+                class="mr-10"
                 mat-raised-button
                 [disabled]="IsPerformingBulkAction"
                 (click)="onClickCancelBulk()"
@@ -72,6 +73,7 @@ import { Subject } from 'rxjs';
               <button
                 mat-raised-button
                 color="secondary"
+                class="ml-10"
                 [disabled]="IsPerformingBulkAction"
                 *ngFor="let action of config?.actionsBulk"
                 (click)="onClickBulkAction(action, btnBulkLoader)"
@@ -132,6 +134,12 @@ import { Subject } from 'rxjs';
       }
       .overflow-x-auto {
         overflow-x: auto;
+      }
+      .mr-10 {
+        margin-right: 10px;
+      }
+      .ml-10 {
+        margin-left: 10px;
       }
     `
   ],
