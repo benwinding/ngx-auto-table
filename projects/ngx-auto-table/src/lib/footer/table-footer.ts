@@ -3,6 +3,7 @@ import { AutoTableConfig } from '../models';
 
 import { Subject } from 'rxjs';
 import { MatPaginator, MatTableDataSource } from '@angular/material';
+import { SimpleLogger } from '../../utils/SimpleLogger';
 
 @Component({
   selector: 'ngx-auto-table-footer',
@@ -77,7 +78,7 @@ export class NgxAutoTableFooterComponent implements OnInit, OnDestroy {
   config: AutoTableConfig<any>;
   @Input()
   set dataSource(newDataSource: MatTableDataSource<any>) {
-    console.log('NgxAutoTableFooterComponent', { newDataSource });
+    this.logger.log('NgxAutoTableFooterComponent', { newDataSource });
     if (!newDataSource) {
       return;
     }
@@ -94,14 +95,18 @@ export class NgxAutoTableFooterComponent implements OnInit, OnDestroy {
 
   private $onDestroyed = new Subject();
 
-  ngOnInit() {}
+  private logger = new SimpleLogger(false);
+
+  ngOnInit() {
+    this.logger = new SimpleLogger(this.config.debug);
+  }
 
   ngOnDestroy() {
     this.$onDestroyed.next();
   }
 
   initExport(originalData: any[]) {
-    console.log('NgxAutoTableFooterComponent initExport', { originalData });
+    this.logger.log('NgxAutoTableFooterComponent initExport', { originalData });
     this.exportFilename = this.config.exportFilename;
     if (!this.exportFilename) {
       return;

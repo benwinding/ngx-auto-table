@@ -6,6 +6,7 @@ import { FormControl } from '@angular/forms';
 import { SelectionModel } from '@angular/cdk/collections';
 import { KeyValue } from '@angular/common';
 import { Subject } from 'rxjs';
+import { SimpleLogger } from '../../utils/SimpleLogger';
 
 @Component({
   selector: 'ngx-auto-table-header',
@@ -23,10 +24,14 @@ import { Subject } from 'rxjs';
         <mat-toolbar class="mat-elevation-z8">
           <mat-toolbar-row class="flex-h align-center space-between">
             <ngx-auto-table-header-search
+              [debug]="config?.debug"
+              [hasFilterByColumn]="config?.searchByColumnOption"
               [hidden]="HasNoItems || config?.hideFilter"
               [filterText]="config?.filterText"
               [$clearTrigger]="$clearTrigger"
               (searchChanged)="onSearchChanged($event)"
+              [headerKeyValues]="headerKeyValues"
+              (searchHeadersChanged)="onSearchHeadersChanged($event)"
             ></ngx-auto-table-header-search>
             <ngx-auto-table-header-columns-chooser
               [hidden]="HasNoItems || config?.hideChooseColumns"
@@ -40,7 +45,9 @@ import { Subject } from 'rxjs';
         <mat-toolbar
           class="bulk-actions flex-h align-center mat-primary overflow-x-auto"
           *ngIf="hasInitialized && config?.actionsBulk?.length && !HasNoItems"
-          [hidden]="!hasInitialized || HasNoItems || !config?.actionsBulk?.length"
+          [hidden]="
+            !hasInitialized || HasNoItems || !config?.actionsBulk?.length
+          "
           [class.hide-header]="!selectionMultiple?.selected?.length"
         >
           <mat-toolbar-row class="flex-h align-center space-between">
@@ -55,9 +62,13 @@ import { Subject } from 'rxjs';
                 <span>Cancel</span>
               </button>
               <ngx-auto-table-header-search
+                [debug]="config?.debug"
+                [hasFilterByColumn]="config?.searchByColumnOption"
                 [filterText]="config?.filterText"
                 [$clearTrigger]="$clearTrigger"
                 (searchChanged)="onSearchChanged($event)"
+                [headerKeyValues]="headerKeyValues"
+                (searchHeadersChanged)="onSearchHeadersChanged($event)"
               ></ngx-auto-table-header-search>
               <span class="item-count">
                 ({{ selectionMultiple.selected.length }} Selected)
@@ -165,6 +176,8 @@ export class NgxAutoTableHeaderComponent implements OnInit {
   @Output()
   searchChanged = new EventEmitter<string>();
   @Output()
+  searchHeadersChanged = new EventEmitter<string[]>();
+  @Output()
   columnsChanged = new EventEmitter<string[]>();
   @Output()
   bulkActionStatus = new EventEmitter<boolean>();
@@ -175,11 +188,14 @@ export class NgxAutoTableHeaderComponent implements OnInit {
 
   $clearTrigger = new Subject();
 
+  private logger = new SimpleLogger(false);
+
   hasInitialized = false;
 
   constructor() {}
 
   ngOnInit() {
+    this.logger = new SimpleLogger(this.config.debug);
     setTimeout(() => {
       this.hasInitialized = true;
     }, 1000);
@@ -214,12 +230,16 @@ export class NgxAutoTableHeaderComponent implements OnInit {
   }
 
   onSearchChanged(newSearchString: string) {
-    console.log('onSearchChanged', { newSearchString });
+    this.logger.log('onSearchChanged', { newSearchString });
     this.searchChanged.next(newSearchString);
   }
 
   onColumnsChanged(newColumnsArray: string[]) {
-    console.log('onColumnsChanged', { newColumnsArray });
+    this.logger.log('onColumnsChanged', { newColumnsArray });
     this.columnsChanged.next(newColumnsArray);
+  }
+
+  onSearchHeadersChanged(newColumnsArray: string[]) {
+    this.searchHeadersChanged.next(newColumnsArray);
   }
 }

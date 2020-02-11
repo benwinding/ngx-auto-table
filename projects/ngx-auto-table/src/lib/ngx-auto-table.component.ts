@@ -25,6 +25,7 @@ import { blankConfig } from './models.defaults';
         [selectionMultiple]="selectionMultiple"
         [selectedHeaderKeys]="columnsManager.HeadersVisible"
         (searchChanged)="onSearchChanged($event)"
+        (searchHeadersChanged)="onSearchHeadersChanged($event)"
         (columnsChanged)="onColumnsChanged($event)"
         (bulkActionStatus)="IsPerformingBulkAction = $event"
       ></ngx-auto-table-header>
@@ -93,6 +94,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   $onDestroyed = new Subject();
   isMobile: boolean;
   $setDisplayedColumnsTrigger = new Subject<string[]>();
+  $setSearchHeadersTrigger = new Subject<string[]>();
 
   private logger: SimpleLogger;
 
@@ -144,12 +146,21 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     this.$setDisplayedColumnsTrigger
       .pipe(takeUntil(this.$onDestroyed), debounceTime(100))
       .subscribe(newHeaders => {
-        console.log('setDisplayedColumnsTrigger', { newHeaders });
+        this.logger.log('setDisplayedColumnsTrigger', { newHeaders });
         this.columnsManager.SetDisplayed<T>(
           newHeaders,
           !!this.config.actions,
           !!this.config.actionsBulk
         );
+        this.dataSource.filter = this.dataSource.filter;
+      });
+
+    this.$setSearchHeadersTrigger
+      .pipe(takeUntil(this.$onDestroyed), debounceTime(100))
+      .subscribe(newHeaders => {
+        this.logger.log('setSearchHeadersTrigger', { newHeaders });
+        this.columnsManager.SetSearchFilterDisplayed<T>(newHeaders);
+        this.dataSource.filter = this.dataSource.filter;
       });
 
     this.reInitializeVariables();
@@ -237,7 +248,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     const initialKeys = Object.keys(columnDefinitions).filter(
       k => !columnDefinitions[k].hide && !(config.hideFields || []).includes(k)
     );
-    console.log('initialKeys', { initialKeys });
+    this.logger.log('initialKeys', { initialKeys });
     this.columnsManager.SetDisplayed(
       initialKeys,
       !!this.config.actions,
@@ -265,6 +276,10 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     const parsedString = inputValue || '';
     this.dataSource.filter = parsedString.trim().toLowerCase();
     this.selectionSingle.clear();
+  }
+
+  public onSearchHeadersChanged(columns: string[]) {
+    this.$setSearchHeadersTrigger.next(columns);
   }
 
   public onColumnsChanged(columns: string[]) {
@@ -318,6 +333,14 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
       }
       if (this.selectionMultiple.isSelected(data)) {
         return true;
+      }
+      if (this.config.searchByColumnOption) {
+        const filterByColumns = this.columnsManager.HeadersSearchFilterVisible;
+        if (filterByColumns.length > 0) {
+          return doesDataContainText(data, filterByColumns, filterText);
+        }
+        const currentHeadersVisible = this.columnsManager.HeadersVisible;
+        return doesDataContainText(data, currentHeadersVisible, filterText);
       }
       if (this.config.searchOnlyVisibleColumns) {
         const currentHeadersVisible = this.columnsManager.HeadersVisible;

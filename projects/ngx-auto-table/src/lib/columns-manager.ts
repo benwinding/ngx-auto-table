@@ -7,6 +7,7 @@ import { KeyValue } from '@angular/common';
 export class ColumnsManager {
   private _headerKeysAllChoices: KeyValue<string, string>[] = [];
   private _headerKeysVisibleArray: string[] = [];
+  private _headersSearchFilterVisible: string[] = [];
   private _headerKeysVisibleSet: Set<string> = new Set();
 
   private _columnDefinitionsAll: ColumnDefinitionMap = {};
@@ -20,6 +21,10 @@ export class ColumnsManager {
 
   public get HeadersVisible(): string[] {
     return this._headerKeysVisibleArray;
+  }
+
+  public get HeadersSearchFilterVisible(): string[] {
+    return this._headersSearchFilterVisible;
   }
 
   public get HeadersVisibleSet(): Set<string> {
@@ -56,6 +61,14 @@ export class ColumnsManager {
     }
   }
 
+  SetSearchFilterDisplayed<T>(selected: string[]) {
+    this._headersSearchFilterVisible.splice(
+      0,
+      this._headersSearchFilterVisible.length
+    );
+    selected.forEach(c => this._headersSearchFilterVisible.push(c));
+  }
+
   public InitializeColumns(
     config: AutoTableConfig<any>,
     columnDefinitions: ColumnDefinitionMap,
@@ -81,7 +94,6 @@ export class ColumnsManager {
     hideTheseFields: string[],
     allColumnDefinitions: ColumnDefinitionInternal[]
   ): KeyValue<string, string>[] {
-    console.log('getHeaderKeys', {hideTheseFields})
     const hideThese = new Set(hideTheseFields || []);
     const allChoices = [];
     // Add to all choices array
