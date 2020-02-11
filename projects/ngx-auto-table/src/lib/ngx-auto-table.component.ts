@@ -7,12 +7,7 @@ import { AutoTableConfig, ColumnDefinitionMap } from './models';
 
 import { ColumnsManager } from './columns-manager';
 import { SimpleLogger } from '../utils/SimpleLogger';
-
-function blankConfig<T>(): AutoTableConfig<T> {
-  return {
-    data$: new Subject<T[]>()
-  };
-}
+import { blankConfig } from './models.defaults';
 
 @Component({
   selector: 'ngx-auto-table',
@@ -285,13 +280,15 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     const firstRowKeysSet = new Set(firstRowKeys);
     keysHeader.delete('__bulk');
     keysHeader.delete('__star');
-    const allFieldsExist = Array.from(keysHeader).reduce((acc, cur) => {
-      return firstRowKeysSet.has(cur) && acc;
-    }, true);
-
+    const firstRowHasAllHeaderFields = Array.from(keysHeader).reduce(
+      (acc, cur) => {
+        return firstRowKeysSet.has(cur) && acc;
+      },
+      true
+    );
     this.logger.log('initFilterPredicate()', {
       firstRowKeysSet,
-      allFieldsExist,
+      firstRowHasAllHeaderFields,
       keysHeader
     });
     this.dataSource.filterPredicate = (data: T, filterText: string) => {
@@ -301,11 +298,12 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
       if (this.selectionMultiple.isSelected(data)) {
         return true;
       }
-      if (!allFieldsExist) {
-        const values = Object.values(data);
-        for (let value of values) {
+      if (this.config.searchOnlyVisibleColumns) {
+        const currentHeadersVisible = this.columnsManager.HeadersVisible;
+        for (const key of currentHeadersVisible) {
+          const dataVal = data[key];
           try {
-            const str = JSON.stringify(value) || '';
+            const str = JSON.stringify(dataVal) || '';
             const isFound = str.toLowerCase().includes(filterText);
             if (isFound) {
               return true;
@@ -316,10 +314,25 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
         }
         return false;
       }
-      for (const key of Array.from(keysHeader)) {
-        const dataVal = data[key];
+      if (firstRowHasAllHeaderFields) {
+        for (const key of Array.from(keysHeader)) {
+          const dataVal = data[key];
+          try {
+            const str = JSON.stringify(dataVal) || '';
+            const isFound = str.toLowerCase().includes(filterText);
+            if (isFound) {
+              return true;
+            }
+          } catch (error) {
+            return false;
+          }
+        }
+        return false;
+      }
+      const values = Object.values(data);
+      for (let value of values) {
         try {
-          const str = JSON.stringify(dataVal) || '';
+          const str = JSON.stringify(value) || '';
           const isFound = str.toLowerCase().includes(filterText);
           if (isFound) {
             return true;
@@ -328,6 +341,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
           return false;
         }
       }
+      return false;
     };
   }
 }

@@ -115,6 +115,7 @@ function MakeRandomRow(): TestRow {
         <form-toggle formControlName="hideHeader"></form-toggle>
         <form-toggle formControlName="hidePaginator"></form-toggle>
         <form-toggle formControlName="hideChooseColumns"></form-toggle>
+        <form-toggle formControlName="searchOnlyVisibleColumns"></form-toggle>
         <form-toggle formControlName="disableSelect"></form-toggle>
         <form-toggle formControlName="disableHoverEffect"></form-toggle>
         <form-toggle formControlName="selectFirstOnInit"></form-toggle>
@@ -144,6 +145,7 @@ export class AppComponent implements OnInit {
     hideHeader: new FormControl(),
     hidePaginator: new FormControl(),
     hideChooseColumns: new FormControl(),
+    searchOnlyVisibleColumns: new FormControl(),
     filterText: new FormControl(),
     exportFilename: new FormControl(),
     disableSelect: new FormControl(),

@@ -38,6 +38,7 @@ export interface AutoTableConfig<T> {
   initialSort?: string;
   initialSortDir?: "asc" | "desc";
   pageSize?: number;
+  searchOnlyVisibleColumns?: boolean;
   // Top bar configuration
   hideFields?: string[];
   hideFilter?: boolean;
