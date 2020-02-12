@@ -9,10 +9,10 @@ import {
 
 import { v4 as uuidv4 } from 'uuid';
 import { FormControl } from '@angular/forms';
-import { takeUntil, debounceTime, filter, delay } from 'rxjs/operators';
-import { Subject, BehaviorSubject } from 'rxjs';
-import { KeyValue } from '@angular/common';
+import { takeUntil, debounceTime } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 import { SimpleLogger } from '../../utils/SimpleLogger';
+import { HeaderKeyList } from '../models.internal';
 
 @Component({
   selector: 'ngx-auto-table-header-search',
@@ -46,10 +46,7 @@ import { SimpleLogger } from '../../utils/SimpleLogger';
               Select All
             </mat-option>
             <mat-optgroup label="Filter By">
-              <mat-option
-                *ngFor="let h of $headerKeyValues | async"
-                [value]="h.key"
-              >
+              <mat-option *ngFor="let h of headerKeyValues" [value]="h.key">
                 {{ h.value }}
               </mat-option>
             </mat-optgroup>
@@ -92,16 +89,8 @@ export class NgxAutoTableHeaderSearchComponent implements OnInit, OnDestroy {
   filterText: string;
   @Input()
   hasFilterByColumn: boolean;
-
   @Input()
-  set headerKeyValues(headerKeyValues) {
-    this.$headerKeyValues.next(headerKeyValues);
-  }
-  get headerKeyValues() {
-    return this.$headerKeyValues.getValue();
-  }
-  $headerKeyValues = new BehaviorSubject<KeyValue<string, string>[]>([]);
-
+  headerKeyValues: HeaderKeyList;
   @Input()
   $clearTrigger: Subject<void>;
 
@@ -156,8 +145,9 @@ export class NgxAutoTableHeaderSearchComponent implements OnInit, OnDestroy {
     }
   }
 
-  selectAllColumns() {
-    const keys = Array.from(this.headerKeyValues.values()).map(v => v.key);
+  async selectAllColumns() {
+    const arr = this.headerKeyValues;
+    const keys = Array.from(arr).map(v => v.key);
     keys.unshift(this.ALL_KEY);
     this.chooseSearchColumnsControl.setValue(keys);
   }

@@ -4,9 +4,9 @@ import { ActionDefinitionBulk, AutoTableConfig } from '../models';
 import { v4 as uuidv4 } from 'uuid';
 import { FormControl } from '@angular/forms';
 import { SelectionModel } from '@angular/cdk/collections';
-import { KeyValue } from '@angular/common';
 import { Subject } from 'rxjs';
 import { SimpleLogger } from '../../utils/SimpleLogger';
+import { HeaderKeyList } from '../models.internal';
 
 @Component({
   selector: 'ngx-auto-table-header',
@@ -167,7 +167,7 @@ export class NgxAutoTableHeaderComponent implements OnInit {
   @Input()
   IsMaxReached: boolean;
   @Input()
-  headerKeyValues: KeyValue<string, string>[];
+  headerKeyValues: HeaderKeyList;
   @Input()
   selectedHeaderKeys: string[];
   @Input()

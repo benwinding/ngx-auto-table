@@ -21,7 +21,7 @@ import { blankConfig } from './models.defaults';
         [IsPerformingBulkAction]="IsPerformingBulkAction"
         [HasNoItems]="HasNoItems"
         [IsMaxReached]="IsMaxReached"
-        [headerKeyValues]="columnsManager.HeadersChoicesKeyValues"
+        [headerKeyValues]="columnsManager.HeadersChoicesKeyValuesSorted$ | async"
         [selectionMultiple]="selectionMultiple"
         [selectedHeaderKeys]="columnsManager.HeadersVisible"
         (searchChanged)="onSearchChanged($event)"

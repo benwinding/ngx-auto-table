@@ -11,7 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { FormControl } from '@angular/forms';
 import { takeUntil, debounceTime } from 'rxjs/operators';
 import { Subject } from 'rxjs';
-import { KeyValue } from '@angular/common';
+import { HeaderKeyList } from '../models.internal';
 
 @Component({
   selector: 'ngx-auto-table-header-columns-chooser',
@@ -42,7 +42,7 @@ import { KeyValue } from '@angular/common';
 export class NgxAutoTableHeaderColumnsChooserComponent
   implements OnInit, OnDestroy {
   @Input()
-  headerKeyValues: KeyValue<string, string>[] = [];
+  headerKeyValues: HeaderKeyList;
   @Input()
   cacheId: string;
   @Input()

@@ -1,11 +1,12 @@
 import { ColumnDefinitionMap, AutoTableConfig } from './models';
 import { SimpleLogger } from '../utils/SimpleLogger';
-import { ColumnDefinitionInternal } from './models.internal';
-import { formatPretty } from '../utils/utils';
-import { KeyValue } from '@angular/common';
+import { ColumnDefinitionInternal, HeaderKeyList } from './models.internal';
+import { formatPretty, sortObjectArrayCase } from '../utils/utils';
+import { Observable, BehaviorSubject } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 export class ColumnsManager {
-  private _headerKeysAllChoices: KeyValue<string, string>[] = [];
+  private _headerKeysAllChoices: HeaderKeyList = [];
   private _headerKeysVisibleArray: string[] = [];
   private _headersSearchFilterVisible: string[] = [];
   private _headerKeysVisibleSet: Set<string> = new Set();
@@ -15,8 +16,17 @@ export class ColumnsManager {
 
   private logger = new SimpleLogger(false);
 
-  public get HeadersChoicesKeyValues(): KeyValue<string, string>[] {
-    return this._headerKeysAllChoices;
+  private _headersChoicesKeyValues$ = new BehaviorSubject<HeaderKeyList>([]);
+  public HeadersChoicesKeyValuesSorted$: Observable<HeaderKeyList>;
+
+  constructor() {
+    this.HeadersChoicesKeyValuesSorted$ = this._headersChoicesKeyValues$.pipe(
+      map(arr => {
+        const clonedValue = [...(arr || [])];
+        clonedValue.sort(sortObjectArrayCase('value'));
+        return clonedValue;
+      })
+    );
   }
 
   public get HeadersVisible(): string[] {
@@ -88,12 +98,13 @@ export class ColumnsManager {
     this._headerKeysAllChoices.push(
       ...this.getHeaderKeys(config.hideFields, this._columnDefinitionsAllArray)
     );
+    this._headersChoicesKeyValues$.next(this._headerKeysAllChoices);
   }
 
   private getHeaderKeys(
     hideTheseFields: string[],
     allColumnDefinitions: ColumnDefinitionInternal[]
-  ): KeyValue<string, string>[] {
+  ): HeaderKeyList {
     const hideThese = new Set(hideTheseFields || []);
     const allChoices = [];
     // Add to all choices array
