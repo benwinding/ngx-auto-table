@@ -5,6 +5,16 @@ import { formatPretty, sortObjectArrayCase } from '../utils/utils';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+function clearArray(arr: any[]) {
+  arr.splice(0, arr.length);
+}
+
+function arrayMoveEl(arr: any[], fromIndex: number, toIndex: number) {
+  var element = arr[fromIndex];
+  arr.splice(fromIndex, 1);
+  arr.splice(toIndex, 0, element);
+}
+
 export class ColumnsManager {
   private _headerKeysAllChoices: HeaderKeyList = [];
   private _headerKeysVisibleArray: string[] = [];
@@ -14,10 +24,9 @@ export class ColumnsManager {
   private _columnDefinitionsAll: ColumnDefinitionMap = {};
   private _columnDefinitionsAllArray: ColumnDefinitionInternal[] = [];
 
-  private logger = new SimpleLogger(false);
+  private logger = new SimpleLogger(true);
 
   private _headersChoicesKeyValues$ = new BehaviorSubject<HeaderKeyList>([]);
-  public HeadersChoicesKeyValuesSorted$: Observable<HeaderKeyList>;
 
   constructor() {
     this.HeadersChoicesKeyValuesSorted$ = this._headersChoicesKeyValues$.pipe(
@@ -28,6 +37,12 @@ export class ColumnsManager {
       })
     );
   }
+
+  public SetLogging(debug: boolean) {
+    this.logger = new SimpleLogger(debug);
+  }
+
+  public HeadersChoicesKeyValuesSorted$: Observable<HeaderKeyList>;
 
   public get HeadersVisible(): string[] {
     return this._headerKeysVisibleArray;
@@ -51,13 +66,18 @@ export class ColumnsManager {
     hasActionsBulk: boolean
   ) {
     selected = selected.filter(s => s !== '__bulk' && s !== '__star');
+    const selectedSet = new Set(selected);
     // Update sets
     this._headerKeysVisibleSet.clear();
     selected.forEach(c => this._headerKeysVisibleSet.add(c));
 
     // Update Array
-    this._headerKeysVisibleArray.splice(0, this._headerKeysVisibleArray.length);
-    selected.forEach(c => this._headerKeysVisibleArray.push(c));
+    clearArray(this._headerKeysVisibleArray);
+    this._columnDefinitionsAllArray.map(colDef => {
+      if (selectedSet.has(colDef.field)) {
+        this._headerKeysVisibleArray.push(colDef.field);
+      }
+    });
 
     // Add bulk select column at start
     if (hasActions) {
@@ -71,28 +91,27 @@ export class ColumnsManager {
     }
   }
 
-  SetSearchFilterDisplayed<T>(selected: string[]) {
-    this._headersSearchFilterVisible.splice(
-      0,
-      this._headersSearchFilterVisible.length
-    );
+  public SetSearchFilterDisplayed<T>(selected: string[]) {
+    clearArray(this._headersSearchFilterVisible);
     selected.forEach(c => this._headersSearchFilterVisible.push(c));
   }
 
   public InitializeColumns(
     config: AutoTableConfig<any>,
-    columnDefinitions: ColumnDefinitionMap,
+    orderedColumnDefinitions: ColumnDefinitionMap,
     dataRow: any
   ) {
     this._columnDefinitionsAll = this.getAllColumnDefinitions(
-      columnDefinitions
+      orderedColumnDefinitions
     );
     this._columnDefinitionsAll = {
-      ...this.getDefinitionsFromDataRow(dataRow),
+      ...this.getMoreDefinitionsFromDataRow(dataRow),
       ...this._columnDefinitionsAll
     };
-    this._columnDefinitionsAllArray = this.getColumnDefinitionArray(
-      this._columnDefinitionsAll
+    const orderedFields = Object.keys(orderedColumnDefinitions);
+    this._columnDefinitionsAllArray = this.getColumnDefinitionOrderedArray(
+      this._columnDefinitionsAll,
+      orderedFields
     );
     this._headerKeysAllChoices.splice(0, this._headerKeysAllChoices.length);
     this._headerKeysAllChoices.push(
@@ -120,12 +139,19 @@ export class ColumnsManager {
     return allChoices;
   }
 
-  private getColumnDefinitionArray(
-    colMap: ColumnDefinitionMap
+  private getColumnDefinitionOrderedArray(
+    allColumnDefinitionsMap: ColumnDefinitionMap,
+    fieldsOrdered: string[]
   ): ColumnDefinitionInternal[] {
     // Make array that template headers use
-    return Object.keys(colMap).map(k => {
-      const columnDef = colMap[k];
+    const allKeys = Object.keys(allColumnDefinitionsMap);
+    fieldsOrdered.map((field, toIndex) => {
+      const fromIndex = allKeys.indexOf(field);
+      arrayMoveEl(allKeys, fromIndex, toIndex);
+    });
+    this.logger.log('final field order', { allKeys });
+    return allKeys.map(k => {
+      const columnDef = allColumnDefinitionsMap[k];
       return {
         ...columnDef,
         header_pretty: columnDef.header || formatPretty(k),
@@ -134,7 +160,9 @@ export class ColumnsManager {
     });
   }
 
-  private getDefinitionsFromDataRow(firstDataItem: any): ColumnDefinitionMap {
+  private getMoreDefinitionsFromDataRow(
+    firstDataItem: any
+  ): ColumnDefinitionMap {
     if (!firstDataItem) {
       return {};
     }

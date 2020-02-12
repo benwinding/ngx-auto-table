@@ -137,6 +137,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.logger = new SimpleLogger(this.config.debug);
+    this.columnsManager.SetLogging(this.config.debug)
 
     if (!this.config) {
       this.logger.log('ngOnInit(), no [config] set on auto-table component');
