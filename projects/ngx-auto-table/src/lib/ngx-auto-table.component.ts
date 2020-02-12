@@ -75,7 +75,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
       this.ngOnInit();
     });
   }
-  get config() {
+  get config(): AutoTableConfig<T> {
     return this._config || this._blankConfig;
   }
   @Input()
