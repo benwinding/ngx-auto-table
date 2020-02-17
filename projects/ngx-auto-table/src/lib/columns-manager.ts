@@ -18,6 +18,7 @@ function arrayMoveEl(arr: any[], fromIndex: number, toIndex: number) {
 export class ColumnsManager {
   private _headerKeysAllChoices: HeaderKeyList = [];
   private _headerKeysVisibleArray: string[] = [];
+  private _headerKeysInitiallyVisible: string[] = [];
   private _headersSearchFilterVisible: string[] = [];
   private _headerKeysVisibleSet: Set<string> = new Set();
 
@@ -48,6 +49,10 @@ export class ColumnsManager {
     return this._headerKeysVisibleArray;
   }
 
+  public get HeadersInitiallyVisible(): string[] {
+    return this._headerKeysInitiallyVisible;
+  }
+
   public get HeadersSearchFilterVisible(): string[] {
     return this._headersSearchFilterVisible;
   }
@@ -58,6 +63,15 @@ export class ColumnsManager {
 
   public get AllColumnDefinitions(): ColumnDefinitionInternal[] {
     return this._columnDefinitionsAllArray;
+  }
+
+  public SetDisplayedInitial(
+    selected: string[],
+    hasActions: boolean,
+    hasActionsBulk: boolean
+  ) {
+    this.SetDisplayed(selected, hasActions, hasActionsBulk);
+    this._headerKeysInitiallyVisible = [...this._headerKeysVisibleArray];
   }
 
   public SetDisplayed<T>(

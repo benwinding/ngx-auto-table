@@ -2,12 +2,13 @@ import { Component, OnInit, Input, OnDestroy } from '@angular/core';
 import { MatTableDataSource } from '@angular/material';
 import { Subject } from 'rxjs';
 import { SelectionModel } from '@angular/cdk/collections';
-import { filter, takeUntil, debounceTime } from 'rxjs/operators';
+import { filter, takeUntil, debounceTime, map, distinctUntilChanged, tap } from 'rxjs/operators';
 import { AutoTableConfig, ColumnDefinitionMap } from './models';
 
 import { ColumnsManager } from './columns-manager';
 import { SimpleLogger } from '../utils/SimpleLogger';
 import { blankConfig } from './models.defaults';
+import { Breakpoints, BreakpointObserver } from '@angular/cdk/layout';
 
 @Component({
   selector: 'ngx-auto-table',
@@ -135,7 +136,27 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     return false;
   }
 
+  constructor(
+    private breakpointObserver: BreakpointObserver
+  ) {}
+
   ngOnInit() {
+    this.breakpointObserver
+      .observe([Breakpoints.HandsetLandscape, Breakpoints.HandsetPortrait])
+      .pipe(
+        takeUntil(this.$onDestroyed),
+        map(result => result.matches),
+        distinctUntilChanged(),
+        debounceTime(100),
+        tap(isMobile =>
+          this.logger.log('this.breakpointObserver$', { isMobile })
+        )
+      )
+      .subscribe((isMobile) => {
+        this.isMobile = isMobile;
+        this.refreshDefaultColumns();
+      });
+
     this.logger = new SimpleLogger(this.config.debug);
     this.columnsManager.SetLogging(this.config.debug)
 
@@ -153,7 +174,9 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
           !!this.config.actions,
           !!this.config.actionsBulk
         );
-        this.dataSource.filter = this.dataSource.filter;
+        if (this.dataSource) {
+          this.dataSource.filter = this.dataSource.filter;
+        }
       });
 
     this.$setSearchHeadersTrigger
@@ -161,7 +184,9 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
       .subscribe(newHeaders => {
         this.logger.log('setSearchHeadersTrigger', { newHeaders });
         this.columnsManager.SetSearchFilterDisplayed<T>(newHeaders);
-        this.dataSource.filter = this.dataSource.filter;
+        if (this.dataSource) {
+          this.dataSource.filter = this.dataSource.filter;
+        }
       });
 
     this.reInitializeVariables();
@@ -250,7 +275,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
       k => !columnDefinitions[k].hide && !(config.hideFields || []).includes(k)
     );
     this.logger.log('initialKeys', { initialKeys });
-    this.columnsManager.SetDisplayed(
+    this.columnsManager.SetDisplayedInitial(
       initialKeys,
       !!this.config.actions,
       !!this.config.actionsBulk
@@ -264,7 +289,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     if (setMobile) {
       columns = this.config.mobileFields;
     } else {
-      columns = [...this.columnsManager.HeadersVisible];
+      columns = [...this.columnsManager.HeadersInitiallyVisible];
     }
     this.logger.log('refreshDefaultColumns()', {
       setMobile,

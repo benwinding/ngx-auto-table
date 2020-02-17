@@ -184,26 +184,7 @@ export class NgxAutoTableContentComponent implements OnInit, OnDestroy {
 
   @ViewChild(MatSort, { static: false }) sort;
 
-  constructor(
-    private breakpointObserver: BreakpointObserver,
-    private notify: TableNotifyService
-  ) {
-    this.breakpointObserver
-      .observe([Breakpoints.HandsetLandscape, Breakpoints.HandsetPortrait])
-      .pipe(
-        takeUntil(this.$onDestroyed),
-        map(result => result.matches),
-        distinctUntilChanged(),
-        debounceTime(100),
-        tap(isMobile =>
-          this.logger.log('this.breakpointObserver$', { isMobile })
-        )
-      )
-      .subscribe(() => {
-        // this.isMobile = isMobile;
-        // this.refreshDefaultColumns();
-      });
-  }
+  constructor(private notify: TableNotifyService) {}
 
   ngOnInit() {}
 

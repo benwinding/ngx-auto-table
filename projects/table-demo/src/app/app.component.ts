@@ -140,6 +140,7 @@ export class AppComponent implements OnInit {
     actionsVisibleCount: new FormControl(1),
     initialSort: new FormControl(),
     initialSortDir: new FormControl(),
+    mobileFields: new FormControl(['mobile']),
     pageSize: new FormControl(10),
     hideFields: new FormControl(['name']),
     hideFilter: new FormControl(),
