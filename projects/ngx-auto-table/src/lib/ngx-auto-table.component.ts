@@ -1,8 +1,15 @@
 import { Component, OnInit, Input, OnDestroy } from '@angular/core';
 import { MatTableDataSource } from '@angular/material';
-import { Subject } from 'rxjs';
+import { Subject, Observable, combineLatest } from 'rxjs';
 import { SelectionModel } from '@angular/cdk/collections';
-import { filter, takeUntil, debounceTime, map, distinctUntilChanged, tap } from 'rxjs/operators';
+import {
+  filter,
+  takeUntil,
+  debounceTime,
+  map,
+  distinctUntilChanged,
+  tap
+} from 'rxjs/operators';
 import { AutoTableConfig, ColumnDefinitionMap } from './models';
 
 import { ColumnsManager } from './columns-manager';
@@ -22,7 +29,9 @@ import { Breakpoints, BreakpointObserver } from '@angular/cdk/layout';
         [IsPerformingBulkAction]="IsPerformingBulkAction"
         [HasNoItems]="HasNoItems"
         [IsMaxReached]="IsMaxReached"
-        [headerKeyValues]="columnsManager.HeadersChoicesKeyValuesSorted$ | async"
+        [headerKeyValues]="
+          columnsManager.HeadersChoicesKeyValuesSorted$ | async
+        "
         [selectionMultiple]="selectionMultiple"
         [selectedHeaderKeys]="columnsManager.HeadersVisible"
         (searchChanged)="onSearchChanged($event)"
@@ -93,7 +102,8 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   selectionSingle = new SelectionModel<any>(false, []);
 
   $onDestroyed = new Subject();
-  isMobile: boolean;
+  $isMobile: Observable<boolean>;
+  $refreshTrigger = new Subject<string[]>();
   $setDisplayedColumnsTrigger = new Subject<string[]>();
   $setSearchHeadersTrigger = new Subject<string[]>();
 
@@ -136,12 +146,13 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     return false;
   }
 
-  constructor(
-    private breakpointObserver: BreakpointObserver
-  ) {}
+  constructor(private breakpointObserver: BreakpointObserver) {}
 
   ngOnInit() {
-    this.breakpointObserver
+    this.logger = new SimpleLogger(this.config.debug);
+    this.columnsManager.SetLogging(this.config.debug);
+
+    this.$isMobile = this.breakpointObserver
       .observe([Breakpoints.HandsetLandscape, Breakpoints.HandsetPortrait])
       .pipe(
         takeUntil(this.$onDestroyed),
@@ -151,14 +162,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
         tap(isMobile =>
           this.logger.log('this.breakpointObserver$', { isMobile })
         )
-      )
-      .subscribe((isMobile) => {
-        this.isMobile = isMobile;
-        this.refreshDefaultColumns();
-      });
-
-    this.logger = new SimpleLogger(this.config.debug);
-    this.columnsManager.SetLogging(this.config.debug)
+      );
 
     if (!this.config) {
       this.logger.log('ngOnInit(), no [config] set on auto-table component');
@@ -213,6 +217,10 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
         );
       });
     this.initializeConfigTriggers();
+
+    combineLatest([this.$isMobile, this.$refreshTrigger])
+      .pipe(takeUntil(this.$onDestroyed))
+      .subscribe(([isMobile]) => this.onRefreshDefaultColumns(isMobile));
   }
 
   ngOnDestroy() {
@@ -280,19 +288,20 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
       !!this.config.actions,
       !!this.config.actionsBulk
     );
-    this.refreshDefaultColumns();
+    this.$refreshTrigger.next();
   }
 
-  refreshDefaultColumns() {
-    const setMobile = this.isMobile && this.config.mobileFields;
+  onRefreshDefaultColumns(isMobile: boolean) {
+    const shoulSetMobile = isMobile && this.config.mobileFields;
     let columns: string[] = [];
-    if (setMobile) {
+    if (shoulSetMobile) {
       columns = this.config.mobileFields;
     } else {
       columns = [...this.columnsManager.HeadersInitiallyVisible];
     }
-    this.logger.log('refreshDefaultColumns()', {
-      setMobile,
+    this.logger.log('onRefreshDefaultColumns()', {
+      isMobile,
+      shoulSetMobile,
       columns
     });
     this.$setDisplayedColumnsTrigger.next(columns);

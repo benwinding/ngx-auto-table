@@ -1,20 +1,12 @@
 import { Component, OnInit, OnDestroy, Input, ViewChild } from '@angular/core';
 import { Subject } from 'rxjs';
-import { AutoTableConfig, ColumnDefinitionMap } from '../models';
+import { AutoTableConfig } from '../models';
 import {
   MatTableDataSource,
   MatCheckboxChange,
   MatSort
 } from '@angular/material';
 import { SelectionModel } from '@angular/cdk/collections';
-import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import {
-  takeUntil,
-  map,
-  distinctUntilChanged,
-  debounceTime,
-  tap
-} from 'rxjs/operators';
 import { SimpleLogger } from '../../utils/SimpleLogger';
 import { TableNotifyService } from '../table-notify.service';
 import { ColumnDefinitionInternal } from '../models.internal';
