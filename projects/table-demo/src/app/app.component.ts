@@ -10,6 +10,8 @@ interface TestRow {
   next_birthday: number;
   id_taken_from_db: string;
   test$: Observable<string>;
+  thisIsSentenceCase: string;
+  thisHas_underScores: string;
 }
 
 const randomNames = [
@@ -46,7 +48,9 @@ function MakeRandomRow(): TestRow {
     age: randomAge,
     id_taken_from_db: randId,
     next_birthday: randomAge + 1,
-    test$: new BehaviorSubject(randId)
+    test$: new BehaviorSubject(randId),
+    thisIsSentenceCase: randId + 'A22',
+    thisHas_underScores: randId + '_26',
   };
 }
 

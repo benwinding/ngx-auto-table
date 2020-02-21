@@ -149,7 +149,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   constructor(private breakpointObserver: BreakpointObserver) {}
 
   ngOnInit() {
-    this.logger = new SimpleLogger(this.config.debug);
+    this.logger = new SimpleLogger('main.component', this.config.debug);
     this.columnsManager.SetLogging(this.config.debug);
 
     this.$isMobile = this.breakpointObserver

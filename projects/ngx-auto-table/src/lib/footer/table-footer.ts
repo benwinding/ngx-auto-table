@@ -95,10 +95,10 @@ export class NgxAutoTableFooterComponent implements OnInit, OnDestroy {
 
   private $onDestroyed = new Subject();
 
-  private logger = new SimpleLogger(false);
+  private logger = new SimpleLogger('footer', false);
 
   ngOnInit() {
-    this.logger = new SimpleLogger(this.config.debug);
+    this.logger = new SimpleLogger('footer', this.config.debug);
   }
 
   ngOnDestroy() {

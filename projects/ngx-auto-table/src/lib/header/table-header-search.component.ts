@@ -110,7 +110,7 @@ export class NgxAutoTableHeaderSearchComponent implements OnInit, OnDestroy {
   private $onDestroyed = new Subject();
 
   ngOnInit() {
-    this.logger = new SimpleLogger(this.debug);
+    this.logger = new SimpleLogger('header-search', this.debug);
 
     this.searchControl.valueChanges
       .pipe(takeUntil(this.$onDestroyed), debounceTime(200))

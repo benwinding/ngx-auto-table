@@ -1,9 +1,9 @@
 import { ColumnDefinitionMap, AutoTableConfig } from './models';
 import { SimpleLogger } from '../utils/SimpleLogger';
 import { ColumnDefinitionInternal, HeaderKeyList } from './models.internal';
-import { formatPretty, sortObjectArrayCase } from '../utils/utils';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
+import * as _ from 'lodash';
 
 function clearArray(arr: any[]) {
   arr.splice(0, arr.length);
@@ -25,7 +25,7 @@ export class ColumnsManager {
   private _columnDefinitionsAll: ColumnDefinitionMap = {};
   private _columnDefinitionsAllArray: ColumnDefinitionInternal[] = [];
 
-  private logger = new SimpleLogger(true);
+  private logger = new SimpleLogger('columns-manager', true);
 
   private _headersChoicesKeyValues$ = new BehaviorSubject<HeaderKeyList>([]);
 
@@ -33,14 +33,13 @@ export class ColumnsManager {
     this.HeadersChoicesKeyValuesSorted$ = this._headersChoicesKeyValues$.pipe(
       map(arr => {
         const clonedValue = [...(arr || [])];
-        clonedValue.sort(sortObjectArrayCase('value'));
-        return clonedValue;
+        return _.sortBy(clonedValue, 'value');
       })
     );
   }
 
   public SetLogging(debug: boolean) {
-    this.logger = new SimpleLogger(debug);
+    this.logger = new SimpleLogger('columns-manager', debug);
   }
 
   public HeadersChoicesKeyValuesSorted$: Observable<HeaderKeyList>;
@@ -168,7 +167,7 @@ export class ColumnsManager {
       const columnDef = allColumnDefinitionsMap[k];
       return {
         ...columnDef,
-        header_pretty: columnDef.header || formatPretty(k),
+        header_pretty: columnDef.header || _.startCase(k),
         field: k
       };
     });

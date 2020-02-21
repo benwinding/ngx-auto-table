@@ -167,12 +167,12 @@ export class NgxAutoTableContentComponent implements OnInit, OnDestroy {
   }
   @Input()
   set debug(newDebug: boolean) {
-    this.logger = new SimpleLogger(newDebug);
+    this.logger = new SimpleLogger('content', newDebug);
   }
 
   private $onDestroyed = new Subject();
 
-  private logger = new SimpleLogger(false);
+  private logger = new SimpleLogger('content', false);
 
   @ViewChild(MatSort, { static: false }) sort;
 

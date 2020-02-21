@@ -188,14 +188,14 @@ export class NgxAutoTableHeaderComponent implements OnInit {
 
   $clearTrigger = new Subject();
 
-  private logger = new SimpleLogger(false);
+  private logger = new SimpleLogger('header', false);
 
   hasInitialized = false;
 
   constructor() {}
 
   ngOnInit() {
-    this.logger = new SimpleLogger(this.config.debug);
+    this.logger = new SimpleLogger('header', this.config.debug);
     setTimeout(() => {
       this.hasInitialized = true;
     }, 1000);
