@@ -110,6 +110,10 @@ function MakeRandomRow(): TestRow {
           [selections]="['name', 'age']"
           formControlName="hideFields"
         ></form-select-string-multiple>
+        <form-select-string-multiple
+          [selections]="['name', 'age', 'id_taken_from_db']"
+          formControlName="dontSearchFields"
+        ></form-select-string-multiple>
         <form-text formControlName="filterText"></form-text>
         <form-text formControlName="exportFilename"></form-text>
       </div>
@@ -147,6 +151,7 @@ export class AppComponent implements OnInit {
     mobileFields: new FormControl(['mobile']),
     pageSize: new FormControl(10),
     hideFields: new FormControl(['name']),
+    dontSearchFields: new FormControl(['id_taken_from_db']),
     hideFilter: new FormControl(),
     hideHeader: new FormControl(),
     hidePaginator: new FormControl(),

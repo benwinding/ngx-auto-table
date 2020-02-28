@@ -16,6 +16,7 @@ import { ColumnsManager } from './columns-manager';
 import { SimpleLogger } from '../utils/SimpleLogger';
 import { blankConfig } from './models.defaults';
 import { Breakpoints, BreakpointObserver } from '@angular/cdk/layout';
+import { SearchManager } from './search-manager';
 
 @Component({
   selector: 'ngx-auto-table',
@@ -94,6 +95,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   dataSource: MatTableDataSource<any>;
 
   columnsManager = new ColumnsManager();
+  searchManager = new SearchManager<T>();
 
   IsPerformingBulkAction = false;
 
@@ -151,6 +153,8 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   ngOnInit() {
     this.logger = new SimpleLogger('main.component', this.config.debug);
     this.columnsManager.SetLogging(this.config.debug);
+    this.searchManager.SetColumsManager(this.columnsManager);
+    this.searchManager.SetConfig(this.config);
 
     this.$isMobile = this.breakpointObserver
       .observe([Breakpoints.HandsetLandscape, Breakpoints.HandsetPortrait])
@@ -211,10 +215,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
           this.selectionSingle.select(firstDataItem);
         }
         this.initTable(this.columnDefinitions, this.config, firstDataItem);
-        this.initFilterPredicate(
-          originalData,
-          this.columnsManager.HeadersVisibleSet
-        );
+        this.initFilterPredicate(originalData);
       });
     this.initializeConfigTriggers();
 
@@ -321,47 +322,14 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     this.$setDisplayedColumnsTrigger.next(columns);
   }
 
-  initFilterPredicate(originalData: T[], keysHeader: Set<string>) {
+  initFilterPredicate(originalData: T[]) {
     if (!originalData.length) {
       return;
     }
+
     const firstRow = originalData[0];
-    const firstRowKeys = Object.keys(firstRow);
-    const firstRowKeysSet = new Set(firstRowKeys);
-    keysHeader.delete('__bulk');
-    keysHeader.delete('__star');
-    const firstRowHasAllHeaderFields = Array.from(keysHeader).reduce(
-      (acc, cur) => {
-        return firstRowKeysSet.has(cur) && acc;
-      },
-      true
-    );
-    this.logger.log('initFilterPredicate()', {
-      firstRowKeysSet,
-      firstRowHasAllHeaderFields,
-      keysHeader
-    });
-
-    const doesDataContainText = (
-      data: {},
-      keysToCheck: string[],
-      filterText: string
-    ): boolean => {
-      for (const key of keysToCheck) {
-        const dataVal = data[key];
-        try {
-          const str = JSON.stringify(dataVal) || '';
-          const isFound = str.toLowerCase().includes(filterText);
-          if (isFound) {
-            return true;
-          }
-        } catch (error) {
-          return false;
-        }
-      }
-      return false;
-    };
-
+    this.searchManager.CheckFirstRow(firstRow);
+  
     this.dataSource.filterPredicate = (data: T, filterText: string) => {
       if (!filterText) {
         return true;
@@ -369,24 +337,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
       if (this.selectionMultiple.isSelected(data)) {
         return true;
       }
-      if (this.config.searchByColumnOption) {
-        const filterByColumns = this.columnsManager.HeadersSearchFilterVisible;
-        if (filterByColumns.length > 0) {
-          return doesDataContainText(data, filterByColumns, filterText);
-        }
-        const currentHeadersVisible = this.columnsManager.HeadersVisible;
-        return doesDataContainText(data, currentHeadersVisible, filterText);
-      }
-      if (this.config.searchOnlyVisibleColumns) {
-        const currentHeadersVisible = this.columnsManager.HeadersVisible;
-        return doesDataContainText(data, currentHeadersVisible, filterText);
-      }
-      if (firstRowHasAllHeaderFields) {
-        const headerFields = Array.from(keysHeader);
-        return doesDataContainText(data, headerFields, filterText);
-      }
-      const allDataKeys = Object.keys(data);
-      return doesDataContainText(data, allDataKeys, filterText);
+      return this.searchManager.DoesDataContainText(data, filterText);
     };
   }
 }

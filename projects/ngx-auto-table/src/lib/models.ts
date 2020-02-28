@@ -40,6 +40,7 @@ export interface AutoTableConfig<T> {
   pageSize?: number;
   searchOnlyVisibleColumns?: boolean;
   searchByColumnOption?: boolean;
+  dontSearchFields?: Array<keyof T>;
   // Top bar configuration
   hideFields?: string[];
   hideFilter?: boolean;
