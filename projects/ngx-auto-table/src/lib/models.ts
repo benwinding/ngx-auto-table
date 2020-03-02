@@ -64,4 +64,5 @@ export interface AutoTableConfig<T> {
   disableMobileScroll?: boolean;
   // Responsive
   mobileFields?: string[];
+  tabletFields?: string[];
 }

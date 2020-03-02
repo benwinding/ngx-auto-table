@@ -105,6 +105,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
 
   $onDestroyed = new Subject();
   $isMobile: Observable<boolean>;
+  $isTablet: Observable<boolean>;
   $refreshTrigger = new Subject<string[]>();
   $setDisplayedColumnsTrigger = new Subject<string[]>();
   $setSearchHeadersTrigger = new Subject<string[]>();
@@ -168,6 +169,18 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
         )
       );
 
+    this.$isTablet = this.breakpointObserver
+      .observe([Breakpoints.TabletLandscape, Breakpoints.TabletPortrait])
+      .pipe(
+        takeUntil(this.$onDestroyed),
+        map(result => result.matches),
+        distinctUntilChanged(),
+        debounceTime(100),
+        tap(isTablet =>
+          this.logger.log('this.breakpointObserver$', { isTablet })
+        )
+      );
+
     if (!this.config) {
       this.logger.log('ngOnInit(), no [config] set on auto-table component');
       return;
@@ -219,9 +232,15 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
       });
     this.initializeConfigTriggers();
 
-    combineLatest([this.$isMobile, this.$refreshTrigger])
+    combineLatest([this.$isMobile, this.$isTablet, this.$refreshTrigger])
       .pipe(takeUntil(this.$onDestroyed))
-      .subscribe(([isMobile]) => this.onRefreshDefaultColumns(isMobile));
+      .subscribe(([isMobile, isTablet]) => {
+        if (isMobile) {
+          this.onRefreshMobileDefaultColumns(isMobile);
+        } else {
+          this.onRefreshTabletDefaultColumns(isTablet);
+        }
+      });
   }
 
   ngOnDestroy() {
@@ -292,7 +311,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     this.$refreshTrigger.next();
   }
 
-  onRefreshDefaultColumns(isMobile: boolean) {
+  onRefreshMobileDefaultColumns(isMobile: boolean) {
     const shoulSetMobile = isMobile && this.config.mobileFields;
     let columns: string[] = [];
     if (shoulSetMobile) {
@@ -303,6 +322,21 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     this.logger.log('onRefreshDefaultColumns()', {
       isMobile,
       shoulSetMobile,
+      columns
+    });
+    this.$setDisplayedColumnsTrigger.next(columns);
+  }
+  onRefreshTabletDefaultColumns(isTablet: boolean) {
+    const shoulSetTablet = isTablet && this.config.tabletFields;
+    let columns: string[] = [];
+    if (shoulSetTablet) {
+      columns = this.config.tabletFields;
+    } else {
+      columns = [...this.columnsManager.HeadersInitiallyVisible];
+    }
+    this.logger.log('onRefreshDefaultColumns()', {
+      tabletFields: isTablet,
+      shoulSetTablet: shoulSetTablet,
       columns
     });
     this.$setDisplayedColumnsTrigger.next(columns);
@@ -329,7 +363,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
 
     const firstRow = originalData[0];
     this.searchManager.CheckFirstRow(firstRow);
-  
+
     this.dataSource.filterPredicate = (data: T, filterText: string) => {
       if (!filterText) {
         return true;
