@@ -104,8 +104,10 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   selectionSingle = new SelectionModel<any>(false, []);
 
   $onDestroyed = new Subject();
+
   $isMobile: Observable<boolean>;
   $isTablet: Observable<boolean>;
+
   $refreshTrigger = new Subject<string[]>();
   $setDisplayedColumnsTrigger = new Subject<string[]>();
   $setSearchHeadersTrigger = new Subject<string[]>();
@@ -158,28 +160,26 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     this.searchManager.SetConfig(this.config);
 
     this.$isMobile = this.breakpointObserver
-      .observe([Breakpoints.HandsetLandscape, Breakpoints.HandsetPortrait])
+      .observe([Breakpoints.Handset])
       .pipe(
-        takeUntil(this.$onDestroyed),
         map(result => result.matches),
+        takeUntil(this.$onDestroyed),
         distinctUntilChanged(),
         debounceTime(100),
         tap(isMobile =>
-          this.logger.log('this.breakpointObserver$', { isMobile })
+          this.logger.log('this.breakpointObserver$ isMobile', { isMobile })
         )
       );
 
-    this.$isTablet = this.breakpointObserver
-      .observe([Breakpoints.TabletLandscape, Breakpoints.TabletPortrait])
-      .pipe(
-        takeUntil(this.$onDestroyed),
-        map(result => result.matches),
-        distinctUntilChanged(),
-        debounceTime(100),
-        tap(isTablet =>
-          this.logger.log('this.breakpointObserver$', { isTablet })
-        )
-      );
+    this.$isTablet = this.breakpointObserver.observe([Breakpoints.Tablet]).pipe(
+      map(result => result.matches),
+      takeUntil(this.$onDestroyed),
+      distinctUntilChanged(),
+      debounceTime(100),
+      tap(isTablet =>
+        this.logger.log('this.breakpointObserver$ isTablet', { isTablet })
+      )
+    );
 
     if (!this.config) {
       this.logger.log('ngOnInit(), no [config] set on auto-table component');
