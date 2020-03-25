@@ -45,7 +45,7 @@ import { ColumnDefinitionInternal } from '../models.internal';
       </ng-container>
 
       <ng-container matColumnDef="__bulk" stickyEnd>
-        <th mat-header-cell *matHeaderCellDef>
+        <th mat-header-cell *matHeaderCellDef class="is-transparent">
           <mat-checkbox
             [disabled]="IsPerformingBulkAction || HasNoItems"
             (change)="onClickMasterToggle()"
@@ -66,7 +66,7 @@ import { ColumnDefinitionInternal } from '../models.internal';
       </ng-container>
 
       <ng-container matColumnDef="__star" stickyEnd>
-        <th mat-header-cell *matHeaderCellDef></th>
+        <th mat-header-cell *matHeaderCellDef class="is-transparent"></th>
         <td mat-cell *matCellDef="let row" class="bg-initial">
           <ngx-auto-table-actions-menu
             [row]="row"
@@ -124,6 +124,9 @@ import { ColumnDefinitionInternal } from '../models.internal';
       }
       .bg-initial {
         background: initial;
+      }
+      .is-transparent {
+        background: transparent;
       }
     `
   ],
