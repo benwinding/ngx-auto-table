@@ -8,9 +8,23 @@ import { CommonModule } from "@angular/common";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { HttpClientModule } from "@angular/common/http";
 import { MatReduceCoreModule } from 'mat-reduce-core'
+import { RouterModule, Routes } from "@angular/router";
+import { MainDemoComponent } from "./main-demo.component";
+
+const routes: Routes = [
+  {
+    path: '',
+    component: MainDemoComponent
+  },
+]
+
+const allComponents = [
+  MainDemoComponent,
+  AppComponent
+]
 
 @NgModule({
-  declarations: [AppComponent],
+  declarations: [...allComponents],
   imports: [
     BrowserModule,
     AutoTableModule,
@@ -21,7 +35,8 @@ import { MatReduceCoreModule } from 'mat-reduce-core'
     BrowserAnimationsModule,
     BrowserModule,
     AutoTableModule,
-    MatReduceCoreModule
+    MatReduceCoreModule,
+    RouterModule.forRoot(routes)
   ],
   providers: [],
   bootstrap: [AppComponent]
