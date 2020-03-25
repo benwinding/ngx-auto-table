@@ -10,16 +10,22 @@ import { HttpClientModule } from "@angular/common/http";
 import { MatReduceCoreModule } from 'mat-reduce-core'
 import { RouterModule, Routes } from "@angular/router";
 import { MainDemoComponent } from "./main-demo.component";
+import { BlankTableDemoComponent } from "./blank-demo.component";
 
 const routes: Routes = [
   {
     path: '',
     component: MainDemoComponent
   },
+  {
+    path: 'blank',
+    component: BlankTableDemoComponent
+  },
 ]
 
 const allComponents = [
   MainDemoComponent,
+  BlankTableDemoComponent,
   AppComponent
 ]
 
