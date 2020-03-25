@@ -1,4 +1,4 @@
-import { AutoTableConfig } from './../../../../dist/ngx-auto-table/lib/models.d';
+import { AutoTableConfig } from './../../../ngx-auto-table/src/public_api';
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
