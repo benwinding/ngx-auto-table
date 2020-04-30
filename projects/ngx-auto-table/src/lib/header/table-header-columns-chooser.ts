@@ -47,7 +47,7 @@ export class NgxAutoTableHeaderColumnsChooserComponent
   cacheId: string;
   @Input()
   set selectedHeaderKeys(newSelected: string[]) {
-    console.log('NgxAutoTableHeaderColumnsChooserComponent', { newSelected });
+    // console.log('NgxAutoTableHeaderColumnsChooserComponent', { newSelected });
     this.chooseColumnsControl.setValue(newSelected, { emitEvent: false });
   }
 
