@@ -344,6 +344,9 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
 
   public onSearchChanged(inputValue: string) {
     const parsedString = inputValue || '';
+    if (!this.dataSource) {
+      return;
+    }
     this.dataSource.filter = parsedString.trim().toLowerCase();
     this.selectionSingle.clear();
   }
