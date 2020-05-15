@@ -29,6 +29,7 @@ export interface AutoTableConfig<T> {
   onDataUpdated?: (rows: T[]) => void;
   debug?: boolean;
   cacheId?: string;
+  noItemsFoundPlaceholder?: string;
   // Actions
   actions?: ActionDefinition<T>[];
   actionsBulk?: ActionDefinitionBulk<T>[];

@@ -109,6 +109,7 @@ function MakeRandomRow(): TestRow {
           [selections]="['name', 'age', 'id_taken_from_db']"
           formControlName="dontSearchFields"
         ></form-select-string-multiple>
+        <form-text formControlName="noItemsFoundPlaceholder"></form-text>
         <form-text formControlName="filterText"></form-text>
         <form-text formControlName="exportFilename"></form-text>
       </div>
@@ -154,6 +155,7 @@ export class MainDemoComponent implements OnInit {
     hideChooseColumns: new FormControl(),
     searchOnlyVisibleColumns: new FormControl(true),
     searchByColumnOption: new FormControl(true),
+    noItemsFoundPlaceholder: new FormControl(),
     filterText: new FormControl(),
     exportFilename: new FormControl(),
     disableSelect: new FormControl(),

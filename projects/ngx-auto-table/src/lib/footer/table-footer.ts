@@ -21,7 +21,7 @@ import { SimpleLogger } from '../../utils/SimpleLogger';
         <h1 class="no-items">Loading...</h1>
       </mat-toolbar-row>
       <mat-toolbar-row *ngIf="HasNoItems">
-        <h1 class="no-items">No items found</h1>
+        <h1 class="no-items">{{ noItemsMessage || 'No items found' }}</h1>
       </mat-toolbar-row>
       <mat-toolbar-row class="paginator-row">
         <app-table-csv-export
@@ -74,6 +74,8 @@ export class NgxAutoTableFooterComponent implements OnInit, OnDestroy {
   IsLoading: boolean;
   @Input()
   HasNoItems: boolean;
+  @Input()
+  noItemsMessage: string;
   @Input()
   config: AutoTableConfig<any>;
   @Input()

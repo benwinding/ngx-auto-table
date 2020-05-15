@@ -58,6 +58,7 @@ import { SearchManager } from './search-manager';
         [IsLoading]="IsLoading"
         [config]="config"
         [dataSource]="dataSource"
+        [noItemsMessage]="config?.noItemsFoundPlaceholder"
       ></ngx-auto-table-footer>
     </div>
   `,
