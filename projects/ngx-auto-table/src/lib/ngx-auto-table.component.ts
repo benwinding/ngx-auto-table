@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, OnDestroy } from '@angular/core';
-import { MatTableDataSource } from '@angular/material';
+import { MatTableDataSource } from '@angular/material/table';
 import { Subject, Observable, combineLatest } from 'rxjs';
 import { SelectionModel } from '@angular/cdk/collections';
 import {

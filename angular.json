@@ -27,7 +27,8 @@
               "projects/table-demo/src/assets"
             ],
             "styles": ["projects/table-demo/src/styles.scss"],
-            "scripts": []
+            "scripts": [],
+            "preserveSymlinks": true
           },
           "configurations": {
             "production": {
@@ -37,16 +38,16 @@
                   "with": "projects/table-demo/src/environments/environment.prod.ts"
                 }
               ],
-              "baseHref" : "/ngx-auto-table/",
-              "optimization": true,
+              "baseHref": "/ngx-auto-table/",
+              "optimization": false,
               "outputHashing": "all",
               "sourceMap": false,
-              "extractCss": true,
+              "extractCss": false,
               "namedChunks": false,
-              "aot": true,
-              "extractLicenses": true,
+              "aot": false,
+              "extractLicenses": false,
               "vendorChunk": false,
-              "buildOptimizer": true,
+              "buildOptimizer": false,
               "budgets": [
                 {
                   "type": "initial",
