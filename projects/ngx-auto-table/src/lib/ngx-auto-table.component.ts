@@ -27,6 +27,7 @@ import { SearchManager } from './search-manager';
     >
       <ngx-auto-table-header
         [config]="config"
+        [$setSearchText]="$setSearchText"
         [IsPerformingBulkAction]="IsPerformingBulkAction"
         [HasNoItems]="HasNoItems"
         [IsMaxReached]="IsMaxReached"
@@ -112,6 +113,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   $refreshTrigger = new Subject<string[]>();
   $setDisplayedColumnsTrigger = new Subject<string[]>();
   $setSearchHeadersTrigger = new Subject<string[]>();
+  $setSearchText = new Subject<string>();
 
   private logger: SimpleLogger;
 
@@ -287,6 +289,23 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
           this.selectionMultiple.clear();
           this.selectionSingle.clear();
         });
+    }
+    if (this.config.$triggerSetTableFilterState) {
+      this.config.$triggerSetTableFilterState
+        .pipe(takeUntil(this.$onDestroyed), filter(a => !!a))
+        .subscribe((newFilterState) => {
+          this.logger.log(
+            'config.$triggerSetTableFilterState.subscribe: clearing selection'
+          );
+          this.$setSearchText.next(newFilterState.searchText)
+        });
+    }
+    if (typeof this.config.onTableFilterStateChanged === 'function') {
+      this.searchManager.FilterTextChanged.pipe(
+        takeUntil(this.$onDestroyed)
+      ).subscribe((searchText) => {
+        this.config.onTableFilterStateChanged({ searchText: searchText });
+      });
     }
   }
 
