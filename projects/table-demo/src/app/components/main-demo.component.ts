@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { AutoTableConfig } from '../../../ngx-auto-table/src/public_api';
+import { AutoTableConfig } from '../../../../ngx-auto-table/src/public_api';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { take, debounceTime, startWith } from 'rxjs/operators';
 import { FormGroup, FormControl } from '@angular/forms';

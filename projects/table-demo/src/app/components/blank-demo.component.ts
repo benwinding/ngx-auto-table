@@ -1,4 +1,4 @@
-import { AutoTableConfig } from './../../../ngx-auto-table/src/public_api';
+import { AutoTableConfig } from './../../../../ngx-auto-table/src/public_api';
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
@@ -21,7 +21,7 @@ interface MyTableRow {
       <div style="width: 10px"></div>
       <form-number formControlName="age"></form-number>
       <div style="width: 10px"></div>
-      <button (click)="this.addRow($event)">Add Row</button>
+      <button mat-raised-button (click)="this.addRow($event)">Add Row</button>
     </form>
     <ngx-auto-table
       [config]="config"
