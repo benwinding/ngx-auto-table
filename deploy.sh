@@ -6,6 +6,12 @@ case "$1" in
     pushd dist/ngx-auto-table && npm publish
     popd
     ;;
+  lib-v8)
+    yarn build-lib
+    cp README.md dist/ngx-auto-table
+    pushd dist/ngx-auto-table && npm publish --tag old-version
+    popd
+    ;;
   demo)
     yarn deploy-demo
     ;;
