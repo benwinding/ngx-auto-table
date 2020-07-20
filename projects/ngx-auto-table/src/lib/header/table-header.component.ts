@@ -28,6 +28,7 @@ import { HeaderKeyList } from '../models.internal';
               [hasFilterByColumn]="config?.searchByColumnOption"
               [hidden]="HasNoItems || config?.hideFilter"
               [filterText]="config?.filterText"
+              [$setSearchText]="$setSearchText"
               [$clearTrigger]="$clearTrigger"
               (searchChanged)="onSearchChanged($event)"
               [headerKeyValues]="headerKeyValues"
@@ -65,6 +66,7 @@ import { HeaderKeyList } from '../models.internal';
                 [debug]="config?.debug"
                 [hasFilterByColumn]="config?.searchByColumnOption"
                 [filterText]="config?.filterText"
+                [$setSearchText]="$setSearchText"
                 [$clearTrigger]="$clearTrigger"
                 (searchChanged)="onSearchChanged($event)"
                 [headerKeyValues]="headerKeyValues"
@@ -157,6 +159,8 @@ import { HeaderKeyList } from '../models.internal';
   styleUrls: ['../ngx-auto-table.component.scss']
 })
 export class NgxAutoTableHeaderComponent implements OnInit {
+  @Input()
+  $setSearchText: Subject<string>;
   @Input()
   config: AutoTableConfig<any>;
 

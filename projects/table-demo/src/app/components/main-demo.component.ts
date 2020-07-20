@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { AutoTableConfig } from '../../../ngx-auto-table/src/public_api';
+import { AutoTableConfig } from '../../../../ngx-auto-table/src/public_api';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { take, debounceTime, startWith } from 'rxjs/operators';
 import { FormGroup, FormControl } from '@angular/forms';
@@ -185,7 +185,7 @@ export class MainDemoComponent implements OnInit {
         this.makeCofig(this.formGroup.value);
       });
     // await this.fakeDelay(1000);
-    await this.fakeDelay(1000);
+    await this.fakeDelay(3000);
     this.data$.next(this.makeRandomSet(30));
   }
 

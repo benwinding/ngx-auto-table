@@ -1,3 +1,4 @@
+import { Subject } from 'rxjs';
 import { ColumnsManager } from './columns-manager';
 import { AutoTableConfig } from './models';
 
@@ -6,6 +7,8 @@ export class SearchManager<T> {
   private columnsManager: ColumnsManager;
   private config: AutoTableConfig<T>;
   private firstRowHeaderFields: string[];
+  
+  public FilterTextChanged = new Subject<string>();
 
   public SetColumsManager(cm: ColumnsManager) {
     this.columnsManager = cm;
@@ -34,6 +37,7 @@ export class SearchManager<T> {
   }
 
   public DoesDataContainText(data: T, filterText: string): boolean {
+    this.FilterTextChanged.next(filterText);
     if (this.config.searchByColumnOption) {
       const filterByColumns = this.columnsManager.HeadersSearchFilterVisible;
       if (filterByColumns.length > 0) {

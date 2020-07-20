@@ -42,7 +42,7 @@ import { HeaderKeyList } from '../models.internal';
             [formControl]="chooseSearchColumnsControl"
             multiple
           >
-            <mat-option [value]="ALL_KEY" (click)="toggleSelectAllColumns()">
+            <mat-option [value]="SELECT_ALL_KEY" (click)="toggleSelectAllColumns()">
               Select All
             </mat-option>
             <mat-optgroup label="Filter By">
@@ -92,6 +92,8 @@ export class NgxAutoTableHeaderSearchComponent implements OnInit, OnDestroy {
   @Input()
   headerKeyValues: HeaderKeyList;
   @Input()
+  $setSearchText: Subject<string>;
+  @Input()
   $clearTrigger: Subject<void>;
 
   @Output()
@@ -103,7 +105,7 @@ export class NgxAutoTableHeaderSearchComponent implements OnInit, OnDestroy {
   searchControl = new FormControl();
   chooseSearchColumnsControl = new FormControl([]);
 
-  ALL_KEY = '__all';
+  SELECT_ALL_KEY = '__all';
 
   private logger: SimpleLogger;
 
@@ -111,6 +113,12 @@ export class NgxAutoTableHeaderSearchComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.logger = new SimpleLogger('header-search', this.debug);
+
+    this.$setSearchText
+      .pipe(takeUntil(this.$onDestroyed))
+      .subscribe((searchString) => {
+        this.searchControl.patchValue(searchString);
+      });
 
     this.searchControl.valueChanges
       .pipe(takeUntil(this.$onDestroyed), debounceTime(200))
@@ -138,7 +146,7 @@ export class NgxAutoTableHeaderSearchComponent implements OnInit, OnDestroy {
 
   toggleSelectAllColumns() {
     const val: string[] = this.chooseSearchColumnsControl.value || [];
-    if (!val.includes(this.ALL_KEY)) {
+    if (!val.includes(this.SELECT_ALL_KEY)) {
       this.chooseSearchColumnsControl.reset();
     } else {
       this.selectAllColumns();
@@ -148,12 +156,12 @@ export class NgxAutoTableHeaderSearchComponent implements OnInit, OnDestroy {
   async selectAllColumns() {
     const arr = this.headerKeyValues;
     const keys = Array.from(arr).map(v => v.key);
-    keys.unshift(this.ALL_KEY);
+    keys.unshift(this.SELECT_ALL_KEY);
     this.chooseSearchColumnsControl.setValue(keys);
   }
 
   getSearchByColumns() {
     const val: string[] = this.chooseSearchColumnsControl.value || [];
-    return val.filter(v => v !== this.ALL_KEY);
+    return val.filter(v => v !== this.SELECT_ALL_KEY);
   }
 }

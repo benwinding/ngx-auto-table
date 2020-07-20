@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, OnDestroy } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
-import { Subject, Observable, combineLatest } from 'rxjs';
+import { Subject, Observable, combineLatest, BehaviorSubject } from 'rxjs';
 import { SelectionModel } from '@angular/cdk/collections';
 import {
   filter,
@@ -8,7 +8,7 @@ import {
   debounceTime,
   map,
   distinctUntilChanged,
-  tap
+  tap,
 } from 'rxjs/operators';
 import { AutoTableConfig, ColumnDefinitionMap } from './models';
 
@@ -27,6 +27,7 @@ import { SearchManager } from './search-manager';
     >
       <ngx-auto-table-header
         [config]="config"
+        [$setSearchText]="$setSearchText"
         [IsPerformingBulkAction]="IsPerformingBulkAction"
         [HasNoItems]="HasNoItems"
         [IsMaxReached]="IsMaxReached"
@@ -35,7 +36,7 @@ import { SearchManager } from './search-manager';
         "
         [selectionMultiple]="selectionMultiple"
         [selectedHeaderKeys]="columnsManager.HeadersVisible"
-        (searchChanged)="onSearchChanged($event)"
+        (searchChanged)="$CurrentSearchText.next($event)"
         (searchHeadersChanged)="onSearchHeadersChanged($event)"
         (columnsChanged)="onColumnsChanged($event)"
         (bulkActionStatus)="IsPerformingBulkAction = $event"
@@ -55,7 +56,7 @@ import { SearchManager } from './search-manager';
       ></ngx-auto-table-content>
       <ngx-auto-table-footer
         [HasNoItems]="HasNoItems"
-        [IsLoading]="IsLoading"
+        [IsLoading]="$IsLoading | async"
         [config]="config"
         [dataSource]="dataSource"
         [noItemsMessage]="config?.noItemsFoundPlaceholder"
@@ -72,9 +73,9 @@ import { SearchManager } from './search-manager';
       .isMobile {
         overflow-x: hidden;
       }
-    `
+    `,
   ],
-  styleUrls: ['./ngx-auto-table.component.scss']
+  styleUrls: ['./ngx-auto-table.component.scss'],
 })
 export class AutoTableComponent<T> implements OnInit, OnDestroy {
   private _blankConfig: AutoTableConfig<T> = blankConfig<T>();
@@ -112,6 +113,10 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   $refreshTrigger = new Subject<string[]>();
   $setDisplayedColumnsTrigger = new Subject<string[]>();
   $setSearchHeadersTrigger = new Subject<string[]>();
+  $setSearchText = new Subject<string>();
+  $CurrentSearchText = new BehaviorSubject<string>('');
+
+  $IsLoading = new Subject<boolean>();
 
   private logger: SimpleLogger;
 
@@ -119,10 +124,6 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     return (
       this.dataSource && this.dataSource.data && !this.dataSource.data.length
     );
-  }
-
-  get IsLoading(): boolean {
-    return !this.dataSource || !this.dataSource.data;
   }
 
   get IsMaxReached(): boolean {
@@ -163,21 +164,21 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     this.$isMobile = this.breakpointObserver
       .observe([Breakpoints.Handset])
       .pipe(
-        map(result => result.matches),
+        map((result) => result.matches),
         takeUntil(this.$onDestroyed),
         distinctUntilChanged(),
         debounceTime(100),
-        tap(isMobile =>
+        tap((isMobile) =>
           this.logger.log('this.breakpointObserver$ isMobile', { isMobile })
         )
       );
 
     this.$isTablet = this.breakpointObserver.observe([Breakpoints.Tablet]).pipe(
-      map(result => result.matches),
+      map((result) => result.matches),
       takeUntil(this.$onDestroyed),
       distinctUntilChanged(),
       debounceTime(100),
-      tap(isTablet =>
+      tap((isTablet) =>
         this.logger.log('this.breakpointObserver$ isTablet', { isTablet })
       )
     );
@@ -189,7 +190,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
 
     this.$setDisplayedColumnsTrigger
       .pipe(takeUntil(this.$onDestroyed), debounceTime(100))
-      .subscribe(newHeaders => {
+      .subscribe((newHeaders) => {
         this.logger.log('setDisplayedColumnsTrigger', { newHeaders });
         this.columnsManager.SetDisplayed<T>(
           newHeaders,
@@ -203,7 +204,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
 
     this.$setSearchHeadersTrigger
       .pipe(takeUntil(this.$onDestroyed), debounceTime(100))
-      .subscribe(newHeaders => {
+      .subscribe((newHeaders) => {
         this.logger.log('setSearchHeadersTrigger', { newHeaders });
         this.columnsManager.SetSearchFilterDisplayed<T>(newHeaders);
         if (this.dataSource) {
@@ -212,13 +213,18 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
       });
 
     this.reInitializeVariables();
+
     this.config.data$
       .pipe(
         debounceTime(100),
-        filter(originalData => Array.isArray(originalData))
+        filter((originalData) => {
+          const isArray = Array.isArray(originalData);
+          this.$IsLoading.next(!isArray);
+          return isArray;
+        })
       )
       .pipe(takeUntil(this.$onDestroyed))
-      .subscribe(originalData => {
+      .subscribe((originalData) => {
         this.logger.log('config.data$.subscribe: ', { originalData });
         this.dataSource = new MatTableDataSource(originalData);
         if (this.config.onDataUpdated) {
@@ -230,7 +236,15 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
         }
         this.initTable(this.columnDefinitions, this.config, firstDataItem);
         this.initFilterPredicate(originalData);
+        this.onSearchChanged(this.$CurrentSearchText.getValue());
       });
+
+    this.$CurrentSearchText
+      .pipe(takeUntil(this.$onDestroyed))
+      .subscribe((text) => {
+        this.onSearchChanged(text);
+      });
+
     this.initializeConfigTriggers();
 
     combineLatest([this.$isMobile, this.$isTablet, this.$refreshTrigger])
@@ -259,17 +273,17 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
       this.config.$triggerSelectItem
         .pipe(debounceTime(300))
         .pipe(takeUntil(this.$onDestroyed))
-        .subscribe(item => {
+        .subscribe((item) => {
           this.logger.log(
             'config.$triggerSelectItem.subscribe: selecting item',
             { item }
           );
           const str = JSON.stringify(item);
           const foundItem = this.dataSource.data.find(
-            row => JSON.stringify(row) === str
+            (row) => JSON.stringify(row) === str
           );
           this.logger.log('config.$triggerSelectItem.subscribe: found item:', {
-            foundItem
+            foundItem,
           });
           if (foundItem) {
             this.selectionSingle.select(foundItem);
@@ -288,6 +302,26 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
           this.selectionSingle.clear();
         });
     }
+    if (this.config.$triggerSetTableFilterState) {
+      this.config.$triggerSetTableFilterState
+        .pipe(
+          takeUntil(this.$onDestroyed),
+          filter((a) => !!a)
+        )
+        .subscribe((newFilterState) => {
+          this.logger.log(
+            'config.$triggerSetTableFilterState.subscribe: clearing selection'
+          );
+          this.$setSearchText.next(newFilterState.searchText);
+        });
+    }
+    if (typeof this.config.onTableFilterStateChanged === 'function') {
+      this.searchManager.FilterTextChanged.pipe(
+        takeUntil(this.$onDestroyed)
+      ).subscribe((searchText) => {
+        this.config.onTableFilterStateChanged({ searchText: searchText });
+      });
+    }
   }
 
   initTable(
@@ -301,7 +335,8 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
       firstDataItem
     );
     const initialKeys = Object.keys(columnDefinitions).filter(
-      k => !columnDefinitions[k].hide && !(config.hideFields || []).includes(k)
+      (k) =>
+        !columnDefinitions[k].hide && !(config.hideFields || []).includes(k)
     );
     this.logger.log('initialKeys', { initialKeys });
     this.columnsManager.SetDisplayedInitial(
@@ -323,10 +358,11 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     this.logger.log('onRefreshDefaultColumns()', {
       isMobile,
       shoulSetMobile,
-      columns
+      columns,
     });
     this.$setDisplayedColumnsTrigger.next(columns);
   }
+
   onRefreshTabletDefaultColumns(isTablet: boolean) {
     const shoulSetTablet = isTablet && this.config.tabletFields;
     let columns: string[] = [];
@@ -338,7 +374,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     this.logger.log('onRefreshDefaultColumns()', {
       tabletFields: isTablet,
       shoulSetTablet: shoulSetTablet,
-      columns
+      columns,
     });
     this.$setDisplayedColumnsTrigger.next(columns);
   }

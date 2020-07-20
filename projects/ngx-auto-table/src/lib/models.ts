@@ -42,6 +42,8 @@ export interface AutoTableConfig<T> {
   searchOnlyVisibleColumns?: boolean;
   searchByColumnOption?: boolean;
   dontSearchFields?: Array<keyof T>;
+  onTableFilterStateChanged?: (currentFilter: TableFiltersState) => void;
+  $triggerSetTableFilterState?: Observable<TableFiltersState>;
   // Top bar configuration
   hideFields?: string[];
   hideFilter?: boolean;
@@ -66,4 +68,13 @@ export interface AutoTableConfig<T> {
   // Responsive
   mobileFields?: string[];
   tabletFields?: string[];
+}
+
+export interface TableFiltersState {
+  searchText?: string;
+  pageSize?: string;
+  columnsState?: {
+    field: string;
+    asc: boolean;
+  }[];
 }
