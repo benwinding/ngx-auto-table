@@ -15,7 +15,7 @@ import {
   QueryParamsTableDemoComponent,
 } from './components';
 import { AppRoutingModule } from './app.routing';
-import { MatSidenavModule } from '@angular/material';
+import { MatSidenavModule } from '@angular/material/sidenav';
 
 const allComponents = [
   AppComponent,

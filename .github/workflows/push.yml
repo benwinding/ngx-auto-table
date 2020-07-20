@@ -2,7 +2,7 @@ on: push
 name: Build and Publish
 jobs:
   build:
-    name: Build
+    name: Deploy Library
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
@@ -20,7 +20,7 @@ jobs:
       if: steps.cache-modules.outputs.cache-hit != 'true'
       run: npm install
     - name: Build Library
-      run: npm run-script build-lib
+      run: npm run-script build-lib && cp README.md dist/ngx-auto-table
     - name: Test
       run: npm test
     - name: Publish
@@ -53,6 +53,9 @@ jobs:
       - name: Build & Deploy Demo
         run: |
           npm run-script build-demo
+      - name: Make 404.html
+        run: cp index.html 404.html
+        workind-directory: dist/table-demo
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@releases/v3
         with:
