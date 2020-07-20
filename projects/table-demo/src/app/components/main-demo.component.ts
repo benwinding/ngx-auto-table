@@ -185,7 +185,7 @@ export class MainDemoComponent implements OnInit {
         this.makeCofig(this.formGroup.value);
       });
     // await this.fakeDelay(1000);
-    await this.fakeDelay(1000);
+    await this.fakeDelay(3000);
     this.data$.next(this.makeRandomSet(30));
   }
 
