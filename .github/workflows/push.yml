@@ -55,7 +55,7 @@ jobs:
           npm run-script build-demo
       - name: Make 404.html
         run: cp index.html 404.html
-        workind-directory: dist/table-demo
+        working-directory: dist/table-demo
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@releases/v3
         with:
