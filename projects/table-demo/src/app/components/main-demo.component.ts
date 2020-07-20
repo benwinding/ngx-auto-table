@@ -70,14 +70,18 @@ function MakeRandomRow(): TestRow {
         name: {},
         name2: { template: name2Template },
         age: {},
-        mobile: { template: mobileTemplate, hide: true }
+        mobile: { template: mobileTemplate, hide: true },
+        tablet: { template: tabletTemplate, hide: true }
       }"
     >
       <ng-template #name2Template let-row>
         <strong>{{ row.test$ | async }}</strong>
       </ng-template>
       <ng-template #mobileTemplate let-row>
-        <strong>{{ row.name }}</strong>
+        <strong>Mobile View: {{ row.name }}</strong>
+      </ng-template>
+      <ng-template #tabletTemplate let-row>
+        <strong>Tablet View: {{ row.name }}</strong>
       </ng-template>
     </ngx-auto-table>
 
@@ -144,8 +148,8 @@ export class MainDemoComponent implements OnInit {
     actionsVisibleCount: new FormControl(1),
     initialSort: new FormControl(),
     initialSortDir: new FormControl(),
-    mobileFields: new FormControl(['age']),
-    tabletFields: new FormControl(['name']),
+    mobileFields: new FormControl(['mobile']),
+    tabletFields: new FormControl(['tablet']),
     pageSize: new FormControl(10),
     hideFields: new FormControl(['name']),
     dontSearchFields: new FormControl(['id_taken_from_db']),
