@@ -9,7 +9,7 @@ jobs:
     name: Build & Deploy Library
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v8-branch
+      - uses: actions/checkout@master
       - name: Use Node.js 10.17
         uses: actions/setup-node@v1
         with:
