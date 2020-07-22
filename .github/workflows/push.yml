@@ -6,6 +6,7 @@ on:
 name: Build and Publish
 jobs:
   build:
+    if: github.ref == 'refs/heads/master'
     name: Deploy Library
     runs-on: ubuntu-latest
     steps:
@@ -36,6 +37,7 @@ jobs:
         NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
 
   deploy-demo:
+    if: github.ref == 'refs/heads/master'
     name: Deploy Demo
     runs-on: ubuntu-latest
     steps:
