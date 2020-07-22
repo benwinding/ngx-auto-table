@@ -1,8 +1,9 @@
 import { Component, OnInit, Input, OnDestroy, ViewChild } from '@angular/core';
 import { AutoTableConfig } from '../models';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 
 import { Subject } from 'rxjs';
-import { MatPaginator, MatTableDataSource } from '@angular/material';
 import { SimpleLogger } from '../../utils/SimpleLogger';
 
 @Component({

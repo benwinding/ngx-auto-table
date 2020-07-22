@@ -3,10 +3,10 @@ on:
     branches:
       - master
 
-name: Deploy Library (latest)
+name: Deploy Demo
 jobs:
   deploy:
-    name: Build & Deploy Library
+    name: Build & Deploy Demo
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
@@ -23,14 +23,15 @@ jobs:
       - name: Install Dependencies
         if: steps.cache-modules.outputs.cache-hit != 'true'
         run: npm install
-      - name: Build Library
-        run: npm run-script build-lib && cp README.md dist/ngx-auto-table
-      - name: Test
-        run: npm test
-      - name: Publish
-        uses: benwinding/merge-release@test-no-npm
-        env:
-          DEPLOY_DIR: dist/ngx-auto-table
-          SRC_PACKAGE_DIR: projects/ngx-auto-table
+      - name: Build & Deploy Demo
+        run: |
+          npm run-script build-demo
+      - name: Make 404.html
+        run: cp index.html 404.html
+        working-directory: dist/table-demo
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@releases/v3
+        with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+          BRANCH: gh-pages # The branch the action should deploy to.
+          FOLDER: dist/table-demo # The folder the action should deploy.

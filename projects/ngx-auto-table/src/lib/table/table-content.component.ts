@@ -1,12 +1,11 @@
 import { Component, OnInit, OnDestroy, Input, ViewChild } from '@angular/core';
 import { Subject } from 'rxjs';
-import { AutoTableConfig } from '../models';
-import {
-  MatTableDataSource,
-  MatCheckboxChange,
-  MatSort
-} from '@angular/material';
 import { SelectionModel } from '@angular/cdk/collections';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatSort } from '@angular/material/sort';
+import { MatCheckboxChange } from '@angular/material/checkbox';
+
+import { AutoTableConfig } from '../models';
 import { SimpleLogger } from '../../utils/SimpleLogger';
 import { TableNotifyService } from '../table-notify.service';
 import { ColumnDefinitionInternal } from '../models.internal';
