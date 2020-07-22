@@ -1,4 +1,8 @@
-on: push
+on: 
+  push
+    branches:
+      - master
+
 name: Build and Publish
 jobs:
   build:
@@ -24,8 +28,7 @@ jobs:
     - name: Test
       run: npm test
     - name: Publish
-      if: github.ref == 'refs/heads/master'
-      uses: benwinding/merge-release@master
+      uses: benwinding/merge-release@test-no-npm
       env:
         DEPLOY_DIR: dist/ngx-auto-table
         SRC_PACKAGE_DIR: projects/ngx-auto-table
