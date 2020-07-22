@@ -4,8 +4,8 @@ on:
       - master
 
 name: Deploy Demo
-  deploy-demo:
-    if: github.ref == 'refs/heads/master'
+jobs:
+  deploy:
     name: Build & Deploy Demo
     runs-on: ubuntu-latest
     steps:

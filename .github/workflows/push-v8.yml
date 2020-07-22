@@ -3,34 +3,34 @@ on:
     branches:
       - v8-branch
 
-name: Build and Publish V8
+name: Deploy Library (V8)
 jobs:
-  build:
-    name: Build
+  deploy:
+    name: Build & Deploy Library
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v8-branch
-    - name: Use Node.js 10.17
-      uses: actions/setup-node@v1
-      with:
-        node-version: 10.17
-    - name: Cache node_modules
-      id: cache-modules
-      uses: actions/cache@v1
-      with:
-        path: node_modules
-        key: ${{ runner.OS }}-build-${{ hashFiles('package.json') }}
-    - name: Install Dependencies
-      if: steps.cache-modules.outputs.cache-hit != 'true'
-      run: npm install
-    - name: Build Library
-      run: npm run-script build-lib
-    - name: Test
-      run: npm test
-    - name: Publish
-      uses: benwinding/merge-release@master
-      env:
-        DEPLOY_DIR: dist/ngx-auto-table
-        SRC_PACKAGE_DIR: projects/ngx-auto-table
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+      - uses: actions/checkout@v8-branch
+      - name: Use Node.js 10.17
+        uses: actions/setup-node@v1
+        with:
+          node-version: 10.17
+      - name: Cache node_modules
+        id: cache-modules
+        uses: actions/cache@v1
+        with:
+          path: node_modules
+          key: ${{ runner.OS }}-build-${{ hashFiles('package.json') }}
+      - name: Install Dependencies
+        if: steps.cache-modules.outputs.cache-hit != 'true'
+        run: npm install
+      - name: Build Library
+        run: npm run-script build-lib
+      - name: Test
+        run: npm test
+      - name: Publish
+        uses: benwinding/merge-release@master
+        env:
+          DEPLOY_DIR: dist/ngx-auto-table
+          SRC_PACKAGE_DIR: projects/ngx-auto-table
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}

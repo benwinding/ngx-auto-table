@@ -3,35 +3,34 @@ on:
     branches:
       - master
 
-name: Deploy Library
+name: Deploy Library (latest)
 jobs:
-  build:
-    if: github.ref == 'refs/heads/master'
+  deploy:
     name: Build & Deploy Library
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
-    - name: Use Node.js 10.17
-      uses: actions/setup-node@v1
-      with:
-        node-version: 10.17
-    - name: Cache node_modules
-      id: cache-modules
-      uses: actions/cache@v1
-      with:
-        path: node_modules
-        key: ${{ runner.OS }}-build-${{ hashFiles('package.json') }}
-    - name: Install Dependencies
-      if: steps.cache-modules.outputs.cache-hit != 'true'
-      run: npm install
-    - name: Build Library
-      run: npm run-script build-lib && cp README.md dist/ngx-auto-table
-    - name: Test
-      run: npm test
-    - name: Publish
-      uses: benwinding/merge-release@test-no-npm
-      env:
-        DEPLOY_DIR: dist/ngx-auto-table
-        SRC_PACKAGE_DIR: projects/ngx-auto-table
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+      - uses: actions/checkout@master
+      - name: Use Node.js 10.17
+        uses: actions/setup-node@v1
+        with:
+          node-version: 10.17
+      - name: Cache node_modules
+        id: cache-modules
+        uses: actions/cache@v1
+        with:
+          path: node_modules
+          key: ${{ runner.OS }}-build-${{ hashFiles('package.json') }}
+      - name: Install Dependencies
+        if: steps.cache-modules.outputs.cache-hit != 'true'
+        run: npm install
+      - name: Build Library
+        run: npm run-script build-lib && cp README.md dist/ngx-auto-table
+      - name: Test
+        run: npm test
+      - name: Publish
+        uses: benwinding/merge-release@test-no-npm
+        env:
+          DEPLOY_DIR: dist/ngx-auto-table
+          SRC_PACKAGE_DIR: projects/ngx-auto-table
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
