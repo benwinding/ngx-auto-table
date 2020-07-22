@@ -1,5 +1,5 @@
 on: 
-  push
+  push:
     branches:
       - v8-branch
 
