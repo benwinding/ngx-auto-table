@@ -1,6 +1,6 @@
 {
   "name": "ngx-auto-table",
-  "version": "10.0.0",
+  "version": "10.0.2",
   "description": "A simple data-table built on Material and RXJS",
   "dependencies": {
     "@angular/cdk": "10.x",
