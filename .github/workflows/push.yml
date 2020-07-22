@@ -28,7 +28,7 @@ jobs:
       - name: Test
         run: npm test
       - name: Publish
-        uses: benwinding/merge-release@test-no-npm
+        uses: benwinding/merge-release@ee73930a37e807814c72a028112ccd67470a981b
         env:
           DEPLOY_DIR: dist/ngx-auto-table
           SRC_PACKAGE_DIR: projects/ngx-auto-table
