@@ -9,7 +9,7 @@ case "$1" in
   lib-v8)
     yarn build-lib
     cp README.md dist/ngx-auto-table
-    pushd dist/ngx-auto-table && npm publish --tag old-version
+    pushd dist/ngx-auto-table && npm publish --tag angular-v8
     popd
     ;;
   demo)
