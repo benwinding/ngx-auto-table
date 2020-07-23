@@ -116,6 +116,8 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   $setSearchText = new Subject<string>();
   $CurrentSearchText = new BehaviorSubject<string>('');
 
+  private $triggerFilter = new Subject<string>();
+
   $IsLoading = new Subject<boolean>();
 
   private logger: SimpleLogger;
@@ -194,7 +196,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
           !!this.config.actionsBulk
         );
         if (this.dataSource) {
-          this.dataSource.filter = this.dataSource.filter;
+          this.$triggerFilter.next(this.dataSource.filter)
         }
       });
 
@@ -204,7 +206,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
         this.logger.log('setSearchHeadersTrigger', { newHeaders });
         this.columnsManager.SetSearchFilterDisplayed<T>(newHeaders);
         if (this.dataSource) {
-          this.dataSource.filter = this.dataSource.filter;
+          this.$triggerFilter.next(this.dataSource.filter)
         }
       });
 
@@ -232,13 +234,13 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
         }
         this.initTable(this.columnDefinitions, this.config, firstDataItem);
         this.initFilterPredicate(originalData);
-        this.onSearchChanged(this.$CurrentSearchText.getValue());
+        this.$triggerFilter.next(this.$CurrentSearchText.getValue())
       });
 
     this.$CurrentSearchText
-      .pipe(takeUntil(this.$onDestroyed))
+      .pipe(debounceTime(50), takeUntil(this.$onDestroyed))
       .subscribe((text) => {
-        this.onSearchChanged(text);
+        this.$triggerFilter.next(text)
       });
 
     this.initializeConfigTriggers();
@@ -255,6 +257,12 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
         else {
           this.onRefreshDefaultColumns();
         }
+      });
+
+    this.$triggerFilter
+      .pipe(takeUntil(this.$onDestroyed))
+      .subscribe((filterText) => {
+        this.onSearchChanged(filterText);
       });
   }
 
