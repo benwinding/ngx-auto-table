@@ -17,6 +17,7 @@ import { SimpleLogger } from '../utils/SimpleLogger';
 import { blankConfig } from './models.defaults';
 import { Breakpoints, BreakpointObserver } from '@angular/cdk/layout';
 import { SearchManager } from './search-manager';
+import { convertObservableToBehaviorSubject } from '../utils/rxjs-helpers';
 
 @Component({
   selector: 'ngx-auto-table',
@@ -210,7 +211,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
 
     this.reInitializeVariables();
 
-    this.config.data$
+    convertObservableToBehaviorSubject(this.config.data$, null)    
       .pipe(
         debounceTime(100),
         filter((originalData) => {
