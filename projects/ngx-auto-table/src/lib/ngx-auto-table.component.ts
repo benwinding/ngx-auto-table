@@ -164,7 +164,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
 
     this.$isMobile = this.breakpointObserver.observe('(max-width: 599px)').pipe(
       map((result) => result.matches && Object.values(result.breakpoints).every(v => !!v)),
-      tap(result => console.log('$isMobile', result)),
+      tap(result => this.logger.log('$isMobile', result)),
       takeUntil(this.$onDestroyed),
       distinctUntilChanged(),
       debounceTime(100),
@@ -174,7 +174,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
       .observe(['(min-width: 600px)', '(max-width: 959px)'])
       .pipe(
         map((result) => result.matches && Object.values(result.breakpoints).every(v => !!v)),
-        tap(result => console.log('$isTablet', result)),
+        tap(result => this.logger.log('$isTablet', result)),
         takeUntil(this.$onDestroyed),
         distinctUntilChanged(),
         debounceTime(100),
