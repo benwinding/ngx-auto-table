@@ -12,7 +12,8 @@ export function convertObservableToBehaviorSubject<T>(
   const subject = new BehaviorSubject(initValue);
 
   observable.subscribe({
-    complete: () => subject.complete(),
+    // DONT COMPLETE ME YET!
+    // complete: () => subject.complete(),
     error: (x) => subject.error(x),
     next: (x) => subject.next(x),
   });
@@ -21,5 +22,7 @@ export function convertObservableToBehaviorSubject<T>(
 }
 
 export function distinctUntilChangedObj<T>() {
-  return distinctUntilChanged<T>((a, b) => JSON.stringify(a) === JSON.stringify(b));
+  return distinctUntilChanged<T>(
+    (a, b) => JSON.stringify(a) === JSON.stringify(b)
+  );
 }

@@ -4,12 +4,14 @@ import {
   MainDemoComponent,
   BlankTableDemoComponent,
   QueryParamsTableDemoComponent,
+  OfTableDemoComponent
 } from './components';
 
 export const allRoutes: Routes = [
   { path: 'main-demo', component: MainDemoComponent },
   { path: 'blank-demo', component: BlankTableDemoComponent },
   { path: 'use-queryparams-demo', component: QueryParamsTableDemoComponent },
+  { path: 'use-of-demo', component: OfTableDemoComponent },
 ];
 
 @NgModule({
