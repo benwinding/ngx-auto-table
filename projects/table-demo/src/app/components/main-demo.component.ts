@@ -34,15 +34,13 @@ const randomNames = [
   'Shena',
   'Darcey',
   'Tad',
-  'Ellsworth'
+  'Ellsworth',
 ];
 function MakeRandomRow(): TestRow {
   const randomName =
     randomNames[Math.floor(Math.random() * randomNames.length)];
   const randomAge = Math.round(Math.random() * 25 + 20);
-  const randId = Math.random()
-    .toString(32)
-    .slice(2);
+  const randId = Math.random().toString(32).slice(2);
   return {
     name: randomName,
     age: randomAge,
@@ -50,7 +48,7 @@ function MakeRandomRow(): TestRow {
     next_birthday: randomAge + 1,
     test$: new BehaviorSubject(randId),
     thisIsSentenceCase: randId + 'A22',
-    thisHas_underScores: randId + '_26'
+    thisHas_underScores: randId + '_26',
   };
 }
 
@@ -85,9 +83,7 @@ function MakeRandomRow(): TestRow {
       </ng-template>
     </ngx-auto-table>
 
-    <h3 style="text-align:center">
-      Configuration Object
-    </h3>
+    <h3 style="text-align:center">Configuration Object</h3>
 
     <form
       [formGroup]="formGroup"
@@ -137,7 +133,7 @@ function MakeRandomRow(): TestRow {
     {{ { config: formGroup.value } | json }}
     </pre
     >
-  `
+  `,
 })
 export class MainDemoComponent implements OnInit {
   config: AutoTableConfig<TestRow>;
@@ -166,17 +162,17 @@ export class MainDemoComponent implements OnInit {
     disableHoverEffect: new FormControl(),
     selectFirstOnInit: new FormControl(true),
     disableMobileScroll: new FormControl(),
-    debug: new FormControl(true)
+    debug: new FormControl(true),
   });
 
   constructor() {}
 
   async fakeDelay(ms: number) {
     console.log('fake delay: begin for: ' + ms + 'ms');
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       setTimeout(() => {
         console.log('fake delay: end...');
-        resolve();
+        resolve(null);
       }, ms);
     });
   }
@@ -185,7 +181,7 @@ export class MainDemoComponent implements OnInit {
     // await this.fakeDelay(500);
     this.formGroup.valueChanges
       .pipe(startWith(null), debounceTime(500))
-      .subscribe(newConfigFlags => {
+      .subscribe((newConfigFlags) => {
         this.makeCofig(this.formGroup.value);
       });
     // await this.fakeDelay(1000);
@@ -210,7 +206,7 @@ export class MainDemoComponent implements OnInit {
             await this.fakeDelay(30000);
             await this.removeItems(rows);
             console.log({ rows });
-          }
+          },
         },
         {
           label: 'Quick Delete (1s)',
@@ -219,7 +215,7 @@ export class MainDemoComponent implements OnInit {
             await this.fakeDelay(1000);
             await this.removeItems(rows);
             console.log({ rows });
-          }
+          },
         },
         {
           label: 'Instant Delete',
@@ -227,8 +223,8 @@ export class MainDemoComponent implements OnInit {
           onClick: async (rows: TestRow[]) => {
             await this.removeItems(rows);
             console.log({ rows });
-          }
-        }
+          },
+        },
       ],
       actions: [
         {
@@ -236,16 +232,22 @@ export class MainDemoComponent implements OnInit {
           icon: 'delete',
           onClick: async (row: TestRow) => {
             await this.removeItems([row]);
-          }
+          },
         },
         {
           label: 'Show',
           icon: 'remove_red_eye',
           onClick: (row: TestRow) => {
             console.log({ row });
-          }
-        }
-      ]
+          },
+        },
+        {
+          label: 'Action',
+          icon: 'arrow_forward',
+          iconColor: 'accent',
+          onClick: async (row: TestRow) => {},
+        },
+      ],
     };
   }
 
@@ -259,10 +261,10 @@ export class MainDemoComponent implements OnInit {
 
   async removeItems(rows: TestRow[]) {
     console.log('app: removing items', { rows });
-    const deleteIds = new Set(rows.map(r => r.id_taken_from_db));
+    const deleteIds = new Set(rows.map((r) => r.id_taken_from_db));
     const dataBefore = await this.data$.pipe(take(1)).toPromise();
     const dataAfter = dataBefore.filter(
-      d => !deleteIds.has(d.id_taken_from_db)
+      (d) => !deleteIds.has(d.id_taken_from_db)
     );
     this.data$.next(dataAfter);
   }

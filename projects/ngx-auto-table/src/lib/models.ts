@@ -3,6 +3,7 @@ import { Observable } from "rxjs";
 export interface ActionDefinition<T> {
   label: string;
   icon?: string;
+  iconColor?: 'primary' | 'accent' | 'warn';
   onClick?: (row: T) => void | Promise<any>;
   onRouterLink?: (row: T) => string;
   routerLinkQuery?: (row: T) => {};

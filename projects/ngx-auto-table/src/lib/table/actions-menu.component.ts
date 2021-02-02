@@ -32,7 +32,7 @@ import { ActionDefinition } from '../models';
             *ngIf="action.onClick"
             (click)="onClickedAction(action, row)"
           >
-            <mat-icon>{{ action.icon }}</mat-icon>
+            <mat-icon [color]="action.iconColor" >{{ action.icon }}</mat-icon>
             <span>{{ action.label }}</span>
           </button>
           <a
@@ -41,7 +41,7 @@ import { ActionDefinition } from '../models';
             *ngIf="action.onRouterLink && !action.routerLinkQuery"
             [routerLink]="['/' + action.onRouterLink(row)]"
           >
-            <mat-icon>{{ action.icon }}</mat-icon>
+            <mat-icon [color]="action.iconColor" >{{ action.icon }}</mat-icon>
             <span>{{ action.label }}</span>
           </a>
           <a
@@ -51,7 +51,7 @@ import { ActionDefinition } from '../models';
             [routerLink]="['/' + action.onRouterLink(row)]"
             [queryParams]="action.routerLinkQuery(row)"
           >
-            <mat-icon>{{ action.icon }}</mat-icon>
+            <mat-icon [color]="action.iconColor" >{{ action.icon }}</mat-icon>
             <span>{{ action.label }}</span>
           </a>
         </div>
@@ -64,8 +64,9 @@ import { ActionDefinition } from '../models';
             *ngIf="action.onClick"
             (click)="onClickedAction(action, row)"
             [matTooltip]="action.label"
+            [color]="action.iconColor || 'accent'"
           >
-            <mat-icon>{{ action.icon }}</mat-icon>
+            <mat-icon  >{{ action.icon }}</mat-icon>
           </button>
           <a
             class="mr-10"
@@ -73,8 +74,9 @@ import { ActionDefinition } from '../models';
             *ngIf="action.onRouterLink && !action.routerLinkQuery"
             [routerLink]="['/' + action.onRouterLink(row)]"
             [matTooltip]="action.label"
+            [color]="action.iconColor || 'accent'"
           >
-            <mat-icon>{{ action.icon }}</mat-icon>
+            <mat-icon >{{ action.icon }}</mat-icon>
           </a>
           <a
             class="mr-10"
@@ -83,8 +85,9 @@ import { ActionDefinition } from '../models';
             [routerLink]="['/' + action.onRouterLink(row)]"
             [queryParams]="action.routerLinkQuery(row)"
             [matTooltip]="action.label"
+            [color]="action.iconColor || 'accent'"
           >
-            <mat-icon>{{ action.icon }}</mat-icon>
+            <mat-icon >{{ action.icon }}</mat-icon>
           </a>
         </div>
       </div>
