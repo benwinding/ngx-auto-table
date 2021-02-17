@@ -116,7 +116,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   $setSearchHeadersTrigger = new Subject<string[]>();
   $setSearchText = new Subject<string>();
   $CurrentSearchText = new BehaviorSubject<string>('');
-
+  
   $IsLoading = new Subject<boolean>();
 
   private logger: SimpleLogger;
@@ -371,11 +371,13 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   }
 
   public onSearchChanged(inputValue: string) {
-    const parsedString = inputValue || '';
     if (!this.dataSource) {
       return;
     }
-    this.dataSource.filter = parsedString.trim().toLowerCase();
+    const parsedString = inputValue || '';
+    const parsedLower = parsedString.trim().toLowerCase();
+    this.dataSource.filter = parsedLower;
+    this.searchManager.FilterTextChanged.next(parsedLower);
     this.selectionSingle.clear();
   }
 
