@@ -38,6 +38,9 @@ export class SearchManager<T> {
 
   public DoesDataContainText(data: T, filterText: string): boolean {
     this.FilterTextChanged.next(filterText);
+    if (!filterText) {
+      return true;
+    }
     if (this.config.searchByColumnOption) {
       const filterByColumns = this.columnsManager.HeadersSearchFilterVisible;
       if (filterByColumns.length > 0) {

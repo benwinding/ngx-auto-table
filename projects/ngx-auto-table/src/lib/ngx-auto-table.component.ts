@@ -396,9 +396,6 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     this.searchManager.CheckFirstRow(firstRow);
 
     this.dataSource.filterPredicate = (data: T, filterText: string) => {
-      if (!filterText) {
-        return true;
-      }
       if (this.selectionMultiple.isSelected(data)) {
         return true;
       }
