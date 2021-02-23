@@ -20,7 +20,14 @@ export interface ColumnDefinition {
   template?: any;
   hide?: boolean;
   forceWrap?: boolean;
+  filter?: FilterOptions
 }
+export interface FilterOptions {
+  string?: {}
+  stringArray?: {}
+  bool?: {}
+}
+
 export interface ColumnDefinitionMap {
   [field: string]: ColumnDefinition;
 }

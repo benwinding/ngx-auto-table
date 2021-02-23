@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": "./",
+    "types": [
+      "jest",
+      "node"
+    ],
+    "paths": {
+      "projects/*": ["./projects/*"]
+    }
+  },
+  "include": [
+    "**/*.spec.ts",
+    "**/*.d.ts"
+  ]
+}

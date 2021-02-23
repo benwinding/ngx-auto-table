@@ -23,9 +23,6 @@ import { MatTooltipModule } from "@angular/material/tooltip"
 import { MatToolbarModule } from "@angular/material/toolbar"
 
 import { NgxAutoTableActionsMenuComponent } from "./table/actions-menu.component";
-import { NgxAutoTableHeaderComponent } from "./header/table-header.component";
-import { NgxAutoTableHeaderColumnsChooserComponent } from "./header/table-header-columns-chooser";
-import { NgxAutoTableHeaderSearchComponent } from "./header/table-header-search.component";
 import { NgxAutoTableFooterComponent } from "./footer/table-footer";
 import { NgxAutoTableContentComponent } from "./table/table-content.component";
 
@@ -35,9 +32,11 @@ import { CommonModule } from "@angular/common";
 import { RouterModule } from "@angular/router";
 import { AutoTableComponent } from "./ngx-auto-table.component";
 import { AppToolbarLoaderComponent } from "./loaders/toolbar-loader.component";
-import { AppBtnLoaderComponent } from "./loaders/btn-loader.component";
 import { AppTableLoaderComponent } from './loaders/table-loader.component';
 import { TableNotifyService } from "./table-notify.service";
+import { TableHeaderModule } from "./header/table-header.module";
+import { NgxAutoTableFilterColumnComponent } from "./table/table-filter-button.component";
+import { MatBadgeModule } from "@angular/material/badge";
 
 const sharedComponents = [AutoTableComponent];
 
@@ -46,13 +45,10 @@ const sharedComponents = [AutoTableComponent];
     AppTableLoaderComponent,
     AppToolbarLoaderComponent,
     AppExportCsvExportComponent,
-    AppBtnLoaderComponent,
     NgxAutoTableActionsMenuComponent,
-    NgxAutoTableHeaderComponent,
-    NgxAutoTableHeaderSearchComponent,
-    NgxAutoTableHeaderColumnsChooserComponent,
     NgxAutoTableFooterComponent,
     NgxAutoTableContentComponent,
+    NgxAutoTableFilterColumnComponent,
     ...sharedComponents,
   ],
   providers: [TableNotifyService],
@@ -61,7 +57,9 @@ const sharedComponents = [AutoTableComponent];
     CsvModule,
     ReactiveFormsModule,
     LayoutModule,
+    TableHeaderModule,
     MatAutocompleteModule,
+    MatBadgeModule,
     MatButtonModule,
     MatButtonToggleModule,
     MatCheckboxModule,

@@ -13,7 +13,8 @@ import {
   MainDemoComponent,
   BlankTableDemoComponent,
   QueryParamsTableDemoComponent,
-  OfTableDemoComponent
+  OfTableDemoComponent,
+  FiltersDemoComponent
 } from './components';
 import { AppRoutingModule } from './app.routing';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -23,7 +24,8 @@ const allComponents = [
   MainDemoComponent,
   BlankTableDemoComponent,
   QueryParamsTableDemoComponent,
-  OfTableDemoComponent
+  OfTableDemoComponent,
+  FiltersDemoComponent,
 ];
 
 @NgModule({
