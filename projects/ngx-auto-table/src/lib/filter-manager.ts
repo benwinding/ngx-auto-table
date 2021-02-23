@@ -1,13 +1,14 @@
 import { Subject } from 'rxjs';
 import { ColumnsManager } from './columns-manager';
 import { AutoTableConfig } from './models';
+import { ColumnFilterByMap } from './models.internal';
 
-export class SearchManager<T> {
+export class FilterManager<T> {
   private searchKeys: string[];
   private columnsManager: ColumnsManager;
   private config: AutoTableConfig<T>;
   private firstRowHeaderFields: string[];
-  
+
   public FilterTextChanged = new Subject<string>();
 
   public SetColumsManager(cm: ColumnsManager) {
@@ -36,6 +37,48 @@ export class SearchManager<T> {
     }
   }
 
+  public FilterData(
+    data: T,
+    filterText: string,
+    filterObj: ColumnFilterByMap,
+    isSelectedInMultiple: (d: T) => boolean
+  ): boolean {
+    const isInFilter = this.IsInFilter(data, filterObj);
+    const noFilterText = !filterText;
+    if (isInFilter && noFilterText) {
+      return true;
+    }
+    if (!isInFilter) {
+      return false;
+    }
+    if (isSelectedInMultiple(data)) {
+      return true;
+    }
+    const containsText = this.DoesDataContainText(
+      data,
+      filterText
+    );
+    return containsText;
+  }
+
+  public IsInFilter(data: T, filters: ColumnFilterByMap): boolean {
+    const filtersSafe = filters || {};
+    const hasFilters = !!Object.values(filtersSafe).length;
+    if (!hasFilters) {
+      return true;
+    }
+    const isInFilter = Object.entries(filters).reduce(
+      (total, [fieldName, val]) => {
+        const valFilter = filters[fieldName].bool;
+        const valData = data[fieldName];
+        const filterMatches = valFilter === valData;
+        return total && filterMatches;
+      },
+      true
+    );
+    return isInFilter;
+  }
+
   public DoesDataContainText(data: T, filterText: string): boolean {
     this.FilterTextChanged.next(filterText);
     if (this.config.searchByColumnOption) {
@@ -62,7 +105,9 @@ export class SearchManager<T> {
     if (!Array.isArray(this.config.dontSearchFields)) {
       return doesDataContainText(data, fields, filterText);
     }
-    const searchOnlyFields = fields.filter(f => !dontSearchFields.includes(f));
+    const searchOnlyFields = fields.filter(
+      (f) => !dontSearchFields.includes(f)
+    );
     return doesDataContainText(data, searchOnlyFields, filterText);
   }
 }

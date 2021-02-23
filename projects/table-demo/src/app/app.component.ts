@@ -7,7 +7,7 @@ import { allRoutes } from './app.routing';
     <!--The content below is only a placeholder and can be replaced.-->
     <h2>ngx-auto-table Demo</h2>
     <mat-drawer-container style="height: 90vh;">
-      <mat-drawer mode="side" opened>
+      <mat-drawer mode="side" style="width: 160px" opened>
         <nav>
           <a
             *ngFor="let linkItem of linkItems"

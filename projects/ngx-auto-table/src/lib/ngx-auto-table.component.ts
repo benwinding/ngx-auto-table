@@ -16,8 +16,9 @@ import { ColumnsManager } from './columns-manager';
 import { SimpleLogger } from '../utils/SimpleLogger';
 import { blankConfig } from './models.defaults';
 import { Breakpoints, BreakpointObserver } from '@angular/cdk/layout';
-import { SearchManager } from './search-manager';
+import { FilterManager } from './filter-manager';
 import { convertObservableToBehaviorSubject } from '../utils/rxjs-helpers';
+import { ColumnFilterBy, ColumnFilterByMap } from './models.internal';
 
 @Component({
   selector: 'ngx-auto-table',
@@ -30,8 +31,8 @@ import { convertObservableToBehaviorSubject } from '../utils/rxjs-helpers';
         [config]="config"
         [$setSearchText]="$setSearchText"
         [IsPerformingBulkAction]="IsPerformingBulkAction"
-        [HasNoItems]="HasNoItems"
-        [IsMaxReached]="IsMaxReached"
+        [HasNoItems]="$HasNoItems | async"
+        [IsMaxReached]="$IsMaxReached | async"
         [headerKeyValues]="
           columnsManager.HeadersChoicesKeyValuesSorted$ | async
         "
@@ -44,9 +45,9 @@ import { convertObservableToBehaviorSubject } from '../utils/rxjs-helpers';
       ></ngx-auto-table-header>
       <ngx-auto-table-content
         [IsPerformingBulkAction]="IsPerformingBulkAction"
-        [IsAllSelected]="IsAllSelected"
-        [IsMaxReached]="IsMaxReached"
-        [HasNoItems]="HasNoItems"
+        [IsAllSelected]="$IsAllSelected | async"
+        [IsMaxReached]="$IsMaxReached | async"
+        [HasNoItems]="$HasNoItems | async"
         [HeadersVisible]="columnsManager.HeadersVisible"
         [config]="config"
         [debug]="config?.debug"
@@ -54,9 +55,10 @@ import { convertObservableToBehaviorSubject } from '../utils/rxjs-helpers';
         [selectionMultiple]="selectionMultiple"
         [selectionSingle]="selectionSingle"
         [columnDefinitionsAll]="columnsManager.AllColumnDefinitions"
+        (filtersChanged)="onFilterChanged($event)"
       ></ngx-auto-table-content>
       <ngx-auto-table-footer
-        [HasNoItems]="HasNoItems"
+        [HasNoItems]="$HasNoItems | async"
         [IsLoading]="$IsLoading | async"
         [config]="config"
         [dataSource]="dataSource"
@@ -95,10 +97,10 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   @Input()
   columnDefinitions: ColumnDefinitionMap = {};
 
-  dataSource: MatTableDataSource<any>;
+  dataSource = new MatTableDataSource<T>(null);
 
   columnsManager = new ColumnsManager();
-  searchManager = new SearchManager<T>();
+  filterManager = new FilterManager<T>();
 
   IsPerformingBulkAction = false;
 
@@ -113,82 +115,40 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
 
   $refreshTrigger = new Subject<string[]>();
   $setDisplayedColumnsTrigger = new Subject<string[]>();
+  $filterChangedTrigger = new BehaviorSubject<ColumnFilterByMap>(null);
   $setSearchHeadersTrigger = new Subject<string[]>();
   $setSearchText = new Subject<string>();
   $CurrentSearchText = new BehaviorSubject<string>('');
 
   $IsLoading = new Subject<boolean>();
+  $HasNoItems = new Subject<boolean>();
+  $IsMaxReached = new Subject<boolean>();
+  $IsAllSelected = new Subject<boolean>();
 
   private logger: SimpleLogger;
-
-  get HasNoItems(): boolean {
-    return (
-      this.dataSource && this.dataSource.data && !this.dataSource.data.length
-    );
-  }
-
-  get IsMaxReached(): boolean {
-    if (!this.config.bulkSelectMaxCount) {
-      return false;
-    }
-    const maxReached =
-      this.selectionMultiple.selected.length >= this.config.bulkSelectMaxCount;
-    return maxReached;
-  }
-
-  get IsAllSelected() {
-    const numSelected = this.selectionMultiple.selected.length;
-    if (!this.dataSource || !this.dataSource.filteredData) {
-      return false;
-    }
-    const numInData = this.dataSource.filteredData.length;
-    if (numSelected >= numInData) {
-      return true;
-    }
-    if (
-      this.config.bulkSelectMaxCount &&
-      numSelected >= this.config.bulkSelectMaxCount
-    ) {
-      return true;
-    }
-    return false;
-  }
 
   constructor(private breakpointObserver: BreakpointObserver) {}
 
   ngOnInit() {
     this.logger = new SimpleLogger('main.component', this.config.debug);
     this.columnsManager.SetLogging(this.config.debug);
-    this.searchManager.SetColumsManager(this.columnsManager);
-    this.searchManager.SetConfig(this.config);
+    this.filterManager.SetColumsManager(this.columnsManager);
+    this.filterManager.SetConfig(this.config);
 
-    this.$isMobile = this.breakpointObserver.observe('(max-width: 599px)').pipe(
-      map((result) => result.matches && Object.values(result.breakpoints).every(v => !!v)),
-      tap(result => this.logger.log('$isMobile', result)),
-      takeUntil(this.$onDestroyed),
-      distinctUntilChanged(),
-      debounceTime(100),
-    );
-
-    this.$isTablet = this.breakpointObserver
-      .observe(['(min-width: 600px)', '(max-width: 959px)'])
-      .pipe(
-        map((result) => result.matches && Object.values(result.breakpoints).every(v => !!v)),
-        tap(result => this.logger.log('$isTablet', result)),
-        takeUntil(this.$onDestroyed),
-        distinctUntilChanged(),
-        debounceTime(100),
-      );
+    this.initResponsive();
 
     if (!this.config) {
       this.logger.log('ngOnInit(), no [config] set on auto-table component');
       return;
     }
 
-    this.$setDisplayedColumnsTrigger
+    combineLatest([
+      this.$setDisplayedColumnsTrigger,
+      this.$filterChangedTrigger,
+    ])
       .pipe(takeUntil(this.$onDestroyed), debounceTime(100))
-      .subscribe((newHeaders) => {
-        this.logger.log('setDisplayedColumnsTrigger', { newHeaders });
+      .subscribe(([newHeaders, filters]) => {
+        this.logger.log('setDisplayedColumnsTrigger', { newHeaders, filters });
         this.columnsManager.SetDisplayed<T>(
           newHeaders,
           !!this.config.actions,
@@ -211,19 +171,34 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
 
     this.reInitializeVariables();
 
-    convertObservableToBehaviorSubject(this.config.data$, null)    
-      .pipe(
-        debounceTime(100),
-        filter((originalData) => {
-          const isArray = Array.isArray(originalData);
-          this.$IsLoading.next(!isArray);
-          return isArray;
-        })
-      )
-      .pipe(takeUntil(this.$onDestroyed))
-      .subscribe((originalData) => {
+    this.initDataChanges();
+    this.initializeConfigTriggers();
+  }
+
+  ngOnDestroy() {
+    this.$onDestroyed.next();
+  }
+
+  initDataChanges() {
+    const inputData$ = convertObservableToBehaviorSubject(
+      this.config.data$,
+      null
+    );
+
+    const DATA$ = new BehaviorSubject<T[]>(null);
+
+    // On Data Changed
+    combineLatest([inputData$, this.$CurrentSearchText])
+      .pipe(debounceTime(100), takeUntil(this.$onDestroyed))
+      .subscribe(([originalData, searchText]) => {
+        DATA$.next(originalData);
+        const isArray = Array.isArray(originalData);
+        this.$IsLoading.next(!isArray);
+        if (!isArray) {
+          return;
+        }
+        this.$HasNoItems.next(!originalData.length);
         this.logger.log('config.data$.subscribe: ', { originalData });
-        this.dataSource = new MatTableDataSource(originalData);
         if (this.config.onDataUpdated) {
           this.config.onDataUpdated(originalData);
         }
@@ -232,41 +207,115 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
           this.selectionSingle.select(firstDataItem);
         }
         this.initTable(this.columnDefinitions, this.config, firstDataItem);
-        this.initFilterPredicate(originalData);
-        this.onSearchChanged(this.$CurrentSearchText.getValue());
+        if (!originalData.length) {
+          return;
+        }
+
+        const firstRow = originalData[0];
+        this.filterManager.CheckFirstRow(firstRow);
       });
 
-    this.$CurrentSearchText
+    combineLatest([DATA$, this.$CurrentSearchText, this.$filterChangedTrigger])
+      .pipe(debounceTime(50), takeUntil(this.$onDestroyed))
+      .subscribe(([originalData, searchText, filters]) => {
+        if (!Array.isArray(originalData)) {
+          this.dataSource.data = null;
+          return;
+        }
+        const searchTextParsed = (searchText || '').trim().toLowerCase();
+        if (searchTextParsed) {
+          this.selectionSingle.clear();
+        }
+        const CheckIsSelected = (d: T) => this.selectionMultiple.isSelected(d);
+        const filtered = originalData.filter((d) =>
+          this.filterManager.FilterData(
+            d,
+            searchTextParsed,
+            filters,
+            CheckIsSelected
+          )
+        );
+        this.dataSource.data = filtered;
+      });
+
+    const IsAllSelected = () => {
+      const numSelected = this.selectionMultiple.selected.length;
+      if (!this.dataSource || !this.dataSource.filteredData) {
+        return false;
+      }
+      const numInData = this.dataSource.filteredData.length;
+      if (numSelected >= numInData) {
+        return true;
+      }
+      if (
+        this.config.bulkSelectMaxCount &&
+        numSelected >= this.config.bulkSelectMaxCount
+      ) {
+        return true;
+      }
+      return false;
+    };
+
+    const IsMaxReached = () => {
+      if (!this.config.bulkSelectMaxCount) {
+        return false;
+      }
+      const maxReached =
+        this.selectionMultiple.selected.length >=
+        this.config.bulkSelectMaxCount;
+      return maxReached;
+    };
+
+    this.selectionMultiple.changed
       .pipe(takeUntil(this.$onDestroyed))
-      .subscribe((text) => {
-        this.onSearchChanged(text);
+      .subscribe(() => {
+        this.$IsMaxReached.next(IsMaxReached());
+        this.$IsAllSelected.next(IsAllSelected());
       });
+  }
 
-    this.initializeConfigTriggers();
+  initResponsive() {
+    this.$isMobile = this.breakpointObserver.observe('(max-width: 599px)').pipe(
+      map(
+        (result) =>
+          result.matches && Object.values(result.breakpoints).every((v) => !!v)
+      ),
+      tap((result) => this.logger.log('$isMobile', result)),
+      takeUntil(this.$onDestroyed),
+      distinctUntilChanged(),
+      debounceTime(100)
+    );
+
+    this.$isTablet = this.breakpointObserver
+      .observe(['(min-width: 600px)', '(max-width: 959px)'])
+      .pipe(
+        map(
+          (result) =>
+            result.matches &&
+            Object.values(result.breakpoints).every((v) => !!v)
+        ),
+        tap((result) => this.logger.log('$isTablet', result)),
+        takeUntil(this.$onDestroyed),
+        distinctUntilChanged(),
+        debounceTime(100)
+      );
 
     combineLatest([this.$isMobile, this.$isTablet, this.$refreshTrigger])
       .pipe(takeUntil(this.$onDestroyed))
       .subscribe(([isMobile, isTablet]) => {
         if (isMobile) {
           this.onRefreshMobileDefaultColumns();
-        } 
-        else if (isTablet) {
+        } else if (isTablet) {
           this.onRefreshTabletDefaultColumns();
-        }
-        else {
+        } else {
           this.onRefreshDefaultColumns();
         }
       });
   }
 
-  ngOnDestroy() {
-    this.$onDestroyed.next();
-  }
-
   reInitializeVariables() {
     this.selectionMultiple = new SelectionModel<any>(true, []);
     this.selectionSingle = new SelectionModel<any>(false, []);
-    this.dataSource = undefined;
   }
 
   initializeConfigTriggers() {
@@ -317,7 +366,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
         });
     }
     if (typeof this.config.onTableFilterStateChanged === 'function') {
-      this.searchManager.FilterTextChanged.pipe(
+      this.filterManager.FilterTextChanged.pipe(
         takeUntil(this.$onDestroyed)
       ).subscribe((searchText) => {
         this.config.onTableFilterStateChanged({ searchText: searchText });
@@ -350,12 +399,14 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
 
   onRefreshDefaultColumns() {
     const columns = [...this.columnsManager.HeadersInitiallyVisible];
-    this.logger.log('onRefreshDefaultColumns()', {columns});
+    this.logger.log('onRefreshDefaultColumns()', { columns });
     this.$setDisplayedColumnsTrigger.next(columns);
   }
 
   onRefreshMobileDefaultColumns() {
-    let columns = this.config.mobileFields || [...this.columnsManager.HeadersInitiallyVisible];
+    let columns = this.config.mobileFields || [
+      ...this.columnsManager.HeadersInitiallyVisible,
+    ];
     this.logger.log('onRefreshMobileDefaultColumns()', {
       columns,
     });
@@ -363,20 +414,13 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   }
 
   onRefreshTabletDefaultColumns() {
-    let columns = this.config.tabletFields || [...this.columnsManager.HeadersInitiallyVisible];
+    let columns = this.config.tabletFields || [
+      ...this.columnsManager.HeadersInitiallyVisible,
+    ];
     this.logger.log('onRefreshMobileDefaultColumns()', {
       columns,
     });
     this.$setDisplayedColumnsTrigger.next(columns);
-  }
-
-  public onSearchChanged(inputValue: string) {
-    const parsedString = inputValue || '';
-    if (!this.dataSource) {
-      return;
-    }
-    this.dataSource.filter = parsedString.trim().toLowerCase();
-    this.selectionSingle.clear();
   }
 
   public onSearchHeadersChanged(columns: string[]) {
@@ -387,22 +431,8 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     this.$setDisplayedColumnsTrigger.next(columns);
   }
 
-  initFilterPredicate(originalData: T[]) {
-    if (!originalData.length) {
-      return;
-    }
-
-    const firstRow = originalData[0];
-    this.searchManager.CheckFirstRow(firstRow);
-
-    this.dataSource.filterPredicate = (data: T, filterText: string) => {
-      if (!filterText) {
-        return true;
-      }
-      if (this.selectionMultiple.isSelected(data)) {
-        return true;
-      }
-      return this.searchManager.DoesDataContainText(data, filterText);
-    };
+  public onFilterChanged(filters: ColumnFilterByMap) {
+    this.logger.log('onFilterChanged', { filters });
+    this.$filterChangedTrigger.next(filters);
   }
 }

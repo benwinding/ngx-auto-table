@@ -35,6 +35,8 @@ import { AppToolbarLoaderComponent } from "./loaders/toolbar-loader.component";
 import { AppTableLoaderComponent } from './loaders/table-loader.component';
 import { TableNotifyService } from "./table-notify.service";
 import { TableHeaderModule } from "./header/table-header.module";
+import { NgxAutoTableFilterColumnComponent } from "./table/table-filter-button.component";
+import { MatBadgeModule } from "@angular/material/badge";
 
 const sharedComponents = [AutoTableComponent];
 
@@ -46,6 +48,7 @@ const sharedComponents = [AutoTableComponent];
     NgxAutoTableActionsMenuComponent,
     NgxAutoTableFooterComponent,
     NgxAutoTableContentComponent,
+    NgxAutoTableFilterColumnComponent,
     ...sharedComponents,
   ],
   providers: [TableNotifyService],
@@ -56,6 +59,7 @@ const sharedComponents = [AutoTableComponent];
     LayoutModule,
     TableHeaderModule,
     MatAutocompleteModule,
+    MatBadgeModule,
     MatButtonModule,
     MatButtonToggleModule,
     MatCheckboxModule,

@@ -163,7 +163,7 @@ export class ColumnsManager {
       arrayMoveEl(allKeys, fromIndex, toIndex);
     });
     this.logger.log('final field order', { allKeys });
-    return allKeys.map(k => {
+    const columnDefsProcessed = allKeys.map(k => {
       const columnDef = allColumnDefinitionsMap[k];
       return {
         ...columnDef,
@@ -171,6 +171,8 @@ export class ColumnsManager {
         field: k
       };
     });
+    this.logger.log('processed column defs', { columnDefsProcessed });
+    return columnDefsProcessed;
   }
 
   private getMoreDefinitionsFromDataRow(
@@ -198,7 +200,8 @@ export class ColumnsManager {
         header: inputDefintion.header,
         template: inputDefintion.template,
         hide: inputDefintion.hide,
-        forceWrap: inputDefintion.forceWrap
+        forceWrap: inputDefintion.forceWrap,
+        filter: inputDefintion.filter,
       };
     });
     return all;

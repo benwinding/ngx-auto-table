@@ -1,5 +1,13 @@
-import { Component, OnInit, OnDestroy, Input, ViewChild } from '@angular/core';
-import { Subject } from 'rxjs';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  Input,
+  ViewChild,
+  Output,
+  EventEmitter,
+} from '@angular/core';
+import { Subject, BehaviorSubject } from 'rxjs';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
@@ -8,7 +16,11 @@ import { MatCheckboxChange } from '@angular/material/checkbox';
 import { AutoTableConfig } from '../models';
 import { SimpleLogger } from '../../utils/SimpleLogger';
 import { TableNotifyService } from '../table-notify.service';
-import { ColumnDefinitionInternal } from '../models.internal';
+import {
+  ColumnDefinitionInternal,
+  ColumnFilterBy,
+  ColumnFilterByMap,
+} from '../models.internal';
 
 @Component({
   selector: 'ngx-auto-table-content',
@@ -28,9 +40,18 @@ import { ColumnDefinitionInternal } from '../models.internal';
         *ngFor="let def of columnDefinitionsAll"
         [matColumnDef]="def.field"
       >
-        <th mat-header-cell mat-sort-header *matHeaderCellDef>
-          {{ def.header_pretty }}
-        </th>
+        <td mat-header-cell *matHeaderCellDef>
+          <div class="flex items-center">
+            <span mat-sort-header>{{ def.header_pretty }}</span>
+            <ngx-auto-table-filter-button
+              *ngIf="!!def.filter"
+              [filter]="def.filter"
+              [header]="def.header_pretty"
+              (filterBy)="onFilterBy($event, def.field)"
+            >
+            </ngx-auto-table-filter-button>
+          </div>
+        </td>
         <td mat-cell *matCellDef="let row">
           <div *ngIf="!def.template" [class.break-words]="def.forceWrap">
             {{ row[def.field] }}
@@ -100,6 +121,12 @@ import { ColumnDefinitionInternal } from '../models.internal';
   `,
   styles: [
     `
+      .flex {
+        display: flex;
+      }
+      .items-center {
+        align-items: center;
+      }
       td {
         background: unset;
       }
@@ -127,9 +154,9 @@ import { ColumnDefinitionInternal } from '../models.internal';
       .is-transparent {
         background: transparent;
       }
-    `
+    `,
   ],
-  styleUrls: ['../ngx-auto-table.component.scss']
+  styleUrls: ['../ngx-auto-table.component.scss'],
 })
 export class NgxAutoTableContentComponent implements OnInit, OnDestroy {
   @Input()
@@ -160,7 +187,7 @@ export class NgxAutoTableContentComponent implements OnInit, OnDestroy {
     this._dataSource = d;
     this.logger.log('ngx-auto-table-content, set dataSource', {
       sort: this.sort,
-      dataSource: this.dataSource
+      dataSource: this.dataSource,
     });
     this.dataSource.sort = this.sort;
   }
@@ -171,6 +198,10 @@ export class NgxAutoTableContentComponent implements OnInit, OnDestroy {
   set debug(newDebug: boolean) {
     this.logger = new SimpleLogger('content', newDebug);
   }
+  @Output()
+  filtersChanged = new EventEmitter<ColumnFilterByMap>();
+
+  currentFilters = new BehaviorSubject<ColumnFilterByMap>(null);
 
   private $onDestroyed = new Subject();
 
@@ -189,7 +220,7 @@ export class NgxAutoTableContentComponent implements OnInit, OnDestroy {
   /** Selects all rows if they are not all selected; otherwise clear selection. */
   onClickMasterToggle() {
     this.logger.log('onClickMasterToggle', {
-      IsAllSelected: this.IsAllSelected
+      IsAllSelected: this.IsAllSelected,
     });
     if (this.IsAllSelected) {
       this.selectionMultiple.clear();
@@ -240,6 +271,16 @@ export class NgxAutoTableContentComponent implements OnInit, OnDestroy {
     if (this.config.onSelectedBulk) {
       this.config.onSelectedBulk(this.selectionMultiple.selected);
     }
+  }
+
+  onFilterBy(filter: ColumnFilterBy, fieldName: string) {
+    const f: ColumnFilterByMap = this.currentFilters.getValue() || {};
+    if (filter) {
+      f[fieldName] = filter;
+    } else {
+      delete f[fieldName];
+    }
+    this.filtersChanged.next(f);
   }
 
   onClickRow(row: any) {
