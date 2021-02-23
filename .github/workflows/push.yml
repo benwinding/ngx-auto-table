@@ -26,7 +26,7 @@ jobs:
       - name: Build Library
         run: npm run-script build-lib && cp README.md dist/ngx-auto-table
       - name: Test
-        run: npm test
+        run: npm run test:ci
       - name: Publish
         uses: benwinding/merge-release@ee73930a37e807814c72a028112ccd67470a981b
         env:

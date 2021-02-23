@@ -188,9 +188,9 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     const DATA$ = new BehaviorSubject<T[]>(null);
 
     // On Data Changed
-    combineLatest([inputData$, this.$CurrentSearchText])
+    inputData$
       .pipe(debounceTime(100), takeUntil(this.$onDestroyed))
-      .subscribe(([originalData, searchText]) => {
+      .subscribe((originalData) => {
         DATA$.next(originalData);
         const isArray = Array.isArray(originalData);
         this.$IsLoading.next(!isArray);

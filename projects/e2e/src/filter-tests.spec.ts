@@ -44,4 +44,24 @@ describe('filter tests', () => {
     await setTimeoutAsync(1000);
     expect(inst.dataSource.data.length).toBe(6);
   });
+  test('should have filtered items', async () => {
+    const inst = MakeTestTableComponent();
+    inst.config = {
+      data$: new BehaviorSubject([
+        MakeRow('Adam', 11),
+        MakeRow('Ben', 20),
+        MakeRow('Alice', 12),
+        MakeRow('Allen', 23),
+        MakeRow('Dan', 33),
+        MakeRow('Robert', 22),
+      ]),
+    }
+    inst.columnDefinitions = {
+      age: {},
+      name: {}
+    }
+    inst.$CurrentSearchText.next('Al');
+    await setTimeoutAsync(1000);
+    expect(inst.dataSource.data.length).toBe(2);
+  });
 });
