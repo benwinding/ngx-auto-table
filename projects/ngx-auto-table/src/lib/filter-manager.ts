@@ -68,11 +68,31 @@ export class FilterManager<T> {
       return true;
     }
     const isInFilter = Object.entries(filters).reduce(
-      (total, [fieldName, val]) => {
-        const valFilter = filters[fieldName].bool;
+      (total, [fieldName, filterObj]) => {
         const valData = data[fieldName];
-        const filterMatches = valFilter === valData;
-        return total && filterMatches;
+        const hasBoolFilter = filterObj.bool;        
+        if (hasBoolFilter) {
+          const valFilter = filterObj.bool;
+          const filterMatches = valFilter === valData;
+          return total && filterMatches;
+        }
+        const hasStringFilter = filterObj.string;
+        if (hasStringFilter) {
+          const valFilter = filterObj.string;
+          const valDataString = typeof valData === 'string' ? valData : (valData || '').toString();
+          const filterMatches = valFilter === valDataString;
+          return total && filterMatches;
+        }
+        const hasStringArrFilter = filterObj.stringArray;
+        if (hasStringArrFilter) {
+          const valFilter = filterObj.stringArray;
+          const dataItemArray = Array.isArray(valData) ? valData : [valData];
+          const filterMatches = valFilter.reduce((allMatches, valFilterCur) => {
+            const matches = dataItemArray.includes(valFilterCur);
+            return allMatches && matches;
+          }, true);
+          return total && filterMatches;
+        }
       },
       true
     );
