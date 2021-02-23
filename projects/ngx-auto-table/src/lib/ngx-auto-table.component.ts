@@ -119,7 +119,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   $setSearchHeadersTrigger = new Subject<string[]>();
   $setSearchText = new Subject<string>();
   $CurrentSearchText = new BehaviorSubject<string>('');
-
+  
   $IsLoading = new Subject<boolean>();
   $HasNoItems = new Subject<boolean>();
   $IsMaxReached = new Subject<boolean>();

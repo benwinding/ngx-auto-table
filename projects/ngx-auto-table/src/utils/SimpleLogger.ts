@@ -8,6 +8,10 @@ export class SimpleLogger {
   private getLogString() {
     return `▦ ngx-auto-table:: ${this.prefix} [${this.loggerID}] `;
   }
+
+  SetEnabled(isDebug: boolean) {
+    this.debug = isDebug;
+  }
   
   public get log() {
     if (!this.debug) {

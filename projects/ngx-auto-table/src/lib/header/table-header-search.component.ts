@@ -84,7 +84,9 @@ import { HeaderKeyList } from '../models.internal';
 })
 export class NgxAutoTableHeaderSearchComponent implements OnInit, OnDestroy {
   @Input()
-  debug: boolean;
+  set debug(isDebug: boolean) {
+    this.logger && this.logger.SetEnabled(isDebug);
+  }
   @Input()
   filterText: string;
   @Input()
@@ -112,7 +114,7 @@ export class NgxAutoTableHeaderSearchComponent implements OnInit, OnDestroy {
   private $onDestroyed = new Subject();
 
   ngOnInit() {
-    this.logger = new SimpleLogger('header-search', this.debug);
+    this.logger = new SimpleLogger('header-search', false);
 
     this.$setSearchText
       .pipe(takeUntil(this.$onDestroyed))
@@ -123,7 +125,8 @@ export class NgxAutoTableHeaderSearchComponent implements OnInit, OnDestroy {
     this.searchControl.valueChanges
       .pipe(takeUntil(this.$onDestroyed), debounceTime(200))
       .subscribe(searchString => {
-        this.searchChanged.next(searchString);
+        this.logger.log('searchControl.valueChanges', { searchString });
+        this.searchChanged.next(searchString || "");
       });
 
     this.chooseSearchColumnsControl.valueChanges
