@@ -1,9 +1,11 @@
 import { ColumnDefinition } from './models';
 import { KeyValue } from '@angular/common';
+import { Observable } from 'rxjs';
 
 export interface ColumnDefinitionInternal extends ColumnDefinition {
   field: string;
   header_pretty: string;
+  $string_options: Observable<string[]>;
 }
 
 export type HeaderKeyList = KeyValue<string, string>[];

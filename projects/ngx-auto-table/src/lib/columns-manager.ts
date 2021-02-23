@@ -165,11 +165,13 @@ export class ColumnsManager {
     this.logger.log('final field order', { allKeys });
     const columnDefsProcessed = allKeys.map(k => {
       const columnDef = allColumnDefinitionsMap[k];
-      return {
+      const columnExtended: ColumnDefinitionInternal = {
         ...columnDef,
         header_pretty: columnDef.header || _.startCase(k),
-        field: k
+        field: k,
+        $string_options: new BehaviorSubject<string[]>([])
       };
+      return columnExtended;
     });
     this.logger.log('processed column defs', { columnDefsProcessed });
     return columnDefsProcessed;

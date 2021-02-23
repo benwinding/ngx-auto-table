@@ -12,6 +12,11 @@ import { Subject, combineLatest } from 'rxjs';
 import { ColumnFilterBy } from '../models.internal';
 import { convertObservableToBehaviorSubject } from '../../utils/rxjs-helpers';
 
+export interface KeyValueItem {
+  key: string;
+  value: string;
+}
+
 @Component({
   selector: 'ngx-auto-table-filter-button',
   template: `
@@ -48,34 +53,34 @@ import { convertObservableToBehaviorSubject } from '../../utils/rxjs-helpers';
       </div>
       <div class="m-4" *ngIf="!!filter?.string">
         <mat-form-field class="filter-columns overflow-hidden">
-          <mat-icon matPrefix>view_column</mat-icon>
+          <mat-icon matPrefix>local_offer</mat-icon>
           <mat-select
             [placeholder]="'Filter by Value'"
             [formControl]="controlString"
             multiple
           >
             <mat-option
-              *ngFor="let h of controlStringKeyValues"
-              [value]="h.key"
+              *ngFor="let item of controlStringOptions"
+              [value]="item"
             >
-              {{ h.value }}
+              {{ item }}
             </mat-option>
           </mat-select>
         </mat-form-field>
       </div>
       <div class="m-4" *ngIf="!!filter?.stringArray">
         <mat-form-field class="filter-columns overflow-hidden">
-          <mat-icon matPrefix>view_column</mat-icon>
+          <mat-icon matPrefix matTooltip="∞">local_offer</mat-icon>
           <mat-select
             [placeholder]="'Filter by Value'"
             [formControl]="controlStringArray"
             multiple
           >
             <mat-option
-              *ngFor="let h of controlStringKeyValues"
-              [value]="h.key"
+              *ngFor="let item of controlStringOptions"
+              [value]="item"
             >
-              {{ h.value }}
+              {{ item }}
             </mat-option>
           </mat-select>
         </mat-form-field>
@@ -106,7 +111,7 @@ export class NgxAutoTableFilterColumnComponent implements OnDestroy {
   filterBy = new EventEmitter<ColumnFilterBy>();
 
   @Input()
-  controlStringKeyValues = [];
+  controlStringOptions: string[];
 
   $filtersActive = new Subject<number>();
 
@@ -118,9 +123,18 @@ export class NgxAutoTableFilterColumnComponent implements OnDestroy {
 
   constructor() {
     combineLatest([
-      convertObservableToBehaviorSubject<boolean>(this.controlBool.valueChanges, null),
-      convertObservableToBehaviorSubject<string>(this.controlString.valueChanges, null),
-      convertObservableToBehaviorSubject<string[]>(this.controlStringArray.valueChanges, null),
+      convertObservableToBehaviorSubject<boolean>(
+        this.controlBool.valueChanges,
+        null
+      ),
+      convertObservableToBehaviorSubject<string>(
+        this.controlString.valueChanges,
+        null
+      ),
+      convertObservableToBehaviorSubject<string[]>(
+        this.controlStringArray.valueChanges,
+        null
+      ),
     ])
       .pipe(debounceTime(50), takeUntil(this.destroyed))
       .subscribe(([bool, str, strArray]) => {

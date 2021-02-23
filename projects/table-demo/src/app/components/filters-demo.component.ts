@@ -23,7 +23,7 @@ function makeRow(name: string, age: number, bool: boolean): MyTableRow {
       [config]="config"
       [columnDefinitions]="{
         name: {},
-        age: {},
+        age: {filter: {string: {}}},
         verified: {filter: {bool: {}}}
       }"
     ></ngx-auto-table>

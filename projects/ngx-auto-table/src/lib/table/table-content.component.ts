@@ -47,6 +47,7 @@ import {
               *ngIf="!!def.filter"
               [filter]="def.filter"
               [header]="def.header_pretty"
+              [controlStringOptions]="def.$string_options | async"
               (filterBy)="onFilterBy($event, def.field)"
             >
             </ngx-auto-table-filter-button>
