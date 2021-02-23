@@ -142,13 +142,10 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
       return;
     }
 
-    combineLatest([
-      this.$setDisplayedColumnsTrigger,
-      this.$filterChangedTrigger,
-    ])
+    this.$setDisplayedColumnsTrigger
       .pipe(takeUntil(this.$onDestroyed), debounceTime(100))
-      .subscribe(([newHeaders, filters]) => {
-        this.logger.log('setDisplayedColumnsTrigger', { newHeaders, filters });
+      .subscribe((newHeaders) => {
+        this.logger.log('setDisplayedColumnsTrigger', { newHeaders });
         this.columnsManager.SetDisplayed<T>(
           newHeaders,
           !!this.config.actions,
@@ -207,6 +204,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
           this.selectionSingle.select(firstDataItem);
         }
         this.initTable(this.columnDefinitions, this.config, firstDataItem);
+        this.initFilters(this.columnDefinitions, originalData);
         if (!originalData.length) {
           return;
         }
@@ -366,12 +364,19 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
         });
     }
     if (typeof this.config.onTableFilterStateChanged === 'function') {
-      this.filterManager.FilterTextChanged.pipe(
+      this.filterManager.$FilterTextChanged.pipe(
         takeUntil(this.$onDestroyed)
       ).subscribe((searchText) => {
         this.config.onTableFilterStateChanged({ searchText: searchText });
       });
     }
+  }
+
+  initFilters(
+    columnDefinitions: ColumnDefinitionMap,
+    dataItems: T[]
+  ) {
+    this.columnsManager.GetFilterOptionsFromData(columnDefinitions, dataItems);
   }
 
   initTable(

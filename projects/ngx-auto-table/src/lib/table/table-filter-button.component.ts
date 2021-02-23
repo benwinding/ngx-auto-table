@@ -23,7 +23,7 @@ export interface KeyValueItem {
     <button
       mat-icon-button
       #btnApps
-      [matBadge]="$filtersActive | async"
+      [matBadge]="($filtersActive | async) ? '1' : null"
       [matMenuTriggerFor]="settingsMenu"
       [matTooltip]="'Filter column'"
     >
@@ -113,7 +113,7 @@ export class NgxAutoTableFilterColumnComponent implements OnDestroy {
   @Input()
   controlStringOptions: string[];
 
-  $filtersActive = new Subject<number>();
+  $filtersActive = new Subject<boolean>();
 
   controlBool = new FormControl();
   controlString = new FormControl();
@@ -127,7 +127,7 @@ export class NgxAutoTableFilterColumnComponent implements OnDestroy {
         this.controlBool.valueChanges,
         null
       ),
-      convertObservableToBehaviorSubject<string>(
+      convertObservableToBehaviorSubject<string[]>(
         this.controlString.valueChanges,
         null
       ),
@@ -138,23 +138,20 @@ export class NgxAutoTableFilterColumnComponent implements OnDestroy {
     ])
       .pipe(debounceTime(50), takeUntil(this.destroyed))
       .subscribe(([bool, str, strArray]) => {
-        const allCleared = bool == null && str == null && strArray == null;
-        if (allCleared) {
-          this.$filtersActive.next(null);
+        const isBoolEmpty = bool == null;
+        const isStrEmpty = !Array.isArray(str) || !str.length;
+        const isStrArrayEmpty = !Array.isArray(strArray) || !strArray.length;
+        const allEmpty = isBoolEmpty && isStrEmpty && isStrArrayEmpty;
+        this.$filtersActive.next(!allEmpty);
+        if (allEmpty) {
           this.filterBy.next(null);
           return;
         }
         const f: ColumnFilterBy = {
           fieldName: this.fieldName,
           bool: bool,
-          string: str,
-          stringArray: strArray,
+          stringArray: str || strArray,
         };
-        const filtesActive =
-          (bool != null ? 1 : 0) +
-          (typeof str == 'string' ? 1 : 0) +
-          (Array.isArray(strArray) ? strArray.length : 0);
-        this.$filtersActive.next(filtesActive);
         this.filterBy.next(f);
       });
   }

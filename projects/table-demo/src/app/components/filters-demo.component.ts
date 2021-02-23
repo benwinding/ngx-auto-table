@@ -22,7 +22,7 @@ function makeRow(name: string, age: number, bool: boolean): MyTableRow {
     <ngx-auto-table
       [config]="config"
       [columnDefinitions]="{
-        name: {},
+        name: {filter: {string: {}}},
         age: {filter: {string: {}}},
         verified: {filter: {bool: {}}}
       }"
@@ -49,6 +49,9 @@ export class FiltersDemoComponent implements OnInit {
         makeRow('alice', 10, true),
         makeRow('dan', 10, true),
         makeRow('ben', 10, false),
+        makeRow('ben', 11, false),
+        makeRow('ben', 12, true),
+        makeRow('ben', 13, true),
       ]),
     };
   }

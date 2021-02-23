@@ -1,4 +1,5 @@
 import { Subject } from 'rxjs';
+import { ToString } from '../utils/tostr';
 import { ColumnsManager } from './columns-manager';
 import { AutoTableConfig } from './models';
 import { ColumnFilterByMap } from './models.internal';
@@ -9,7 +10,7 @@ export class FilterManager<T> {
   private config: AutoTableConfig<T>;
   private firstRowHeaderFields: string[];
 
-  public FilterTextChanged = new Subject<string>();
+  public $FilterTextChanged = new Subject<string>();
 
   public SetColumsManager(cm: ColumnsManager) {
     this.columnsManager = cm;
@@ -54,10 +55,7 @@ export class FilterManager<T> {
     if (isSelectedInMultiple(data)) {
       return true;
     }
-    const containsText = this.DoesDataContainText(
-      data,
-      filterText
-    );
+    const containsText = this.DoesDataContainText(data, filterText);
     return containsText;
   }
 
@@ -70,28 +68,33 @@ export class FilterManager<T> {
     const isInFilter = Object.entries(filters).reduce(
       (total, [fieldName, filterObj]) => {
         const valData = data[fieldName];
-        const hasBoolFilter = filterObj.bool;        
+        const hasBoolFilter = filterObj.bool != undefined;
         if (hasBoolFilter) {
           const valFilter = filterObj.bool;
           const filterMatches = valFilter === valData;
           return total && filterMatches;
         }
-        const hasStringFilter = filterObj.string;
+        const hasStringFilter = filterObj.stringArray != undefined;
         if (hasStringFilter) {
-          const valFilter = filterObj.string;
-          const valDataString = typeof valData === 'string' ? valData : (valData || '').toString();
-          const filterMatches = valFilter === valDataString;
-          return total && filterMatches;
-        }
-        const hasStringArrFilter = filterObj.stringArray;
-        if (hasStringArrFilter) {
-          const valFilter = filterObj.stringArray;
-          const dataItemArray = Array.isArray(valData) ? valData : [valData];
-          const filterMatches = valFilter.reduce((allMatches, valFilterCur) => {
-            const matches = dataItemArray.includes(valFilterCur);
-            return allMatches && matches;
-          }, true);
-          return total && filterMatches;
+          const isEmptyFilter =
+            !Array.isArray(filterObj.stringArray) ||
+            !filterObj.stringArray.length;
+          if (isEmptyFilter) {
+            return true;
+          }
+          if (Array.isArray(valData)) {
+            const valDataStringArr = (valData as any[]).map((v) => ToString(v));
+            const valDataSet = new Set(valDataStringArr);
+            const filterMatches = valDataStringArr.every((d) =>
+              valDataSet.has(d)
+            );
+            return total && filterMatches;
+          } else {
+            const valFilter = new Set(filterObj.stringArray);
+            const valDataString = ToString(valData);
+            const filterMatches = valFilter.has(valDataString);
+            return total && filterMatches;
+          }
         }
       },
       true
@@ -100,7 +103,7 @@ export class FilterManager<T> {
   }
 
   public DoesDataContainText(data: T, filterText: string): boolean {
-    this.FilterTextChanged.next(filterText);
+    this.$FilterTextChanged.next(filterText);
     if (this.config.searchByColumnOption) {
       const filterByColumns = this.columnsManager.HeadersSearchFilterVisible;
       if (filterByColumns.length > 0) {

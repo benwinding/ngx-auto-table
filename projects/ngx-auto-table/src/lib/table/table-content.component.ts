@@ -208,7 +208,7 @@ export class NgxAutoTableContentComponent implements OnInit, OnDestroy {
 
   private logger = new SimpleLogger('content', false);
 
-  @ViewChild(MatSort, { static: false }) sort;
+  @ViewChild(MatSort, { static: false }) sort: MatSort;
 
   constructor(private notify: TableNotifyService) {}
 

@@ -1,9 +1,14 @@
 import { ColumnDefinitionMap, AutoTableConfig } from './models';
 import { SimpleLogger } from '../utils/SimpleLogger';
-import { ColumnDefinitionInternal, HeaderKeyList } from './models.internal';
+import {
+  ColumnDefinitionInternal,
+  FieldFilterMap,
+  HeaderKeyList,
+} from './models.internal';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import * as _ from 'lodash';
+import { ToString } from '../utils/tostr';
 
 function clearArray(arr: any[]) {
   arr.splice(0, arr.length);
@@ -28,10 +33,11 @@ export class ColumnsManager {
   private logger = new SimpleLogger('columns-manager', true);
 
   private _headersChoicesKeyValues$ = new BehaviorSubject<HeaderKeyList>([]);
+  private $FilterOptions = new BehaviorSubject<FieldFilterMap>({});
 
   constructor() {
     this.HeadersChoicesKeyValuesSorted$ = this._headersChoicesKeyValues$.pipe(
-      map(arr => {
+      map((arr) => {
         const clonedValue = [...(arr || [])];
         return _.sortBy(clonedValue, 'value');
       })
@@ -73,20 +79,50 @@ export class ColumnsManager {
     this._headerKeysInitiallyVisible = [...this._headerKeysVisibleArray];
   }
 
+  public GetFilterOptionsFromData(
+    columnDefinitions: ColumnDefinitionMap,
+    data: any[]
+  ): void {
+    const columnsWithFilters = Object.entries(columnDefinitions).filter(
+      ([key, value]) => !!value.filter && typeof value.filter === 'object'
+    );
+    const fieldFilterMap: FieldFilterMap = {};
+    columnsWithFilters.map(([key, cDef]) => {
+      let opts = [];
+      let type: 'boolean' | 'string' | 'stringArray';
+      if (cDef.filter.bool) {
+        type = 'boolean';
+      } else if (cDef.filter.string) {
+        type = 'string';
+        opts = data.map((d) => ToString(d[key]));
+      } else if (cDef.filter.stringArray) {
+        type = 'stringArray';
+        opts = data.reduce((acc, d) => acc.concat(ToString(d[key])), []) as string[];
+      }
+      const optsUnique = Array.from(new Set(opts));
+      fieldFilterMap[key] = {
+        field: key,
+        options: optsUnique,
+        type: type,
+      };
+    });
+    this.$FilterOptions.next(fieldFilterMap);
+  }
+
   public SetDisplayed<T>(
     selected: string[],
     hasActions: boolean,
     hasActionsBulk: boolean
   ) {
-    selected = selected.filter(s => s !== '__bulk' && s !== '__star');
+    selected = selected.filter((s) => s !== '__bulk' && s !== '__star');
     const selectedSet = new Set(selected);
     // Update sets
     this._headerKeysVisibleSet.clear();
-    selected.forEach(c => this._headerKeysVisibleSet.add(c));
+    selected.forEach((c) => this._headerKeysVisibleSet.add(c));
 
     // Update Array
     clearArray(this._headerKeysVisibleArray);
-    this._columnDefinitionsAllArray.map(colDef => {
+    this._columnDefinitionsAllArray.map((colDef) => {
       if (selectedSet.has(colDef.field)) {
         this._headerKeysVisibleArray.push(colDef.field);
       }
@@ -106,7 +142,7 @@ export class ColumnsManager {
 
   public SetSearchFilterDisplayed<T>(selected: string[]) {
     clearArray(this._headersSearchFilterVisible);
-    selected.forEach(c => this._headersSearchFilterVisible.push(c));
+    selected.forEach((c) => this._headersSearchFilterVisible.push(c));
   }
 
   public InitializeColumns(
@@ -119,7 +155,7 @@ export class ColumnsManager {
     );
     this._columnDefinitionsAll = {
       ...this.getMoreDefinitionsFromDataRow(dataRow),
-      ...this._columnDefinitionsAll
+      ...this._columnDefinitionsAll,
     };
     const orderedFields = Object.keys(orderedColumnDefinitions);
     this._columnDefinitionsAllArray = this.getColumnDefinitionOrderedArray(
@@ -140,13 +176,13 @@ export class ColumnsManager {
     const hideThese = new Set(hideTheseFields || []);
     const allChoices = [];
     // Add to all choices array
-    allColumnDefinitions.map(cd => {
+    allColumnDefinitions.map((cd) => {
       if (hideThese.has(cd.field)) {
         return;
       }
       allChoices.push({
         key: cd.field,
-        value: cd.header_pretty
+        value: cd.header_pretty,
       });
     });
     return allChoices;
@@ -163,13 +199,24 @@ export class ColumnsManager {
       arrayMoveEl(allKeys, fromIndex, toIndex);
     });
     this.logger.log('final field order', { allKeys });
-    const columnDefsProcessed = allKeys.map(k => {
+    const columnDefsProcessed = allKeys.map((k) => {
       const columnDef = allColumnDefinitionsMap[k];
       const columnExtended: ColumnDefinitionInternal = {
         ...columnDef,
         header_pretty: columnDef.header || _.startCase(k),
         field: k,
-        $string_options: new BehaviorSubject<string[]>([])
+        $string_options: this.$FilterOptions.pipe(
+          map((opts) => {
+            const f = opts[k];
+            if (!f) {
+              return [];
+            }
+            if (f.type == 'boolean') {
+              return [];
+            }
+            return f.options;
+          })
+        ),
       };
       return columnExtended;
     });
@@ -186,7 +233,7 @@ export class ColumnsManager {
     // Set all column defintions read from the "input data"
     return Object.keys(firstDataItem).reduce((acc, fieldName) => {
       acc[fieldName] = {
-        hide: true
+        hide: true,
       };
       return acc;
     }, {} as ColumnDefinitionMap);
