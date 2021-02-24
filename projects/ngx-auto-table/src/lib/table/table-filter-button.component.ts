@@ -58,6 +58,7 @@ export interface KeyValueItem {
             [placeholder]="'Filter by Value'"
             [formControl]="controlString"
             multiple
+            (click)="$event.stopPropagation()"
           >
             <mat-option
               *ngFor="let item of controlStringOptions"
@@ -74,6 +75,7 @@ export interface KeyValueItem {
           <mat-select
             [placeholder]="'Filter by Value'"
             [formControl]="controlStringArray"
+            (click)="$event.stopPropagation()"
             multiple
           >
             <mat-option
