@@ -37,7 +37,7 @@ import { ColumnFilterBy, ColumnFilterByMap } from './models.internal';
           columnsManager.HeadersChoicesKeyValuesSorted$ | async
         "
         [selectionMultiple]="selectionMultiple"
-        [selectedHeaderKeys]="columnsManager.HeadersVisible"
+        [selectedHeaderKeys]="columnsManager.HeadersVisible$ | async"
         (searchChanged)="$CurrentSearchText.next($event)"
         (searchHeadersChanged)="onSearchHeadersChanged($event)"
         (columnsChanged)="onColumnsChanged($event)"
@@ -48,7 +48,7 @@ import { ColumnFilterBy, ColumnFilterByMap } from './models.internal';
         [IsAllSelected]="$IsAllSelected | async"
         [IsMaxReached]="$IsMaxReached | async"
         [HasNoItems]="$HasNoItems | async"
-        [HeadersVisible]="columnsManager.HeadersVisible"
+        [HeadersVisible]="columnsManager.HeadersVisible$ | async"
         [config]="config"
         [debug]="config?.debug"
         [dataSource]="dataSource"
@@ -61,6 +61,7 @@ import { ColumnFilterBy, ColumnFilterByMap } from './models.internal';
         [HasNoItems]="$HasNoItems | async"
         [IsLoading]="$IsLoading | async"
         [config]="config"
+        [dataSourceData]="dataSource?.data"
         [dataSource]="dataSource"
         [noItemsMessage]="config?.noItemsFoundPlaceholder"
       ></ngx-auto-table-footer>
@@ -97,7 +98,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   @Input()
   columnDefinitions: ColumnDefinitionMap = {};
 
-  dataSource = new MatTableDataSource<T>(null);
+  dataSource = new MatTableDataSource<T>([]);
 
   columnsManager = new ColumnsManager();
   filterManager = new FilterManager<T>();
@@ -119,7 +120,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   $setSearchHeadersTrigger = new Subject<string[]>();
   $setSearchText = new Subject<string>();
   $CurrentSearchText = new BehaviorSubject<string>('');
-  
+
   $IsLoading = new Subject<boolean>();
   $HasNoItems = new Subject<boolean>();
   $IsMaxReached = new Subject<boolean>();
@@ -151,9 +152,6 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
           !!this.config.actions,
           !!this.config.actionsBulk
         );
-        if (this.dataSource) {
-          this.dataSource.filter = this.dataSource.filter;
-        }
       });
 
     this.$setSearchHeadersTrigger
@@ -161,9 +159,6 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
       .subscribe((newHeaders) => {
         this.logger.log('setSearchHeadersTrigger', { newHeaders });
         this.columnsManager.SetSearchFilterDisplayed<T>(newHeaders);
-        if (this.dataSource) {
-          this.dataSource.filter = this.dataSource.filter;
-        }
       });
 
     this.reInitializeVariables();
@@ -211,13 +206,17 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
 
         const firstRow = originalData[0];
         this.filterManager.CheckFirstRow(firstRow);
+        if (!Array.isArray(originalData)) {
+          this.dataSource.data = [];
+          return;
+        }
+        this.dataSource.data = originalData;
       });
 
     combineLatest([DATA$, this.$CurrentSearchText, this.$filterChangedTrigger])
       .pipe(debounceTime(50), takeUntil(this.$onDestroyed))
       .subscribe(([originalData, searchText, filters]) => {
         if (!Array.isArray(originalData)) {
-          this.dataSource.data = null;
           return;
         }
         const searchTextParsed = (searchText || '').trim().toLowerCase();
@@ -364,18 +363,15 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
         });
     }
     if (typeof this.config.onTableFilterStateChanged === 'function') {
-      this.filterManager.$FilterTextChanged.pipe(
-        takeUntil(this.$onDestroyed)
-      ).subscribe((searchText) => {
-        this.config.onTableFilterStateChanged({ searchText: searchText });
-      });
+      this.filterManager.$FilterTextChanged
+        .pipe(takeUntil(this.$onDestroyed))
+        .subscribe((searchText) => {
+          this.config.onTableFilterStateChanged({ searchText: searchText });
+        });
     }
   }
 
-  initFilters(
-    columnDefinitions: ColumnDefinitionMap,
-    dataItems: T[]
-  ) {
+  initFilters(columnDefinitions: ColumnDefinitionMap, dataItems: T[]) {
     this.columnsManager.GetFilterOptionsFromData(columnDefinitions, dataItems);
   }
 

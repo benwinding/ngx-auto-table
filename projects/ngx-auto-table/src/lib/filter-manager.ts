@@ -21,7 +21,7 @@ export class FilterManager<T> {
   }
 
   public CheckFirstRow(firstRow: T) {
-    const keysHeader = this.columnsManager.HeadersVisibleSet;
+    const keysHeader = new Set(...this.columnsManager.HeadersVisible);
     const firstRowKeys = Object.keys(firstRow);
     const firstRowKeysSet = new Set(firstRowKeys);
     keysHeader.delete('__bulk');

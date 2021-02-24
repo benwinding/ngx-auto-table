@@ -5,7 +5,6 @@
   "dependencies": {
     "@angular/cdk": "10.x",
     "@angular/material": "10.x",
-    "@ctrl/ngx-csv": "3.x",
     "lodash": "^4.x",
     "uuid": "^3.3.3"
   },

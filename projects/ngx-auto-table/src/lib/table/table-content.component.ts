@@ -6,6 +6,7 @@ import {
   ViewChild,
   Output,
   EventEmitter,
+  AfterViewInit,
 } from '@angular/core';
 import { Subject, BehaviorSubject } from 'rxjs';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -21,6 +22,7 @@ import {
   ColumnFilterBy,
   ColumnFilterByMap,
 } from '../models.internal';
+import { debounceTime, filter, takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'ngx-auto-table-content',
@@ -37,7 +39,7 @@ import {
     >
       <!-- All header definitions given to ngx-auto-table -->
       <ng-container
-        *ngFor="let def of columnDefinitionsAll"
+        *ngFor="let def of $ColumnDefinitions | async"
         [matColumnDef]="def.field"
       >
         <td mat-header-cell *matHeaderCellDef>
@@ -159,7 +161,8 @@ import {
   ],
   styleUrls: ['../ngx-auto-table.component.scss'],
 })
-export class NgxAutoTableContentComponent implements OnInit, OnDestroy {
+export class NgxAutoTableContentComponent
+  implements OnInit, OnDestroy, AfterViewInit {
   @Input()
   IsPerformingBulkAction: boolean;
   @Input()
@@ -170,31 +173,26 @@ export class NgxAutoTableContentComponent implements OnInit, OnDestroy {
   HasNoItems: boolean;
   @Input()
   HeadersVisible: string[];
+  $ColumnDefinitions = new BehaviorSubject<ColumnDefinitionInternal[]>([]);
   @Input()
-  columnDefinitionsAll: ColumnDefinitionInternal[] = [];
-
+  set columnDefinitionsAll(cols: any[]) {
+    console.log({cols})
+    this.$ColumnDefinitions.next(cols || []);
+  }
   @Input()
   config: AutoTableConfig<any>;
   @Input()
   selectionMultiple: SelectionModel<any>;
   @Input()
   selectionSingle: SelectionModel<any>;
-  _dataSource: MatTableDataSource<any>;
   @Input()
   set dataSource(d: MatTableDataSource<any>) {
-    if (!d) {
-      return;
-    }
-    this._dataSource = d;
-    this.logger.log('ngx-auto-table-content, set dataSource', {
-      sort: this.sort,
-      dataSource: this.dataSource,
-    });
-    this.dataSource.sort = this.sort;
+    this._dataSource.next(d);
   }
   get dataSource() {
-    return this._dataSource;
+    return this._dataSource.getValue();
   }
+  _dataSource = new BehaviorSubject<MatTableDataSource<any>>(null);
   @Input()
   set debug(newDebug: boolean) {
     this.logger = new SimpleLogger('content', newDebug);
@@ -218,6 +216,22 @@ export class NgxAutoTableContentComponent implements OnInit, OnDestroy {
     this.$onDestroyed.next();
   }
 
+  ngAfterViewInit() {
+    this._dataSource
+      .pipe(
+        takeUntil(this.$onDestroyed),
+        filter((d) => !!d),
+        debounceTime(10)
+      )
+      .subscribe((dataSource) => {
+        this.logger.log('_dataSource.pipe', {
+          sort: this.sort,
+          dataSource: this.dataSource,
+        });
+        this.dataSource.sort = this.sort;
+      });
+  }
+
   /** Selects all rows if they are not all selected; otherwise clear selection. */
   onClickMasterToggle() {
     this.logger.log('onClickMasterToggle', {
@@ -234,16 +248,9 @@ export class NgxAutoTableContentComponent implements OnInit, OnDestroy {
   }
 
   private selectAll() {
-    this.dataSource.sortData(
-      this.dataSource.filteredData,
-      this.dataSource.sort
-    );
-    let cutArray = this.dataSource.filteredData;
+    let cutArray = this.dataSource.data;
     if (this.config.bulkSelectMaxCount) {
-      cutArray = this.dataSource.filteredData.slice(
-        0,
-        this.config.bulkSelectMaxCount
-      );
+      cutArray = cutArray.slice(0, this.config.bulkSelectMaxCount);
     }
     this.selectionMultiple.select(...cutArray);
   }

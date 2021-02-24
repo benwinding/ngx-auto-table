@@ -1,10 +1,18 @@
-import { Component, OnInit, Input, OnDestroy, ViewChild } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  AfterViewInit,
+  Input,
+  ViewChild,
+} from '@angular/core';
 import { AutoTableConfig } from '../models';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 
-import { Subject } from 'rxjs';
+import { Subject, BehaviorSubject } from 'rxjs';
 import { SimpleLogger } from '../../utils/SimpleLogger';
+import { filter, takeUntil, debounceTime } from 'rxjs/operators';
 
 @Component({
   selector: 'ngx-auto-table-footer',
@@ -27,10 +35,12 @@ import { SimpleLogger } from '../../utils/SimpleLogger';
       <mat-toolbar-row class="paginator-row">
         <app-table-csv-export
           *ngIf="exportFilename"
-          [dataArray]="exportData"
+          [data]="rawData"
+          [exportFunction]="exportFunction"
           [filename]="exportFilename"
         ></app-table-csv-export>
         <mat-paginator
+          #paginator
           [hidden]="config.hidePaginator"
           [pageSize]="config.pageSize || defaultPageSize"
           [pageSizeOptions]="[5, 10, 25, 100]"
@@ -66,11 +76,12 @@ import { SimpleLogger } from '../../utils/SimpleLogger';
         flex-grow: 1;
         min-height: 0px;
       }
-    `
+    `,
   ],
-  styleUrls: ['../ngx-auto-table.component.scss']
+  styleUrls: ['../ngx-auto-table.component.scss'],
 })
-export class NgxAutoTableFooterComponent implements OnInit, OnDestroy {
+export class NgxAutoTableFooterComponent
+  implements OnInit, OnDestroy, AfterViewInit {
   @Input()
   IsLoading: boolean;
   @Input()
@@ -80,28 +91,46 @@ export class NgxAutoTableFooterComponent implements OnInit, OnDestroy {
   @Input()
   config: AutoTableConfig<any>;
   @Input()
-  set dataSource(newDataSource: MatTableDataSource<any>) {
-    this.logger.log('NgxAutoTableFooterComponent', { newDataSource });
-    if (!newDataSource) {
-      return;
-    }
-    newDataSource.paginator = this.paginator;
-    this.initExport(newDataSource.data);
+  set dataSourceData(data: any[]) {
+    this.initExport(data);
   }
+  @Input()
+  set dataSource(newDataSource: MatTableDataSource<any>) {
+    this._dataSource.next(newDataSource);
+  }
+
+  _dataSource = new BehaviorSubject<MatTableDataSource<any>>(null);
 
   defaultPageSize = 25;
 
-  exportData: any[];
+  rawData: any[];
   exportFilename: string;
+  exportFunction: (row: any) => void;
 
-  @ViewChild(MatPaginator, { static: false }) paginator: MatPaginator;
+  @ViewChild('paginator', { static: false }) paginator: MatPaginator;
 
   private $onDestroyed = new Subject();
 
   private logger = new SimpleLogger('footer', false);
 
   ngOnInit() {
-    this.logger = new SimpleLogger('footer', this.config.debug);
+    this.logger = new SimpleLogger('footer', true);
+  }
+
+  ngAfterViewInit(): void {
+    this._dataSource
+      .pipe(
+        takeUntil(this.$onDestroyed),
+        filter((d) => !!d),
+        debounceTime(10)
+      )
+      .subscribe((dataSource) => {
+        this.logger.log('_dataSource.pipe', {
+          dataSource,
+          paginator: this.paginator,
+        });
+        dataSource.paginator = this.paginator;
+      });
   }
 
   ngOnDestroy() {
@@ -114,11 +143,7 @@ export class NgxAutoTableFooterComponent implements OnInit, OnDestroy {
     if (!this.exportFilename) {
       return;
     }
-    this.exportData = originalData.map(dataItem => {
-      if (!this.config.exportRowFormat) {
-        return dataItem;
-      }
-      return this.config.exportRowFormat(dataItem);
-    });
+    this.rawData = originalData;
+    this.exportFunction = this.config.exportRowFormat;
   }
 }

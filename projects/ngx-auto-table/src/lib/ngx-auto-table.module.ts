@@ -26,7 +26,6 @@ import { NgxAutoTableActionsMenuComponent } from "./table/actions-menu.component
 import { NgxAutoTableFooterComponent } from "./footer/table-footer";
 import { NgxAutoTableContentComponent } from "./table/table-content.component";
 
-import { CsvModule } from "@ctrl/ngx-csv";
 import { AppExportCsvExportComponent } from "./footer/app-table-csv-export.component";
 import { CommonModule } from "@angular/common";
 import { RouterModule } from "@angular/router";
@@ -54,7 +53,6 @@ const sharedComponents = [AutoTableComponent];
   providers: [TableNotifyService],
   exports: sharedComponents,
   imports: [
-    CsvModule,
     ReactiveFormsModule,
     LayoutModule,
     TableHeaderModule,
