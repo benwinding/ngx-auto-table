@@ -8,6 +8,11 @@ interface MyTableRow {
   age: number;
 }
 
+const DEFAULT_VAL: MyTableRow = {
+  name: 'Frank',
+  age: 22
+}
+
 @Component({
   template: `
     <h2>Simple Table</h2>
@@ -42,13 +47,14 @@ export class BlankTableDemoComponent implements OnInit {
   config: AutoTableConfig<MyTableRow>;
 
   form = new FormGroup({
-    name: new FormControl(),
-    age: new FormControl()
+    name: new FormControl('Frank'),
+    age: new FormControl(2)
   });
 
   myDataSource = new BehaviorSubject<MyTableRow[]>([]);
 
   ngOnInit() {
+    this.form.patchValue(DEFAULT_VAL);
     this.config = {
       debug: true,
       data$: this.myDataSource.asObservable(),
@@ -70,5 +76,6 @@ export class BlankTableDemoComponent implements OnInit {
     const row = this.form.value;
     this.myDataSource.getValue().push(row)
     this.myDataSource.next(this.myDataSource.getValue())
+    this.form.patchValue(DEFAULT_VAL);
   }
 }

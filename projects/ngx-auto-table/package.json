@@ -5,6 +5,8 @@
   "dependencies": {
     "@angular/cdk": "10.x",
     "@angular/material": "10.x",
+    "flatted": "3.x",
+    "papaparse": "5.3.x",
     "lodash": "^4.x",
     "uuid": "^3.3.3"
   },

@@ -248,6 +248,8 @@ export class MainDemoComponent implements OnInit {
           onClick: async (row: TestRow) => {},
         },
       ],
+      exportFilename: 'export.csv',
+      exportRowFormat: null
     };
   }
 

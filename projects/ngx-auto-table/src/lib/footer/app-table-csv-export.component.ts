@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { downloadCSVData } from './csv-export-functions';
 
 @Component({
   selector: 'app-table-csv-export',
@@ -33,27 +34,6 @@ export class AppExportCsvExportComponent {
   filename: string;
 
   onClickDownload() {
-    const exportFunctionSafe =
-      typeof this.exportFunction === 'function'
-        ? this.exportFunction
-        : (a: any) => a;
-    const rows = this.data.map((d) => exportFunctionSafe(d));
-    downloadCsvFile(rows, this.filename);
+    downloadCSVData(this.data, this.exportFunction, this.filename);
   }
-}
-
-function downloadCsvFile(rowStrings: string[], filename: string) {
-  const csv_string = rowStrings.join('\n');
-  // Download it
-  const link = document.createElement('a');
-  link.style.display = 'none';
-  link.setAttribute('target', '_blank');
-  link.setAttribute(
-    'href',
-    'data:text/csv;charset=utf-8,' + encodeURIComponent(csv_string)
-  );
-  link.setAttribute('download', filename);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
 }
