@@ -68,16 +68,6 @@ export class ColumnsManager {
     return this._columnDefinitionsAllArray;
   }
 
-  public SetDisplayedInitial(
-    selected: string[],
-    hasActions: boolean,
-    hasActionsBulk: boolean
-  ) {
-    this.SetDisplayed(selected, hasActions, hasActionsBulk);
-    this._headerKeysInitiallyVisible = [...selected];
-    this._$headerKeysVisible.next([...selected]);
-  }
-
   public GetFilterOptionsFromData(
     columnDefinitions: ColumnDefinitionMap,
     data: any[]
@@ -111,30 +101,39 @@ export class ColumnsManager {
     this.$FilterOptions.next(fieldFilterMap);
   }
 
+  public SetDisplayedInitial(
+    selected: string[],
+    hasActions: boolean,
+    hasActionsBulk: boolean
+  ) {
+    this.SetDisplayed(selected, hasActions, hasActionsBulk);
+    const selectedNew = this.GetHeaderKeysVisibleNoActions();
+    this._headerKeysInitiallyVisible = [...selectedNew];
+  }
+
   public SetDisplayed<T>(
     selected: string[],
     hasActions: boolean,
     hasActionsBulk: boolean
   ) {
-    selected = selected.filter((s) => s !== '__bulk' && s !== '__star');
-    const selectedSet = new Set(selected);
     // Update Array
-    const visibleKeys: string[] = [];
-    this._columnDefinitionsAllArray.map((colDef) => {
-      if (selectedSet.has(colDef.field)) {
-        visibleKeys.push(colDef.field);
-      }
-    });
+    const colFields = this._columnDefinitionsAllArray.map((c) => c.field);
+    const visibleKeys = GetFieldKeys(
+      colFields,
+      selected,
+      hasActions,
+      hasActionsBulk
+    );
+    this.SetHeaderKeysVisible(visibleKeys);
+  }
 
-    // Add bulk select column at start
-    if (hasActions) {
-      visibleKeys.push('__star');
-    }
-    // Add actions column at end
-    if (hasActionsBulk) {
-      visibleKeys.unshift('__bulk');
-    }
+  private SetHeaderKeysVisible(visibleKeys: string[]) {
     this._$headerKeysVisible.next(visibleKeys);
+  }
+
+  private GetHeaderKeysVisibleNoActions(): string[] {
+    const keys = this._$headerKeysVisible.value;
+    return FilterOutActions(keys);
   }
 
   public SetSearchFilterDisplayed<T>(selected: string[]) {
@@ -259,4 +258,35 @@ export class ColumnsManager {
     });
     return all;
   }
+}
+
+function GetFieldKeys(
+  colFields: string[],
+  selectedInput: string[],
+  hasActions: boolean,
+  hasActionsBulk: boolean
+): string[] {
+  const selectedNoActions = FilterOutActions(selectedInput);
+  const visibleKeys = [];
+  colFields.map((colField) => {
+    if (selectedNoActions.includes(colField)) {
+      visibleKeys.push(colField);
+    }
+  });
+  // Add bulk select column at start
+  if (hasActions) {
+    visibleKeys.push('__star');
+  }
+  // Add actions column at end
+  if (hasActionsBulk) {
+    visibleKeys.unshift('__bulk');
+  }
+  return visibleKeys;
+}
+
+function FilterOutActions(selectedInput: string[]) {
+  const selectedNoActions = selectedInput.filter(
+    (s) => s !== '__bulk' && s !== '__star'
+  );
+  return selectedNoActions;
 }
