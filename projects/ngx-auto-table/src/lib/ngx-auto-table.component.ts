@@ -392,8 +392,8 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     this.logger.log('initialKeys', { initialKeys });
     this.columnsManager.SetDisplayedInitial(
       initialKeys,
-      !!this.config.actions,
-      !!this.config.actionsBulk
+      !!config.actions,
+      !!config.actionsBulk
     );
     this.$refreshTrigger.next();
   }
