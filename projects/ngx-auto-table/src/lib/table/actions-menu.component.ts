@@ -30,28 +30,37 @@ import { ActionDefinition } from '../models';
             class="mr-10"
             mat-menu-item
             *ngIf="action.onClick"
+            [disabled]="
+              !!action.disabledByRowField && row[action.disabledByRowField]
+            "
             (click)="onClickedAction(action, row)"
           >
-            <mat-icon [color]="action.iconColor" >{{ action.icon }}</mat-icon>
+            <mat-icon [color]="action.iconColor">{{ action.icon }}</mat-icon>
             <span>{{ action.label }}</span>
           </button>
           <a
             class="mr-10"
             mat-menu-item
             *ngIf="action.onRouterLink && !action.routerLinkQuery"
+            [disabled]="
+              !!action.disabledByRowField && row[action.disabledByRowField]
+            "
             [routerLink]="['/' + action.onRouterLink(row)]"
           >
-            <mat-icon [color]="action.iconColor" >{{ action.icon }}</mat-icon>
+            <mat-icon [color]="action.iconColor">{{ action.icon }}</mat-icon>
             <span>{{ action.label }}</span>
           </a>
           <a
             class="mr-10"
             mat-menu-item
             *ngIf="action.onRouterLink && action.routerLinkQuery"
+            [disabled]="
+              !!action.disabledByRowField && row[action.disabledByRowField]
+            "
             [routerLink]="['/' + action.onRouterLink(row)]"
             [queryParams]="action.routerLinkQuery(row)"
           >
-            <mat-icon [color]="action.iconColor" >{{ action.icon }}</mat-icon>
+            <mat-icon [color]="action.iconColor">{{ action.icon }}</mat-icon>
             <span>{{ action.label }}</span>
           </a>
         </div>
@@ -62,32 +71,41 @@ import { ActionDefinition } from '../models';
             class="mr-10"
             mat-mini-fab
             *ngIf="action.onClick"
+            [disabled]="
+              !!action.disabledByRowField && row[action.disabledByRowField]
+            "
             (click)="onClickedAction(action, row)"
             [matTooltip]="action.label"
             [color]="action.iconColor || 'accent'"
           >
-            <mat-icon  >{{ action.icon }}</mat-icon>
+            <mat-icon>{{ action.icon }}</mat-icon>
           </button>
           <a
             class="mr-10"
             mat-mini-fab
             *ngIf="action.onRouterLink && !action.routerLinkQuery"
+            [disabled]="
+              !!action.disabledByRowField && row[action.disabledByRowField]
+            "
             [routerLink]="['/' + action.onRouterLink(row)]"
             [matTooltip]="action.label"
             [color]="action.iconColor || 'accent'"
           >
-            <mat-icon >{{ action.icon }}</mat-icon>
+            <mat-icon>{{ action.icon }}</mat-icon>
           </a>
           <a
             class="mr-10"
             mat-mini-fab
             *ngIf="action.onRouterLink && action.routerLinkQuery"
+            [disabled]="
+              !!action.disabledByRowField && row[action.disabledByRowField]
+            "
             [routerLink]="['/' + action.onRouterLink(row)]"
             [queryParams]="action.routerLinkQuery(row)"
             [matTooltip]="action.label"
             [color]="action.iconColor || 'accent'"
           >
-            <mat-icon >{{ action.icon }}</mat-icon>
+            <mat-icon>{{ action.icon }}</mat-icon>
           </a>
         </div>
       </div>
@@ -110,9 +128,9 @@ import { ActionDefinition } from '../models';
       .mr-10 {
         margin-right: 10px;
       }
-    `
+    `,
   ],
-  styleUrls: ['../ngx-auto-table.component.scss']
+  styleUrls: ['../ngx-auto-table.component.scss'],
 })
 export class NgxAutoTableActionsMenuComponent implements OnInit {
   @Input()

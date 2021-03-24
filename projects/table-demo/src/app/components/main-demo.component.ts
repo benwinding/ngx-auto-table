@@ -3,10 +3,12 @@ import { AutoTableConfig } from '../../../../ngx-auto-table/src/public_api';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { take, debounceTime, startWith } from 'rxjs/operators';
 import { FormGroup, FormControl } from '@angular/forms';
+import _ from 'lodash';
 
 interface TestRow {
   name: string;
   age: number;
+  good: boolean;
   next_birthday: number;
   id_taken_from_db: string;
   test$: Observable<string>;
@@ -44,6 +46,7 @@ function MakeRandomRow(): TestRow {
   return {
     name: randomName,
     age: randomAge,
+    good: _.shuffle([false, true]).pop(),
     id_taken_from_db: randId,
     next_birthday: randomAge + 1,
     test$: new BehaviorSubject(randId),
@@ -68,6 +71,7 @@ function MakeRandomRow(): TestRow {
         name: {},
         name2: { template: name2Template },
         age: {},
+        good: {},
         mobile: { template: mobileTemplate, hide: true },
         tablet: { template: tabletTemplate, hide: true }
       }"
@@ -233,6 +237,7 @@ export class MainDemoComponent implements OnInit {
           onClick: async (row: TestRow) => {
             await this.removeItems([row]);
           },
+          disabledByRowField: 'good'
         },
         {
           label: 'Show',
