@@ -25,6 +25,13 @@ import { ActionDefinition } from '../models';
             let action of actions
               | slice: actionsVisibleCount || 0:actions.length
           "
+          [matTooltip]="
+            action.disabledTooltip ||
+            'Action [' + action.label + '] is disabled'
+          "
+          [matTooltipDisabled]="
+            !(!!action.disabledByRowField && row[action.disabledByRowField])
+          "
         >
           <button
             class="mr-10"
@@ -66,7 +73,16 @@ import { ActionDefinition } from '../models';
         </div>
       </mat-menu>
       <div class="flex" *ngIf="actionsVisibleCount as visibleCount">
-        <div *ngFor="let action of actions | slice: 0:visibleCount">
+        <div
+          *ngFor="let action of actions | slice: 0:visibleCount"
+          [matTooltip]="
+            action.disabledTooltip ||
+            'Action [' + action.label + '] is disabled'
+          "
+          [matTooltipDisabled]="
+            !(!!action.disabledByRowField && row[action.disabledByRowField])
+          "
+        >
           <button
             class="mr-10"
             mat-mini-fab

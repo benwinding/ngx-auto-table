@@ -8,6 +8,7 @@ export interface ActionDefinition<T> {
   onRouterLink?: (row: T) => string;
   routerLinkQuery?: (row: T) => {};
   disabledByRowField?: string;
+  disabledTooltip?: string;
 }
 
 export interface ActionDefinitionBulk<T> {
