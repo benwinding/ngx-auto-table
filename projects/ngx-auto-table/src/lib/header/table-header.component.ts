@@ -44,7 +44,7 @@ import { HeaderKeyList } from '../models.internal';
           </mat-toolbar-row>
         </mat-toolbar>
         <mat-toolbar
-          class="bulk-actions flex-h align-center mat-primary overflow-x-auto"
+          class="bulk-actions flex-h align-center mat-primary overflow-x-auto overflow-y-hidden"
           *ngIf="hasInitialized && config?.actionsBulk?.length && !HasNoItems"
           [hidden]="
             !hasInitialized || HasNoItems || !config?.actionsBulk?.length
@@ -148,6 +148,9 @@ import { HeaderKeyList } from '../models.internal';
       .overflow-x-auto {
         overflow-x: auto;
       }
+      .overflow-y-hidden {
+        overflow-y: hidden;
+      }
       .mr-10 {
         margin-right: 10px;
       }
@@ -189,7 +192,7 @@ export class NgxAutoTableHeaderComponent implements OnInit {
   autoCompleteObscureName = uuidv4();
   searchControl = new FormControl();
   chooseColumnsControl = new FormControl();
-
+  tool
   $clearTrigger = new Subject();
 
   private logger = new SimpleLogger('header', false);
