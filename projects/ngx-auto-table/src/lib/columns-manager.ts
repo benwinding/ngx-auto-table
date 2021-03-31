@@ -77,7 +77,7 @@ export class ColumnsManager {
     );
     const fieldFilterMap: FieldFilterMap = {};
     columnsWithFilters.map(([key, cDef]) => {
-      let opts = [];
+      let opts = [] as string[];
       let type: 'boolean' | 'string' | 'stringArray';
       if (cDef.filter.bool) {
         type = 'boolean';
@@ -92,6 +92,7 @@ export class ColumnsManager {
         ) as string[];
       }
       const optsUnique = Array.from(new Set(opts));
+      optsUnique.sort();
       fieldFilterMap[key] = {
         field: key,
         options: optsUnique,
