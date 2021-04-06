@@ -2,6 +2,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { MatSidenavModule } from '@angular/material/sidenav';
 
 import { AppComponent } from './app.component';
 import { AutoTableModule } from '../../../ngx-auto-table/src/public_api';
@@ -14,10 +15,10 @@ import {
   BlankTableDemoComponent,
   QueryParamsTableDemoComponent,
   OfTableDemoComponent,
-  FiltersDemoComponent
+  FiltersDemoComponent,
+  ManyColumnsComponent,
 } from './components';
 import { AppRoutingModule } from './app.routing';
-import { MatSidenavModule } from '@angular/material/sidenav';
 
 const allComponents = [
   AppComponent,
@@ -26,6 +27,7 @@ const allComponents = [
   QueryParamsTableDemoComponent,
   OfTableDemoComponent,
   FiltersDemoComponent,
+  ManyColumnsComponent,
 ];
 
 @NgModule({

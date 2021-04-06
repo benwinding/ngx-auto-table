@@ -5,7 +5,8 @@ import {
   BlankTableDemoComponent,
   QueryParamsTableDemoComponent,
   OfTableDemoComponent,
-  FiltersDemoComponent
+  FiltersDemoComponent,
+  ManyColumnsComponent
 } from './components';
 
 export const allRoutes: Routes = [
@@ -14,6 +15,7 @@ export const allRoutes: Routes = [
   { path: 'use-queryparams-demo', component: QueryParamsTableDemoComponent },
   { path: 'use-of-demo', component: OfTableDemoComponent },
   { path: 'filters-demo', component: FiltersDemoComponent },
+  { path: 'many-columns', component: ManyColumnsComponent },
 ];
 
 @NgModule({
