@@ -77,6 +77,9 @@ import { ColumnFilterBy, ColumnFilterByMap } from './models.internal';
       .isMobile {
         overflow-x: hidden;
       }
+      ngx-auto-table-content {
+        overflow-x: auto;
+      }
     `,
   ],
   styleUrls: ['./ngx-auto-table.component.scss'],
