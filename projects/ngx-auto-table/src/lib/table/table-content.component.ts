@@ -42,7 +42,7 @@ import { debounceTime, filter, takeUntil } from 'rxjs/operators';
         *ngFor="let def of $ColumnDefinitions | async"
         [matColumnDef]="def.field"
       >
-        <td mat-header-cell *matHeaderCellDef>
+        <th mat-header-cell *matHeaderCellDef>
           <div class="flex items-center">
             <span mat-sort-header>{{ def.header_pretty }}</span>
             <ngx-auto-table-filter-button
@@ -54,7 +54,7 @@ import { debounceTime, filter, takeUntil } from 'rxjs/operators';
             >
             </ngx-auto-table-filter-button>
           </div>
-        </td>
+        </th>
         <td mat-cell *matCellDef="let row">
           <div *ngIf="!def.template" [class.break-words]="def.forceWrap">
             {{ row[def.field] }}
@@ -176,7 +176,7 @@ export class NgxAutoTableContentComponent
   $ColumnDefinitions = new BehaviorSubject<ColumnDefinitionInternal[]>([]);
   @Input()
   set columnDefinitionsAll(cols: any[]) {
-    console.log({cols})
+    console.log({ cols });
     this.$ColumnDefinitions.next(cols || []);
   }
   @Input()
