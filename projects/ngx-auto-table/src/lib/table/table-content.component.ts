@@ -55,7 +55,7 @@ import { debounceTime, filter, takeUntil } from 'rxjs/operators';
             </ngx-auto-table-filter-button>
           </div>
         </th>
-        <td mat-cell *matCellDef="let row">
+        <td mat-cell *matCellDef="let row" class="bg-unset">
           <div *ngIf="!def.template" [class.break-words]="def.forceWrap">
             {{ row[def.field] }}
           </div>
@@ -77,7 +77,7 @@ import { debounceTime, filter, takeUntil } from 'rxjs/operators';
           >
           </mat-checkbox>
         </th>
-        <td mat-cell *matCellDef="let row" class="bulk-checkbox bg-initial">
+        <td mat-cell *matCellDef="let row" class="bg-unset bg-initial bulk-checkbox">
           <mat-checkbox
             [disabled]="IsPerformingBulkAction"
             (click)="$event.stopPropagation()"
@@ -90,7 +90,7 @@ import { debounceTime, filter, takeUntil } from 'rxjs/operators';
 
       <ng-container matColumnDef="__star" stickyEnd>
         <th mat-header-cell *matHeaderCellDef class="is-transparent"></th>
-        <td mat-cell *matCellDef="let row" class="bg-initial">
+        <td mat-cell *matCellDef="let row">
           <ngx-auto-table-actions-menu
             [row]="row"
             [actions]="config?.actions"
@@ -130,9 +130,6 @@ import { debounceTime, filter, takeUntil } from 'rxjs/operators';
       .items-center {
         align-items: center;
       }
-      td {
-        background: unset;
-      }
       .has-pointer {
         cursor: pointer;
       }
@@ -153,6 +150,9 @@ import { debounceTime, filter, takeUntil } from 'rxjs/operators';
       }
       .bg-initial {
         background: initial;
+      }
+      .bg-unset {
+        background: unset;
       }
       .is-transparent {
         background: transparent;
