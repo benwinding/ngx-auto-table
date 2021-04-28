@@ -10,7 +10,7 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import { FormControl } from '@angular/forms';
 import { takeUntil, debounceTime } from 'rxjs/operators';
-import { Subject } from 'rxjs';
+import { Subject, Observable } from 'rxjs';
 import { SimpleLogger } from '../../utils/SimpleLogger';
 import { HeaderKeyList } from '../models.internal';
 
@@ -94,9 +94,9 @@ export class NgxAutoTableHeaderSearchComponent implements OnInit, OnDestroy {
   @Input()
   headerKeyValues: HeaderKeyList;
   @Input()
-  $setSearchText: Subject<string>;
+  $setSearchText: Observable<string>;
   @Input()
-  $clearTrigger: Subject<void>;
+  $clearTrigger: Observable<void>;
 
   @Output()
   searchChanged: EventEmitter<string> = new EventEmitter();

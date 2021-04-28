@@ -5,10 +5,12 @@ import {
   AfterViewInit,
   Input,
   ViewChild,
+  Output,
+  EventEmitter,
 } from '@angular/core';
 import { AutoTableConfig } from '../models';
 import { MatTableDataSource } from '@angular/material/table';
-import { MatPaginator } from '@angular/material/paginator';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
 
 import { Subject, BehaviorSubject } from 'rxjs';
 import { SimpleLogger } from '../../utils/SimpleLogger';
@@ -42,8 +44,9 @@ import { filter, takeUntil, debounceTime } from 'rxjs/operators';
         <mat-paginator
           #paginator
           [hidden]="config.hidePaginator"
+          (page)="onPageChange($event)"
           [pageSize]="config.pageSize || defaultPageSize"
-          [pageSizeOptions]="[5, 10, 25, 100]"
+          [pageSizeOptions]="defaultPageOptions"
         >
         </mat-paginator>
       </mat-toolbar-row>
@@ -95,13 +98,33 @@ export class NgxAutoTableFooterComponent
     this.initExport(data);
   }
   @Input()
+  set pageIndex(val: number) {
+    val && (this.paginator.pageIndex = Number(val));
+  }
+  @Input()
+  set pageSize(val: number) {
+    if (!val) {
+      return;
+    }
+    const valNum = Number(val);
+    this.paginator.pageSize = valNum;
+    if (!this.defaultPageOptions.includes(valNum)) {
+      this.defaultPageOptions.push(valNum);
+    }
+  }
+  @Input()
   set dataSource(newDataSource: MatTableDataSource<any>) {
     this._dataSource.next(newDataSource);
   }
+  @Output()
+  pageSizeChanged = new EventEmitter<number>();
+  @Output()
+  pageIndexChanged = new EventEmitter<number>();
 
   _dataSource = new BehaviorSubject<MatTableDataSource<any>>(null);
 
   defaultPageSize = 25;
+  defaultPageOptions = [5, 10, 25, 100];
 
   rawData: any[];
   exportFilename: string;
@@ -135,6 +158,11 @@ export class NgxAutoTableFooterComponent
 
   ngOnDestroy() {
     this.$onDestroyed.next();
+  }
+
+  onPageChange($event: PageEvent) {
+    this.pageSizeChanged.next($event.pageSize);
+    this.pageIndexChanged.next($event.pageIndex);
   }
 
   initExport(originalData: any[]) {

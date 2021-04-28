@@ -82,7 +82,8 @@ export interface AutoTableConfig<T> {
 
 export interface TableFiltersState {
   searchText?: string;
-  pageSize?: string;
+  pageSize?: number;
+  pageIndex?: number;
   columnsState?: {
     field: string;
     asc: boolean;

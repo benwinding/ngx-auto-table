@@ -13,12 +13,13 @@ import {
 import { AutoTableConfig, ColumnDefinitionMap } from './models';
 
 import { ColumnsManager } from './columns-manager';
+import { TableStateManager } from './table-state-manager';
 import { SimpleLogger } from '../utils/SimpleLogger';
 import { blankConfig } from './models.defaults';
-import { Breakpoints, BreakpointObserver } from '@angular/cdk/layout';
+import { BreakpointObserver } from '@angular/cdk/layout';
 import { FilterManager } from './filter-manager';
 import { convertObservableToBehaviorSubject } from '../utils/rxjs-helpers';
-import { ColumnFilterBy, ColumnFilterByMap } from './models.internal';
+import { ColumnFilterByMap } from './models.internal';
 
 @Component({
   selector: 'ngx-auto-table',
@@ -29,7 +30,7 @@ import { ColumnFilterBy, ColumnFilterByMap } from './models.internal';
     >
       <ngx-auto-table-header
         [config]="config"
-        [$setSearchText]="$setSearchText"
+        [$setSearchText]="stateManager.$updatedSearch"
         [IsPerformingBulkAction]="IsPerformingBulkAction"
         [HasNoItems]="$HasNoItems | async"
         [IsMaxReached]="$IsMaxReached | async"
@@ -38,7 +39,7 @@ import { ColumnFilterBy, ColumnFilterByMap } from './models.internal';
         "
         [selectionMultiple]="selectionMultiple"
         [selectedHeaderKeys]="columnsManager.HeadersVisible$ | async"
-        (searchChanged)="$CurrentSearchText.next($event)"
+        (searchChanged)="onSearchTextChanged($event)"
         (searchHeadersChanged)="onSearchHeadersChanged($event)"
         (columnsChanged)="onColumnsChanged($event)"
         (bulkActionStatus)="IsPerformingBulkAction = $event"
@@ -64,6 +65,10 @@ import { ColumnFilterBy, ColumnFilterByMap } from './models.internal';
         [dataSourceData]="dataSource?.data"
         [dataSource]="dataSource"
         [noItemsMessage]="config?.noItemsFoundPlaceholder"
+        [pageIndex]="stateManager.$updatedPageIndex | async"
+        [pageSize]="stateManager.$updatedPageSize | async"
+        (pageIndexChanged)="stateManager.patchPageIndex($event)"
+        (pageSizeChanged)="stateManager.patchPageSize($event)"
       ></ngx-auto-table-footer>
     </div>
   `,
@@ -105,6 +110,7 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
 
   columnsManager = new ColumnsManager();
   filterManager = new FilterManager<T>();
+  stateManager = new TableStateManager();
 
   IsPerformingBulkAction = false;
 
@@ -121,7 +127,6 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   $setDisplayedColumnsTrigger = new Subject<string[]>();
   $filterChangedTrigger = new BehaviorSubject<ColumnFilterByMap>(null);
   $setSearchHeadersTrigger = new Subject<string[]>();
-  $setSearchText = new Subject<string>();
   $CurrentSearchText = new BehaviorSubject<string>('');
 
   $IsLoading = new Subject<boolean>();
@@ -355,21 +360,26 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     if (this.config.$triggerSetTableFilterState) {
       this.config.$triggerSetTableFilterState
         .pipe(
+          debounceTime(50),
           takeUntil(this.$onDestroyed),
           filter((a) => !!a)
         )
         .subscribe((newFilterState) => {
           this.logger.log(
-            'config.$triggerSetTableFilterState.subscribe: clearing selection'
+            'config.$triggerSetTableFilterState.subscribe: trigged new state',
+            { newFilterState }
           );
-          this.$setSearchText.next(newFilterState.searchText);
+          this.stateManager.PatchTableState(newFilterState);
         });
     }
     if (typeof this.config.onTableFilterStateChanged === 'function') {
-      this.filterManager.$FilterTextChanged
-        .pipe(takeUntil(this.$onDestroyed))
-        .subscribe((searchText) => {
-          this.config.onTableFilterStateChanged({ searchText: searchText });
+      this.stateManager
+        .AllTableState$()
+        .pipe(debounceTime(50), takeUntil(this.$onDestroyed))
+        .subscribe((state) => {
+          this.config.onTableFilterStateChanged({
+            ...state,
+          });
         });
     }
   }
@@ -438,5 +448,10 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   public onFilterChanged(filters: ColumnFilterByMap) {
     this.logger.log('onFilterChanged', { filters });
     this.$filterChangedTrigger.next(filters);
+  }
+
+  public onSearchTextChanged(searchText: string) {
+    this.$CurrentSearchText.next(searchText);
+    this.stateManager.patchSearch(searchText);
   }
 }

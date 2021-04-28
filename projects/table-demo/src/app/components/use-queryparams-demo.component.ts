@@ -43,7 +43,17 @@ export class QueryParamsTableDemoComponent implements OnInit {
   myDataSource = new BehaviorSubject<MyTableRow[]>([
     { name: 'Something', age: 222 },
     { name: 'Another', age: 12 },
+    { name: 'Big list', age: 3 },
+    { name: 'Of things', age: 3 },
     { name: 'Thing', age: 3 },
+    { name: 'Here is one', age: 13 },
+    { name: 'Yet another', age: 32 },
+    { name: 'Thing', age: 93 },
+    { name: 'A Of things', age: 3 },
+    { name: 'A Thing', age: 3 },
+    { name: 'A Here is one', age: 13 },
+    { name: 'A Yet another', age: 32 },
+    { name: 'A Thing', age: 93 },
   ]);
 
   constructor(private route: ActivatedRoute, private router: Router) {}
@@ -55,15 +65,14 @@ export class QueryParamsTableDemoComponent implements OnInit {
       .subscribe((queryParams) => {
         const searchText = queryParams.searchText;
         console.log({ queryParams, searchText });
-        if (searchText) {
-          searchFilterState.next({ searchText: searchText });
-        }
+        searchFilterState.next({ ...queryParams });
       });
     this.config = {
       debug: true,
       data$: this.myDataSource.asObservable(),
       $triggerSetTableFilterState: searchFilterState,
       onTableFilterStateChanged: (newState) => {
+        console.log('onTableFilterStateChanged', {newState})
         this.router.navigate([], {
           relativeTo: this.route,
           queryParams: newState,
@@ -82,15 +91,4 @@ export class QueryParamsTableDemoComponent implements OnInit {
       ],
     };
   }
-}
-
-function JsonToQueryString(json: {}): string {
-  return (
-    '?' +
-    Object.keys(json)
-      .map(function (key) {
-        return encodeURIComponent(key) + '=' + encodeURIComponent(json[key]);
-      })
-      .join('&')
-  );
 }

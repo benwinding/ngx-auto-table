@@ -4,7 +4,7 @@ import { ActionDefinitionBulk, AutoTableConfig } from '../models';
 import { v4 as uuidv4 } from 'uuid';
 import { FormControl } from '@angular/forms';
 import { SelectionModel } from '@angular/cdk/collections';
-import { Subject } from 'rxjs';
+import { Subject, Observable } from 'rxjs';
 import { SimpleLogger } from '../../utils/SimpleLogger';
 import { HeaderKeyList } from '../models.internal';
 
@@ -163,7 +163,7 @@ import { HeaderKeyList } from '../models.internal';
 })
 export class NgxAutoTableHeaderComponent implements OnInit {
   @Input()
-  $setSearchText: Subject<string>;
+  $setSearchText: Observable<string>;
   @Input()
   config: AutoTableConfig<any>;
 
