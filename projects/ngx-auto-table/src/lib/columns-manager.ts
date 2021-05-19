@@ -6,9 +6,10 @@ import {
   HeaderKeyList,
 } from './models.internal';
 import { Observable, BehaviorSubject } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, take } from 'rxjs/operators';
 import * as _ from 'lodash';
 import { ToString } from '../utils/tostr';
+import { TableStateManager } from './table-state-manager';
 
 function clearArray(arr: any[]) {
   arr.splice(0, arr.length);
@@ -21,6 +22,10 @@ function arrayMoveEl(arr: any[], fromIndex: number, toIndex: number) {
 }
 
 export class ColumnsManager {
+  SetStateManager(stateManager: TableStateManager) {
+    this.stateManager = stateManager;
+  }
+  private stateManager: TableStateManager
   private _headerKeysAllChoices: HeaderKeyList = [];
   private _$headerKeysVisible = new BehaviorSubject<string[]>([]);
   private _headerKeysInitiallyVisible: string[] = [];
@@ -50,10 +55,12 @@ export class ColumnsManager {
   public HeadersChoicesKeyValuesSorted$: Observable<HeaderKeyList>;
 
   public get HeadersVisible(): string[] {
-    return this._$headerKeysVisible.getValue();
+    // return this._$headerKeysVisible.getValue();
+    return this.stateManager.getColumnsEnabled();
   }
   public get HeadersVisible$(): Observable<string[]> {
-    return this._$headerKeysVisible;
+    // return this._$headerKeysVisible;
+    return this.stateManager.$columsEnabled;
   }
 
   public get HeadersInitiallyVisible(): string[] {
@@ -129,11 +136,13 @@ export class ColumnsManager {
   }
 
   private SetHeaderKeysVisible(visibleKeys: string[]) {
-    this._$headerKeysVisible.next(visibleKeys);
+    // this._$headerKeysVisible.next(visibleKeys);
+    this.stateManager.patchColumnsEnabled(visibleKeys);
   }
 
   private GetHeaderKeysVisibleNoActions(): string[] {
-    const keys = this._$headerKeysVisible.value;
+    // const keys = this._$headerKeysVisible.value;
+    const keys = this.stateManager.getColumnsEnabled();
     return FilterOutActions(keys);
   }
 

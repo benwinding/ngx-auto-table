@@ -84,8 +84,7 @@ export interface TableFiltersState {
   searchText?: string;
   pageSize?: number;
   pageIndex?: number;
-  columnsState?: {
-    field: string;
-    asc: boolean;
-  }[];
+  columnsEnabled?: string[]; 
+  primaryColumn?: string;
+  primarySortDirection?: string;
 }
