@@ -1,5 +1,5 @@
-import { debounceTime } from 'rxjs/operators';
-import { AutoTableConfig } from '../../../../ngx-auto-table/src/public_api';
+import { debounceTime, delay } from 'rxjs/operators';
+import { AutoTableConfig, TableFiltersState } from '../../../../ngx-auto-table/src/public_api';
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
 import { BehaviorSubject, of } from 'rxjs';
@@ -48,9 +48,16 @@ export class OfTableDemoComponent implements OnInit {
   });
 
   myDataSource = new BehaviorSubject<MyTableRow[]>([]);
+  $stateUpdateTrigger = new BehaviorSubject<TableFiltersState>({});
 
   ngOnInit() {
+    if(sessionStorage.getItem('tableState')){
+      this.$stateUpdateTrigger.next(JSON.parse(sessionStorage.getItem('tableState')));
+      //console.error('state triger',(await $stateUpdateTrigger.toPromise()).columnsEnabled);
+    }
     this.config = {
+      onTableFilterStateChanged: (s) => sessionStorage.setItem('tableState',JSON.stringify(s)),
+      $triggerSetTableFilterState: this.$stateUpdateTrigger.pipe(delay(2000)),
       debug: true,
       data$: of([{
         name: 'frank',

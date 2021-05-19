@@ -143,7 +143,17 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
     this.columnsManager.SetLogging(this.config.debug);
     this.columnsManager.SetStateManager(this.stateManager);
     this.filterManager.SetColumsManager(this.columnsManager);
-    this.filterManager.SetConfig(this.config);                                                              
+    this.filterManager.SetConfig(this.config); 
+    
+    const $stateUpdateTrigger = new BehaviorSubject<TableFiltersState>({});
+    try{
+      if(sessionStorage.getItem('tableState')){
+        $stateUpdateTrigger.next(JSON.parse(sessionStorage.getItem('tableState')));
+        //console.error('state triger',(await $stateUpdateTrigger.toPromise()).columnsEnabled);
+      }
+    } catch (e){
+      console.log(e);
+    }
 
     this.initResponsive();
 
@@ -347,7 +357,6 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
           }
         });
     }
-
     if (this.config.$triggerClearSelected) {
       this.config.$triggerClearSelected
         .pipe(takeUntil(this.$onDestroyed))
