@@ -10,7 +10,7 @@ import {
   distinctUntilChanged,
   tap,
 } from 'rxjs/operators';
-import { AutoTableConfig, ColumnDefinitionMap } from './models';
+import { AutoTableConfig, ColumnDefinitionMap, TableFiltersState } from './models';
 
 import { ColumnsManager } from './columns-manager';
 import { TableStateManager } from './table-state-manager';
@@ -141,8 +141,9 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
   ngOnInit() {
     this.logger = new SimpleLogger('main.component', this.config.debug);
     this.columnsManager.SetLogging(this.config.debug);
+    this.columnsManager.SetStateManager(this.stateManager);
     this.filterManager.SetColumsManager(this.columnsManager);
-    this.filterManager.SetConfig(this.config);
+    this.filterManager.SetConfig(this.config);                                                              
 
     this.initResponsive();
 
@@ -151,28 +152,29 @@ export class AutoTableComponent<T> implements OnInit, OnDestroy {
       return;
     }
 
+    
     this.$setDisplayedColumnsTrigger
-      .pipe(takeUntil(this.$onDestroyed), debounceTime(100))
-      .subscribe((newHeaders) => {
-        this.logger.log('setDisplayedColumnsTrigger', { newHeaders });
-        this.columnsManager.SetDisplayed<T>(
-          newHeaders,
-          !!this.config.actions,
-          !!this.config.actionsBulk
+    .pipe(takeUntil(this.$onDestroyed), debounceTime(100))
+    .subscribe((newHeaders) => {
+      this.logger.log('setDisplayedColumnsTrigger', { newHeaders });
+      this.columnsManager.SetDisplayed<T>(
+        newHeaders,
+        !!this.config.actions,
+        !!this.config.actionsBulk
         );
       });
-
-    this.$setSearchHeadersTrigger
+      
+      this.$setSearchHeadersTrigger
       .pipe(takeUntil(this.$onDestroyed), debounceTime(100))
       .subscribe((newHeaders) => {
         this.logger.log('setSearchHeadersTrigger', { newHeaders });
         this.columnsManager.SetSearchFilterDisplayed<T>(newHeaders);
       });
-
-    this.reInitializeVariables();
-
-    this.initDataChanges();
-    this.initializeConfigTriggers();
+      
+      this.reInitializeVariables();
+      
+      this.initDataChanges();
+      this.initializeConfigTriggers();
   }
 
   ngOnDestroy() {

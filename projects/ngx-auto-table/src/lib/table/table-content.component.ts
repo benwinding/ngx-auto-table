@@ -176,7 +176,7 @@ export class NgxAutoTableContentComponent
   $ColumnDefinitions = new BehaviorSubject<ColumnDefinitionInternal[]>([]);
   @Input()
   set columnDefinitionsAll(cols: any[]) {
-    console.log({ cols });
+    // console.log({ cols });
     this.$ColumnDefinitions.next(cols || []);
   }
   @Input()
@@ -264,7 +264,7 @@ export class NgxAutoTableContentComponent
     if (maxReached) {
       $event.source.writeValue(false);
     }
-    console.log('onClickBulkItem()', { isSelected, maxReached, $event });
+    // console.log('onClickBulkItem()', { isSelected, maxReached, $event });
     if (!maxReached) {
       this.selectionMultiple.toggle(item);
     }
