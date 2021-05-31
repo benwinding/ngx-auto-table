@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { AutoTableConfig } from '../../../../ngx-auto-table/src/public_api';
+import { AutoTableConfig, TableFiltersState } from '../../../../ngx-auto-table/src/public_api';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { take, debounceTime, startWith } from 'rxjs/operators';
 import { FormGroup, FormControl } from '@angular/forms';
@@ -168,7 +168,7 @@ export class MainDemoComponent implements OnInit {
     disableMobileScroll: new FormControl(),
     debug: new FormControl(true),
   });
-
+  
   constructor() {}
 
   async fakeDelay(ms: number) {
@@ -191,7 +191,12 @@ export class MainDemoComponent implements OnInit {
     // await this.fakeDelay(1000);
     await this.fakeDelay(3000);
     this.data$.next(this.makeRandomSet(30));
+    if(sessionStorage.getItem('tableState')){
+      this.$stateUpdateTrigger.next(JSON.parse(sessionStorage.getItem('tableState')));
+      //console.error('state triger',(await $stateUpdateTrigger.toPromise()).columnsEnabled);
+    }
   }
+  $stateUpdateTrigger = new BehaviorSubject<TableFiltersState>({});
 
   makeRandomSet(count: number) {
     return Array.from('1'.repeat(count)).map(() => MakeRandomRow());
@@ -201,6 +206,7 @@ export class MainDemoComponent implements OnInit {
     // await this.fakeDelay(100);
     this.config = {
       ...newConfigFlags,
+      $triggerSetTableFilterState: this.$stateUpdateTrigger,
       data$: this.data$,
       actionsBulk: [
         {
