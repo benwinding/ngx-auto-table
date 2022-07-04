@@ -18,6 +18,7 @@ A simple to use data table for Angular. (Wrapper around the Material Table)
 - Row and Bulk actions, easily configurable
 - Typed Data passed into the configuration
 - Custom ng-templates for each column
+- All configuration options [can be found here.](https://github.com/benwinding/ngx-auto-table/blob/master/projects/ngx-auto-table/src/lib/models.ts#L37) 
 
 #### Install
 `yarn add ngx-auto-table`
@@ -64,6 +65,16 @@ ngOnInit() {
     data$: people$
   };
 }
+```
+#### Sorting/Ordering
+``` typescript
+this.config = {
+  data$: people$,
+  // Initially sort by the "name" column
+  initialSort: 'name';
+  // Initially sort in Descending order
+  initialSortDir: "desc";
+};
 ```
 
 #### Row Operations
