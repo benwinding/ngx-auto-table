@@ -17,6 +17,7 @@ import {
   OfTableDemoComponent,
   FiltersDemoComponent,
   ManyColumnsComponent,
+  OrderDemoComponent,
 } from './components';
 import { AppRoutingModule } from './app.routing';
 
@@ -26,6 +27,7 @@ const allComponents = [
   BlankTableDemoComponent,
   QueryParamsTableDemoComponent,
   OfTableDemoComponent,
+  OrderDemoComponent,
   FiltersDemoComponent,
   ManyColumnsComponent,
 ];
