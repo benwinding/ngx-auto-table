@@ -4,14 +4,16 @@ import { BehaviorSubject, of } from 'rxjs';
 
 interface MyTableRow {
   name: string;
-  age: number;
+  obj: {
+    age: number;
+  };
   verified: boolean;
 }
 
 function makeRow(name: string, age: number, bool: boolean): MyTableRow {
   return {
     name,
-    age,
+    obj: { age },
     verified: bool 
   }
 }
@@ -23,7 +25,7 @@ function makeRow(name: string, age: number, bool: boolean): MyTableRow {
       [config]="config"
       [columnDefinitions]="{
         name: {},
-        age: {},
+        'obj.age': {},
         verified: {}
       }"
     ></ngx-auto-table>

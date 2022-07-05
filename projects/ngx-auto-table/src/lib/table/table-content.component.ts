@@ -23,6 +23,7 @@ import {
   ColumnFilterByMap,
 } from '../models.internal';
 import { debounceTime, filter, takeUntil } from 'rxjs/operators';
+import { get } from 'lodash';
 
 @Component({
   selector: 'ngx-auto-table-content',
@@ -57,7 +58,7 @@ import { debounceTime, filter, takeUntil } from 'rxjs/operators';
         </th>
         <td mat-cell *matCellDef="let row" class="bg-unset">
           <div *ngIf="!def.template" [class.break-words]="def.forceWrap">
-            {{ row[def.field] }}
+            {{ row | lodash_get : def.field }}
           </div>
           <div *ngIf="def.template">
             <div
@@ -187,6 +188,7 @@ export class NgxAutoTableContentComponent
   selectionSingle: SelectionModel<any>;
   @Input()
   set dataSource(d: MatTableDataSource<any>) {
+    addSortToDataSource(d);
     this._dataSource.next(d);
   }
   get dataSource() {
@@ -305,5 +307,14 @@ export class NgxAutoTableContentComponent
       this.selectionSingle.select(row);
       this.config.onSelectItemDoubleClick(row);
     }
+  }
+}
+
+function addSortToDataSource<T>(dataSource: MatTableDataSource<T>) {
+  dataSource.sortingDataAccessor = (item, property) => {
+    if (property.includes('.')) {
+      return get(item, property);
+    }
+    return item[property];
   }
 }

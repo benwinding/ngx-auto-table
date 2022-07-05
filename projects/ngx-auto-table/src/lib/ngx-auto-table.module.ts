@@ -25,6 +25,7 @@ import { MatToolbarModule } from "@angular/material/toolbar"
 import { NgxAutoTableActionsMenuComponent } from "./table/actions-menu.component";
 import { NgxAutoTableFooterComponent } from "./footer/table-footer";
 import { NgxAutoTableContentComponent } from "./table/table-content.component";
+import { LodashGetPipe } from "./table/lodash_get.pipe";
 
 import { AppExportCsvExportComponent } from "./footer/app-table-csv-export.component";
 import { CommonModule } from "@angular/common";
@@ -41,6 +42,7 @@ const sharedComponents = [AutoTableComponent];
 
 @NgModule({
   declarations: [
+    LodashGetPipe,
     AppTableLoaderComponent,
     AppToolbarLoaderComponent,
     AppExportCsvExportComponent,
