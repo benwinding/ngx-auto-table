@@ -6,7 +6,8 @@ import {
   QueryParamsTableDemoComponent,
   OfTableDemoComponent,
   FiltersDemoComponent,
-  ManyColumnsComponent
+  ManyColumnsComponent,
+  OrderDemoComponent
 } from './components';
 
 export const allRoutes: Routes = [
@@ -15,6 +16,7 @@ export const allRoutes: Routes = [
   { path: 'use-queryparams-demo', component: QueryParamsTableDemoComponent },
   { path: 'use-of-demo', component: OfTableDemoComponent },
   { path: 'filters-demo', component: FiltersDemoComponent },
+  { path: 'order-demo', component: OrderDemoComponent },
   { path: 'many-columns', component: ManyColumnsComponent },
 ];
 
